@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>three-datgui-xr | examples</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<style>
-
 		:root {
 			--navbar-height: 60px;
 			--dark-colour: #262626;
@@ -87,7 +87,7 @@
 			margin: 8px 0 30px 0;
 			padding: 5px 10px;
 			font-size: 1.1em;
-			box-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+			box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 			border-radius: 3px;
 		}
 
@@ -131,7 +131,7 @@
 			text-decoration: none;
 			padding: 5px 10px;
 			font-size: 1.1em;
-			box-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+			box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 			border-radius: 3px;
 		}
 
@@ -141,7 +141,7 @@
 
 		#examples-container {
 			padding: 20px;
-			max-height: calc( 100% - 60px );
+			max-height: calc(100% - 60px);
 			overflow-y: auto;
 		}
 
@@ -165,7 +165,7 @@
 			justify-content: center;
 			outline: none;
 			margin-right: 15px;
-			box-shadow: 1.5px 1.5px 4px rgba(0,0,0,0.75);
+			box-shadow: 1.5px 1.5px 4px rgba(0, 0, 0, 0.75);
 			transition: box-shadow 0.12s;
 		}
 
@@ -191,12 +191,11 @@
 			}
 
 			#iframe-container {
-				height: calc( 100% - var(--navbar-height) );
+				height: calc(100% - var(--navbar-height));
 				width: 100vw;
 			}
 
 		}
-
 	</style>
 </head>
 
@@ -214,31 +213,32 @@
 
 			<div id="examples-container">
 				<h1>three-datgui-xr</h1>
-				<a id="github-link-menu" href="https://github.com/innovixr/three-datgui-xr" target="_blank"><img id="menu-icon" src="/assets/github-white-icon.png"> Github page</a>
+				<a id="github-link-menu" href="https://github.com/innovixr/three-datgui-xr" target="_blank"><img
+						id="menu-icon" src="/assets/github-white-icon.png"> Github page</a>
 
-                <% if(!htmlWebpackPlugin.options.environment.production){ %>
-                    <!-- workbenches are only available during development -->
-                    <h2> Workbenches </h2>
-                    <ul>
-                        <%= htmlWebpackPlugin.options.pages.dev %>
-                    </ul>
-                <% } %>
+				<% if(!htmlWebpackPlugin.options.environment.production){ %>
+					<!-- workbenches are only available during development -->
+					<h2> Workbenches </h2>
+					<ul>
+						<%= htmlWebpackPlugin.options.pages.dev %>
+					</ul>
+					<% } %>
 
 
-				<h2>examples</h2>
-				<ul>
-					<%= htmlWebpackPlugin.options.pages.examples %>
-				</ul>
+						<h2>examples</h2>
+						<ul>
+							<%= htmlWebpackPlugin.options.pages.examples %>
+						</ul>
 
-                <h2>samples & tutorials</h2>
-                <ul>
-                    <%= htmlWebpackPlugin.options.pages.tutorials %>
-                </ul>
+						<h2>samples & tutorials</h2>
+						<ul>
+							<%= htmlWebpackPlugin.options.pages.tutorials %>
+						</ul>
 
-                <h2>features</h2>
-                <ul>
-                    <%= htmlWebpackPlugin.options.pages.features %>
-                </ul>
+						<h2>features</h2>
+						<ul>
+							<%= htmlWebpackPlugin.options.pages.features %>
+						</ul>
 			</div>
 
 		</div>
@@ -246,7 +246,8 @@
 		<div id="iframe-container">
 			<iframe src="./tut_basic_setup.html" allowfullscreen allowvr frameBorder="0"></iframe>
 			<img src="./assets/loading.gif">
-			<a id="github-link" href="" target="_blank" ><img id="example-code-icon" src="/assets/github-white-icon.png">code on Github</a>
+			<a id="github-link" href="" target="_blank"><img id="example-code-icon"
+					src="/assets/github-white-icon.png">code on Github</a>
 		</div>
 
 	</div>
@@ -254,30 +255,31 @@
 	<script>
 
 		const root = document.documentElement;
-		const btn = document.getElementById('toggle-btn');
-		const link = document.getElementById('github-link');
-		const iframe = document.querySelector('iframe');
+		const btn = document.getElementById( 'toggle-btn' );
+		const link = document.getElementById( 'github-link' );
+		const iframe = document.querySelector( 'iframe' );
 
 		let navbarIsClosed = true;
 
-		const hash = window.location.hash.substr(1);
+		const hash = window.location.hash.substr( 1 );
 
-		if ( hash === "" ){
-            window.location.hash = "tut_basic_setup";
-            document.querySelector('li[title="tut_basic_setup"]').classList.add('selected-view');
-        }
+		if ( hash === "" ) {
+			window.location.hash = "tut_basic_setup";
+			document.querySelector( 'li[title="tut_basic_setup"]' ).classList.add( 'selected-view' );
+		}
 
 		// let hash = window.location.hash.substring(1);
 		//console.log( hash )
 
-		function toggleNavbar() {
+		function toggleNavbar()
+		{
 			if ( navbarIsClosed ) {
-				root.style.setProperty('--navbar-height', '100%');
-				root.style.setProperty('--github-btn-offset', '-300px');
+				root.style.setProperty( '--navbar-height', '100%' );
+				root.style.setProperty( '--github-btn-offset', '-300px' );
 				btn.innerHTML = "hide examples ▲";
 			} else {
-				root.style.setProperty('--navbar-height', '60px');
-				root.style.setProperty('--github-btn-offset', '20px');
+				root.style.setProperty( '--navbar-height', '60px' );
+				root.style.setProperty( '--github-btn-offset', '20px' );
 				btn.innerHTML = "more examples ▼";
 			};
 			navbarIsClosed = !navbarIsClosed
@@ -285,40 +287,45 @@
 
 		//
 
-		document.querySelectorAll('li').forEach( (node)=> {
+		document.querySelectorAll( 'li' ).forEach( ( node ) =>
+		{
 			if ( node.title === hash ) selectView( node );
-			node.onclick = ()=> {
+			node.onclick = () =>
+			{
 				selectView( node );
 				if ( !navbarIsClosed ) {
 					toggleNavbar();
 				};
 			};
-		});
+		} );
 
 		//
 
-		window.addEventListener('popstate', () => {
-			let hash = window.location.hash.substring(1);
-			iframe.src = `./${ hash }.html`;
-			link.href = `https://github.com/innovixr/three-datgui-xr/blob/master/examples/${ hash }.js`
-		})
+		window.addEventListener( 'popstate', () =>
+		{
+			let hash = window.location.hash.substring( 1 );
+			iframe.src = `./${hash}.html`;
+			link.href = `https://github.com/innovixr/three-datgui-xr/blob/master/examples/${hash}.js`
+		} )
 
 		//
 
-		function selectView( listItem ) {
-			iframe.src = `./${ listItem.title }.html`;
-			link.href = `https://github.com/innovixr/three-datgui-xr/blob/master/examples/${ listItem.title }.js`
+		function selectView( listItem )
+		{
+			iframe.src = `./${listItem.title}.html`;
+			link.href = `https://github.com/innovixr/three-datgui-xr/blob/master/examples/${listItem.title}.js`
 			window.location.hash = listItem.title;
-			document.querySelectorAll('li').forEach( (node)=> {
+			document.querySelectorAll( 'li' ).forEach( ( node ) =>
+			{
 				if ( node === listItem ) {
-					node.classList.add('selected-view');
+					node.classList.add( 'selected-view' );
 				} else {
-					node.classList.remove('selected-view');
+					node.classList.remove( 'selected-view' );
 				};
-			});
+			} );
 		};
 
 	</script>
-
 </body>
+
 </html>

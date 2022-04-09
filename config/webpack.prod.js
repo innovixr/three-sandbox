@@ -10,6 +10,7 @@ const TEMPLATE_PATH = `../${PUBLIC_PATH}/html`;
 // data in format [ JS file name => demo title in public pages ]
 let pages = [
 	[ 'tut_basic_setup', 'basic setup' ],
+	[ 'tut_simpledategui', 'simpledatgui' ]
 ];
 
 // create one config for each of the data set above
@@ -65,8 +66,8 @@ module.exports = env => {
 	}
 
 	const alias = {};
-	// add an alias of three-datgui-xr itself in order to make examples more real-case
-	// scenario and avoiding ../src/three-datgui-xr;
+	// add an alias of for itself in order to make examples more real-case
+	// scenario and avoiding ../src/..;
 	alias[ `${MODULE_NAME}/${PUBLIC_PATH}` ] = path.resolve( __dirname, `../${PUBLIC_PATH}/` );
 	alias[ `${MODULE_NAME}`] = path.resolve( __dirname, `../src/${MODULE_NAME}.js` );
 	//alias[ `/assets/`] = path.resolve( __dirname, `../${PUBLIC_PATH}/assets/` );

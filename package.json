@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack-dev-server --config config/webpack.prod.js --open --env NODE_ENV=dev",
-    "start-https": "webpack-dev-server --config config/webpack.prod.js --open --env NODE_ENV=dev --env NODE_SSL=true"
+    "https": "webpack-dev-server --config config/webpack.prod.js --open --env NODE_ENV=dev --env NODE_SSL=true"
   },
   "repository": {
     "type": "git",

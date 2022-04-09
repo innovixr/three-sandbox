@@ -1,29 +1,31 @@
 //import * as THREE from 'three';
-//import ThreeDatGuiXR from 'three-datgui-xr';
 import App from './App.js';
 
 window.addEventListener( 'load', init );
 
 //
 
-let app;
+let app, camera, scene, renderer, controls;
 
 function init() {
 	app = new App();
-	app.renderer.setAnimationLoop( () => {
-		//ThreeDatGuiXR.update();
-		app.controls.update();
-		app.renderer.render( app.scene, app.camera );
-	} );
+
+	renderer = app.renderer;
+	camera = app.camera;
+	scene = app.scene;
+	controls = app.controls;
+
 	initApp();
+
+	renderer.setAnimationLoop( () => {
+		controls.update();
+		renderer.render( scene, camera );
+	} );
 }
 
 //
 
 function initApp() {
-	//const container = new ThreeDatGuiXR();
-	//container.position.set( 0, 1, -1.8 );
-	//container.rotation.x = -0.55;
-	//scene.add( container );
+	// code here
 }
 
