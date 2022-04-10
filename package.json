@@ -33,7 +33,7 @@
     "webpack-dev-server": "^4.8.1"
   },
   "peerDependencies": {
-    "three": "^0.132.1",
+    "three": "^0.138",
     "pixi.js": "6.3.0",
     "@pixi/graphics-smooth": "^0.0.26"
   }

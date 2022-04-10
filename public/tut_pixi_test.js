@@ -58,9 +58,18 @@ class DatGuiXR {
 		const planeWidth = 0.4;
 		const planeHeight = 0.3;
 		const planeRatio = planeHeight / planeWidth;
-		const planeMaterial = new THREE.MeshBasicMaterial( { transparent: true, opacity: 0.999, side: THREE.DoubleSide } );
+		const planeMaterial = new THREE.MeshBasicMaterial( {
+			transparent: true,
+			opacity: 0.999,
+			side: THREE.DoubleSide,
+			color:'white'
+		} );
 		const planeGeometry = new THREE.PlaneGeometry( planeWidth, planeHeight );
 		this.mesh = new THREE.Mesh( planeGeometry, planeMaterial );
+		this.mesh.position.set( 0, 1.6, -0.5 );
+		//this.mesh.rotateY( Math.PI );
+		this.scene.add( this.mesh );
+
 		this.raycasterObjects.push( this.mesh );
 
 		const size = 1024;
@@ -75,12 +84,9 @@ class DatGuiXR {
 			backgroundColor:0xFF0000
 		} );
 
-		//this.pixiApp = new PIXI.autoDetectRenderer(canvasWidth, canvasHeight);//Chooses either WebGL if supported or falls back to Canvas rendering
-
-
-		this.threeJsPixiTexture  = new THREE.CanvasTexture( this.pixiApp.view );
-		this.mesh.material.map = this.threeJsPixiTexture;
+		this.threeJsPixiTexture = new THREE.CanvasTexture( this.pixiApp.view );
 		this.threeJsPixiTexture.wrapS = this.threeJsPixiTexture.wrapT = THREE.ClampToEdgeWrapping;
+		this.mesh.material.map = this.threeJsPixiTexture;
 
 		/*
 		let repeatX, repeatY;
@@ -102,6 +108,9 @@ class DatGuiXR {
 		*/
 
 
+		const cbt = new PIXI.Container();
+		this.pixiApp.stage.addChild( cbt );
+
 		let text = new PIXI.Text(
 			'Press me',
 			{
@@ -111,24 +120,8 @@ class DatGuiXR {
 				align : 'center'
 			}
 		);
-
-		text.interactive = true;
-
-		text.on( 'mousedown', event => {
-			console.log( 'text mousedown', event );
-		} );
-
-		text.on( 'pointerdown', event => {
-			console.log( 'text pointerdown', event );
-		} );
-
-		text.on( 'click', event => {
-			console.log( 'text clicked', event );
-		} );
-
-		this.pixiApp.stage.addChild( text );
-
-
+		text.anchor.set( 0.5, 0.5 );
+		text.position.set( 120, 35 );
 
 		let padding = 10;
 		const bt = new PIXI.Graphics();
@@ -138,6 +131,10 @@ class DatGuiXR {
 		bt.endFill();
 		bt.interactive = true;
 		bt.buttonMode = true;
+		bt.pivot.set( 50, 25 );
+		bt.position.set( 120, 35 );
+		bt.addChild( text );
+
 
 		bt.on( 'mousedown', event => {
 			console.log( 'bt mousedown', event );
@@ -151,20 +148,19 @@ class DatGuiXR {
 			console.log( 'bt clicked', event );
 		} );
 
-		this.pixiApp.stage.addChild( bt );
+		cbt.addChild( bt );
 
 		this.pixiApp.ticker.add( ( delta ) => {
-			bt.rotation += 0.01;
+			bt.rotation += 0.001;
 			this.threeJsPixiTexture.needsUpdate = true;
 			this.needsUpdate = true;
 		} );
 
-		this.mesh.position.set( 0, 1.6, 0.4 );
-		this.scene.add( this.mesh );
-
-		const appPos = new THREE.Vector3();
-		this.mesh.position.copy( appPos );
-		this.controls.target = appPos;
+		if ( this.controls ) {
+			const appPos = new THREE.Vector3();
+			//this.mesh.position.copy( appPos );
+			this.controls.target = this.mesh.position;
+		}
 
 		this.bt = bt;
 		this.needsUpdate = true;

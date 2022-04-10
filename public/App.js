@@ -49,18 +49,37 @@ class App {
 	addScene() {
 		this.scene = new THREE.Scene();
 		this.scene.background = new THREE.Color( 0x00051c );
+
+		this.scene.add(
+			new THREE.HemisphereLight( 0xffffff, 0x332222 ),
+			new THREE.AmbientLight( 0x999999 )
+		);
+
+		const axesHelper = new THREE.AxesHelper( 5 );
+		this.scene.add( axesHelper );
+
+		const grid = new THREE.GridHelper( 10, 10 );
+		//this.scene.add( grid );
+
+		/*
+		const geometry = new THREE.BoxGeometry();
+		const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+		const cube = new THREE.Mesh( geometry, material );
+		this.scene.add( cube );
+		*/
 	}
 
 	addCamera() {
 		this.camera = new THREE.PerspectiveCamera( 60, this.screenWidth / this.screenHeight, 0.1, 100 );
-		this.camera.position.set( 0, 0, 2 );
+		this.camera.position.set( 0.1, 1.6, 0 );
 	}
 
 	addRoom() {
 		const room = new THREE.LineSegments(
-			new BoxLineGeometry( 5, 5, 5, 10, 10, 10 ),
+			new BoxLineGeometry( 10, 10, 10, 10, 10, 10 ),
 			new THREE.LineBasicMaterial( { color: 0x808080 } )
 		);
+		room.position.set( 0, 5, 0 );
 		this.scene.add( room );
 	}
 
