@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require( 'html-webpack-plugin' );
 const utils = require( './utils.js' );
 
 //
-const MODULE_NAME = 'three-datgui-xr';
+const MODULE_NAME = 'three-sandbox';
 const PUBLIC_PATH = 'public';
 const TEMPLATE_PATH = `../${PUBLIC_PATH}/html`;
 

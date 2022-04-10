@@ -17,7 +17,8 @@ class App {
 		this.addMouseHandler();
 		this.addMouseRaycaster();
 		this.addControls();
-		window.addEventListener( 'resize', this.onWindowResize.bind( this ) );
+		window.addEventListener( 'resize', this.onWindowResizeEvent.bind( this ) );
+		window.addEventListener( 'resizeend', this.onWindowResizeEnd.bind( this ) );
 	}
 
 	getScreenDimension() {
@@ -38,15 +39,16 @@ class App {
 
 	addControls() {
 		this.controls = new OrbitControls( this.camera, this.renderer.domElement );
-		//this.controls.autoRotate = true;
+		this.controls.autoRotate = true;
+		this.controls.autoRotateSpeed = 0.4;
 		this.controls.enableDamping = true;
 		this.controls.enableZoom = true;
-		this.controls.maxDistance = 0.4;
+		this.controls.maxDistance = 0.45;
 	}
 
 	addScene() {
 		this.scene = new THREE.Scene();
-		this.scene.background = new THREE.Color( 0x505050 );
+		this.scene.background = new THREE.Color( 0x00051c );
 	}
 
 	addCamera() {
@@ -66,19 +68,19 @@ class App {
 
 		this.mouse = new THREE.Vector2( 1, 1 );
 
-		function onMouseMove( event ) {
+		const onMouseMove = ( event ) => {
 			this.mouse.x = ( event.clientX / this.screenWidth ) * 2 - 1;
 			this.mouse.y = - ( event.clientY / this.screenHeight ) * 2 + 1;
 			console.log( 'threejs canvas onMouseMove', this.mouse.x, this.mouse.y );
 			this.handlerMouseRaycaster();
-		}
+		};
 
-		function onMouseDown() {
+		const onMouseDown = () => {
 			console.log( 'threejs canvas onMouseDown' );
-		}
+		};
 
-		this.renderer.domElement.addEventListener( 'mousemove', onMouseMove.bind( this ) );
-		this.renderer.domElement.addEventListener( 'mousedown', onMouseDown.bind( this ) );
+		this.renderer.domElement.addEventListener( 'mousemove', onMouseMove );
+		this.renderer.domElement.addEventListener( 'mousedown', onMouseDown );
 	}
 
 	handlerMouseRaycaster() {
@@ -86,9 +88,9 @@ class App {
 		this.mouseRaycaster.setFromCamera( this.mouse, this.camera );
 		this.raycasterIntersects = this.mouseRaycaster.intersectObjects( this.raycasterObjects );
 		if ( this.raycasterIntersects.length !== 0 ) {
-			console.log( 'handlerMouseRaycaster: hovered ', this.raycasterIntersects[0].object );
-			let obj = this.raycasterIntersects[0].object;
-			obj.material.color.set( 0xffff00 );
+			let firstItem = this.raycasterIntersects[ 0 ];
+			console.log( 'handlerMouseRaycaster: hovered ', firstItem.point );
+			firstItem.object.material.color.set( 0xffff00 );
 		}
 	}
 
@@ -97,12 +99,29 @@ class App {
 	}
 
 	// handles resizing the renderer when the viewport is resized
+
 	onWindowResize() {
-		this.screenHeight = window.innerHeight;
+		const ev = new MouseEvent( 'resizeend', {
+			view: window,
+			bubbles: true,
+			cancelable: true
+		} );
+
+		window.dispatchEvent( ev );
+	}
+
+	onWindowResizeEnd() {
 		this.screenWidth = window.innerWidth;
-		this.camera.aspect = this.screenHeight / this.screenWidth;
+		this.screenHeight = window.innerHeight;
+
+		this.camera.aspect = this.screenWidth / this.screenHeight;
 		this.camera.updateProjectionMatrix();
 		this.renderer.setSize( this.screenWidth, this.screenHeight );
+	}
+
+	onWindowResizeEvent() {
+		clearTimeout( this.timerWindowResize );
+		this.timerWindowResize = setTimeout( this.onWindowResize.bind( this ), 50 );
 	}
 
 }

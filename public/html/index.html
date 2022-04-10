@@ -2,22 +2,23 @@
 <html>
 
 <head>
-	<title>three-datgui-xr | examples</title>
+	<title>three-sandbox | examples</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<style>
 		:root {
 			--navbar-height: 60px;
-			--dark-colour: #262626;
+			--dark-colour: #cacaca;
 			--github-btn-offset: 20px;
 		}
 
 		* {
 			margin: 0;
 			padding: 0;
-			font-family: "Courier New", Courier, monospace;
+			font-family: "Roboto", Courier, monospace;
 			color: var(--dark-colour);
 			box-sizing: border-box;
+			user-select: none;
 		}
 
 		body {
@@ -27,6 +28,7 @@
 		h1 {
 			font-size: 1.55em;
 			font-weight: 600;
+			text-align: center;
 		}
 
 		h2 {
@@ -42,53 +44,66 @@
 		}
 
 		#menu {
-			position: relative;
-			height: 100%;
-			min-width: 270px;
-			border-right: solid 1px var(--dark-colour);
+			min-width: 240px;
 			transition: height 0.26s;
 			overflow-y: auto;
+			background-color: #1a1d25;
+			box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 4);
 		}
 
 		li {
-			font-size: 1.1em;
+			font-size: 0.8em;
 			padding: 4px 10px;
 			margin: 10px 0;
-			border-radius: 3px;
+			border-radius: 8px;
+			transition: all 0.2s;
+			box-shadow: inset 0px 0px 3px rgb(0 73 255);
+			background-color: #222a40;
+			color: #9fc4ff
 		}
 
 		li:hover {
 			cursor: pointer;
-			background-color: #e6e6e6;
+			background-color: #005eff55;
+			color: #c0c0FF;
+			transition: background-color 0.1s;
 		}
 
 		li.selected-view {
-			background-color: var(--dark-colour);
-			color: #ffffff;
+			background-color: #005eff;
+			color: #e0e2ff;
+			position: relative;
+			box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.8);
 		}
 
 		ul {
-			margin-top: 10px;
-			border-top: solid 1px var(--dark-colour);
 			list-style-type: none;
+		}
+
+		hr {
+			border: 0px;
+			height: 1px;
+			background-color: #4f7bff;
+			margin-top: 10px;
+			margin-bottom: 20px;
 		}
 
 		#example-code-icon {
 			width: 25px;
-			margin-right: 10px;
+
 		}
 
 		#github-link-menu {
 			display: flex;
 			align-items: center;
 			color: white;
-			background-color: var(--dark-colour);
 			text-decoration: none;
-			margin: 8px 0 30px 0;
+			margin: 8px 0 20px 0;
 			padding: 5px 10px;
 			font-size: 1.1em;
-			box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+			box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.8);
 			border-radius: 3px;
+			width: 50px;
 		}
 
 		#menu-icon {
@@ -100,7 +115,7 @@
 			position: relative;
 			height: 100%;
 			width: 100%;
-			background-color: grey;
+			background-color: #1a1d25;
 		}
 
 		#iframe-container>iframe {
@@ -137,6 +152,12 @@
 
 		#iframe-container>a:hover {
 			background-color: #424242;
+		}
+
+		#social-container {
+			position: absolute;
+			bottom: 0px;
+			left: 30px;
 		}
 
 		#examples-container {
@@ -195,61 +216,45 @@
 				width: 100vw;
 			}
 
+			#social-container {
+				display: none;
+			}
+
 		}
 	</style>
 </head>
 
 <body>
-
 	<div id="page">
-
 		<div id="menu">
-
 			<div id="navbar-container">
-				<button id="toggle-btn" onclick="toggleNavbar()">
-					more examples ▼
-				</button>
+				<button id="toggle-btn" onclick="toggleNavbar()">more examples ▼</button>
 			</div>
-
 			<div id="examples-container">
-				<h1>three-datgui-xr</h1>
-				<a id="github-link-menu" href="https://github.com/innovixr/three-datgui-xr" target="_blank"><img
-						id="menu-icon" src="/assets/github-white-icon.png"> Github page</a>
-
+				<h1>threejs sandbox</h1>
+				<hr />
 				<% if(!htmlWebpackPlugin.options.environment.production){ %>
 					<!-- workbenches are only available during development -->
-					<h2> Workbenches </h2>
 					<ul>
 						<%= htmlWebpackPlugin.options.pages.dev %>
 					</ul>
 					<% } %>
-
-
-						<h2>examples</h2>
-						<ul>
-							<%= htmlWebpackPlugin.options.pages.examples %>
-						</ul>
-
-						<h2>samples & tutorials</h2>
+						<h2>Experiences</h2>
 						<ul>
 							<%= htmlWebpackPlugin.options.pages.tutorials %>
 						</ul>
-
-						<h2>features</h2>
-						<ul>
-							<%= htmlWebpackPlugin.options.pages.features %>
-						</ul>
 			</div>
-
+			<div id="social-container">
+				<a id="github-link-menu" href="https://github.com/innovixr/three-sandox" target="_blank"><img
+						id="menu-icon" src="/assets/github-white-icon.png"></a>
+			</div>
 		</div>
-
 		<div id="iframe-container">
 			<iframe src="./tut_basic_setup.html" allowfullscreen allowvr frameBorder="0"></iframe>
 			<img src="./assets/loading.gif">
 			<a id="github-link" href="" target="_blank"><img id="example-code-icon"
-					src="/assets/github-white-icon.png">code on Github</a>
+					src="/assets/github-white-icon.png"></a>
 		</div>
-
 	</div>
 
 	<script>
@@ -306,7 +311,7 @@
 			let hash = window.location.hash.substring( 1 );
 			iframe.src = `./${hash}.html`;
 			link.href = `https://github.com/innovixr/three-datgui-xr/blob/master/examples/${hash}.js`
-		} )
+		} );
 
 		//
 

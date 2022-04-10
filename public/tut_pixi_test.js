@@ -75,6 +75,9 @@ class DatGuiXR {
 			backgroundColor:0xFF0000
 		} );
 
+		//this.pixiApp = new PIXI.autoDetectRenderer(canvasWidth, canvasHeight);//Chooses either WebGL if supported or falls back to Canvas rendering
+
+
 		this.threeJsPixiTexture  = new THREE.CanvasTexture( this.pixiApp.view );
 		this.mesh.material.map = this.threeJsPixiTexture;
 		this.threeJsPixiTexture.wrapS = this.threeJsPixiTexture.wrapT = THREE.ClampToEdgeWrapping;
@@ -134,6 +137,7 @@ class DatGuiXR {
 		bt.drawRoundedRect( padding, padding, 200, 50, 16 );
 		bt.endFill();
 		bt.interactive = true;
+		bt.buttonMode = true;
 
 		bt.on( 'mousedown', event => {
 			console.log( 'bt mousedown', event );
@@ -165,9 +169,13 @@ class DatGuiXR {
 		this.bt = bt;
 		this.needsUpdate = true;
 
-		setInterval( ( a ) => {
-			this.simulateClick( a );
-		}, 1000 );
+		//setInterval( this.simulateClick.bind( this ) , 1000 );
+
+		window.addEventListener( 'resizeend', this.onWindowResizeEnd.bind( this ) );
+	}
+
+	onWindowResizeEnd() {
+
 	}
 
 	simulateClick( mode ) {

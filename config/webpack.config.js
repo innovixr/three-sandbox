@@ -8,12 +8,12 @@ module.exports = env => {
 		mode: 'production',
 
 		entry: {
-			'../build/three-datgui-xr': './src/three-datgui-xr.js',
+			'../build/three-sandbox': './src/three-sandbox.js',
 		},
 
 		output: {
 			filename: '[name].js',
-			library: 'ThreeDatGuiXR',
+			library: 'ThreeSandbox',
 			libraryTarget: 'umd'
 		}
 
