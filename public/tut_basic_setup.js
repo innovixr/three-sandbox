@@ -3,8 +3,6 @@ import App from './App.js';
 
 window.addEventListener( 'load', init );
 
-//
-
 let app, camera, scene, renderer, controls;
 
 function init() {

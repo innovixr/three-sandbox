@@ -4,8 +4,6 @@ import SimpleDateGui from './libs/SimpleDateGui/SimpleDateGui.js';
 
 window.addEventListener( 'load', init );
 
-//
-
 let app, camera, scene, renderer, controls, gui;
 
 function init() {
