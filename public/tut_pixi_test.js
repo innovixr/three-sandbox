@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import App from './App.js';
-import * as PIXI from 'pixi.js';
+import * as PIXI from 'pixi.js-legacy';
+import { SmoothGraphics as Graphics } from '@pixi/graphics-smooth';
 
 window.addEventListener( 'load', init );
 
-let app, camera, scene, renderer, controls, gui, raycasterObjects
+let app, camera, scene, renderer, controls, gui, raycasterObjects, pixiRenderer;
 
 function init() {
 	app = new App();
@@ -17,10 +18,10 @@ function init() {
 	renderer.setAnimationLoop( animate );
 }
 
-function animate() {
-	gui && gui.update();
-	controls && controls.update();
-	renderer.render( scene, camera );
+function animate( delta ) {
+	gui && gui.update( delta );
+	controls && controls.update( delta );
+	renderer && renderer.render( scene, camera );
 }
 
 function initApp() {
@@ -58,15 +59,14 @@ class DatGuiXR {
 		const planeWidth = 0.4;
 		const planeHeight = 0.3;
 		const planeRatio = planeHeight / planeWidth;
-		const planeMaterial = new THREE.MeshBasicMaterial( {
+		const planeMaterial = new THREE.MeshStandardMaterial( {
 			transparent: true,
 			opacity: 0.999,
 			side: THREE.DoubleSide,
-			color:'white'
 		} );
 		const planeGeometry = new THREE.PlaneGeometry( planeWidth, planeHeight );
 		this.mesh = new THREE.Mesh( planeGeometry, planeMaterial );
-		this.mesh.position.set( 0, 1.6, -0.5 );
+		this.mesh.position.set( 0, 1.6, -0.6 );
 		//this.mesh.rotateY( Math.PI );
 		this.scene.add( this.mesh );
 
@@ -77,90 +77,87 @@ class DatGuiXR {
 		const canvasHeight = size * planeRatio;
 		this.#createCanvas( canvasWidth, canvasHeight );
 
+		PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.LINEAR;
+
 		this.pixiApp = new PIXI.Application( {
+			//legacy: true,
+			//clearBeforeRender: true,
+			//forceCanvas:true,
+			//interactive:true,
+			//autoResize: true,
+			//powerPreference: 'high-performance',
 			view: this.canvas,
-			interactive:true,
-			backgroundAlpha:0.5,
-			backgroundColor:0xFF0000
+			backgroundAlpha:0,
+			backgroundColor: 0x010101,
+			width: canvasWidth,
+			height: canvasHeight
 		} );
 
 		this.threeJsPixiTexture = new THREE.CanvasTexture( this.pixiApp.view );
-		this.threeJsPixiTexture.wrapS = this.threeJsPixiTexture.wrapT = THREE.ClampToEdgeWrapping;
 		this.mesh.material.map = this.threeJsPixiTexture;
+		app.registerHoverCallback( 'myhovercallback', item => {
 
-		/*
-		let repeatX, repeatY;
-		let squareWidth = 1;
-		texture.wrapS = THREE.RepeatWrapping;
-		texture.wrapT = THREE.RepeatWrapping;
+			const x = item.uv.x * canvasWidth;
+			const y = item.uv.y * canvasHeight;
 
-		if ( texture.image.height < texture.image.width ) {
-			repeatX = squareWidth * texture.image.height / ( squareWidth * texture.image.width );
-			repeatY = 1;
-			texture.repeat.set( repeatX, repeatY );
-			texture.offset.x = ( repeatX - 1 ) / 2 * -1;
-		} else {
-			repeatX = 1;
-			repeatY = squareWidth * texture.image.width / ( squareWidth * texture.image.height );
-			texture.repeat.set( repeatX, repeatY );
-			texture.offset.y = ( repeatY - 1 ) / 2 * -1;
-		}
-		*/
+			console.log( 'myhovercallback', item.uv, x, y );
 
+			const ev = new MouseEvent( 'mousemove', {
+				bubbles: true,
+				cancelable: true,
+				clientX: x,
+				clientY: y
+			} );
+
+			this.threeJsPixiTexture.image.dispatchEvent( ev );
+
+
+		} );
 
 		const cbt = new PIXI.Container();
 		this.pixiApp.stage.addChild( cbt );
+		//cbt.interactive = true;
+		cbt.on( 'mousemove', event => { console.log( 'cbt mousemove', event ); } );
 
-		let text = new PIXI.Text(
-			'Press me',
-			{
-				fontFamily : 'Arial',
-				fontSize: 24,
-				fill : 0xff1010,
-				align : 'center'
-			}
-		);
+		let text = new PIXI.Text( 'Press me', {
+			fontFamily : 'Arial',
+			fontSize: 24,
+			align : 'center'
+		} );
 		text.anchor.set( 0.5, 0.5 );
-		text.position.set( 120, 35 );
+		text.position.set( 110, 35 );
 
 		let padding = 10;
-		const bt = new PIXI.Graphics();
-		bt.lineStyle( 2, 0xFF00FF, 1 );
-		bt.beginFill( 0x650A5A, 0.25 );
+		const bt = new Graphics();
+		bt.lineStyle( 2, 0x4f7bff, 1 );
+		bt.beginFill( 0x005eff, 1 );
 		bt.drawRoundedRect( padding, padding, 200, 50, 16 );
 		bt.endFill();
-		bt.interactive = true;
+		//bt.interactive = true;
 		bt.buttonMode = true;
-		bt.pivot.set( 50, 25 );
-		bt.position.set( 120, 35 );
+		bt.pivot.set( 100, 35 );
+		bt.position.set( 500, 500 * planeRatio );
 		bt.addChild( text );
 
+		bt.on( 'mousemove', event => { console.log( 'bt mousemove', event ); } );
+		bt.on( 'mousedown', event => { console.log( 'bt mousedown', event ); } );
+		bt.on( 'pointerdown', event => { console.log( 'bt pointerdown', event ); } );
+		bt.on( 'click', event => { console.log( 'bt clicked', event ); } );
 
-		bt.on( 'mousedown', event => {
-			console.log( 'bt mousedown', event );
-		} );
+		// backdrop
+		const textbg = new PIXI.Graphics();
+		textbg.beginFill( 0x111111, 0.8 );
+		textbg.drawRoundedRect( 0, 0, canvasWidth, canvasHeight, 20 );
+		textbg.endFill();
+		this.pixiApp.stage.addChild( textbg );
 
-		bt.on( 'pointerdown', event => {
-			console.log( 'bt pointerdown', event );
-		} );
-
-		bt.on( 'click', event => {
-			console.log( 'bt clicked', event );
-		} );
-
-		cbt.addChild( bt );
-
-		this.pixiApp.ticker.add( ( delta ) => {
-			bt.rotation += 0.001;
-			this.threeJsPixiTexture.needsUpdate = true;
-			this.needsUpdate = true;
-		} );
+		textbg.addChild( bt );
 
 		if ( this.controls ) {
-			const appPos = new THREE.Vector3();
-			//this.mesh.position.copy( appPos );
 			this.controls.target = this.mesh.position;
 		}
+
+		//this.pixiApp.ticker.add( ( delta ) => {} );
 
 		this.bt = bt;
 		this.needsUpdate = true;
@@ -178,7 +175,7 @@ class DatGuiXR {
 		console.log( 'click interval' );
 		const x = 20;
 		const y = 20;
-		const ev = new MouseEvent( 'pointerdown', {
+		const ev = new MouseEvent( 'mousedown', {
 			//view: window,
 			bubbles: true,
 			cancelable: true,
@@ -197,11 +194,14 @@ class DatGuiXR {
 		this.canvas = document.createElement( 'canvas' );
 		this.canvas.width = width;
 		this.canvas.height = height;
-		//this.canvas.style = 'position:absolute;top:5px;left:5px;z-index:10;zoom:0.3';
+		this.canvas.style = 'position:absolute;top:5px;left:5px;z-index:10;zoom:0.3';
 		//document.body.appendChild( this.canvas );
+		this.threeClock = new THREE.Clock();
+		this.increase = Math.PI * 2 / 100;
+		this.counter = 0;
 	}
 
-	#draw() {
+	draw() {
 		//this.bt.direction = Math.random() * Math.PI * 2;
 		if ( !this.needsUpdate ) return;
 		this.needsUpdate = false;
@@ -211,8 +211,15 @@ class DatGuiXR {
 		console.log( 'DatGuiXR', 'add' );
 	}
 
-	update() {
-		this.#draw();
+	update( delta ) {
+		this.pixiApp.renderer.clear();
+		this.bt.position.y += Math.sin( this.counter );
+		this.bt.rotation += 0.01;
+		this.counter += this.increase;
+		this.draw();
+		this.threeJsPixiTexture.needsUpdate = true;
+		this.pixiApp.renderer.render( this.pixiApp.stage, { clear: false } );
+
 	}
 
 }

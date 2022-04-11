@@ -8,9 +8,11 @@ class App {
 
 		this.raycasterObjects = [];
 		this.raycasterIntersects = [];
-
+		this.raycasterHoverCallbacks = {};
 		this.getScreenDimension();
 		this.addScene();
+		this.addLights();
+
 		this.addCamera();
 		this.addRoom();
 		this.addRenderer();
@@ -27,38 +29,60 @@ class App {
 	}
 
 	addRenderer() {
-		this.renderer = new THREE.WebGLRenderer( { antialias: true } );
+		let canvas = document.createElement( 'canvas' );
+		document.body.appendChild( canvas );
+		this.renderer = new THREE.WebGLRenderer( {
+			antialias: true,
+			width: window.innerWidth,
+			height: window.innerHeight,
+			canvas
+		} );
 		this.renderer.setPixelRatio( window.devicePixelRatio );
 		this.renderer.setSize( this.screenWidth, this.screenHeight );
 		this.renderer.shadowMap.enabled = true;
+		this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+		this.renderer.toneMappingExposure = 0.35;
 		this.renderer.outputEncoding = THREE.sRGBEncoding;
 		this.renderer.xr.enabled = true;
+		this.renderer.xr.addEventListener( 'sessionstart', this.onXRSessionStart.bind( this ) );
+		this.renderer.xr.addEventListener( 'sessionend', this.onXRSessionEnd.bind( this ) );
+
 		document.body.appendChild( VRButton.createButton( this.renderer ) );
 		document.body.appendChild( this.renderer.domElement );
 	}
 
+	onXRSessionStart() {
+
+	}
+
+	onXRSessionEnd() {
+
+	}
+
 	addControls() {
 		this.controls = new OrbitControls( this.camera, this.renderer.domElement );
-		this.controls.autoRotate = true;
-		this.controls.autoRotateSpeed = 0.4;
+		this.controls.autoRotate = false;
+		this.controls.autoRotateSpeed = 1;
 		this.controls.enableDamping = true;
 		this.controls.enableZoom = true;
 		this.controls.maxDistance = 0.45;
 	}
 
-	addScene() {
-		this.scene = new THREE.Scene();
-		this.scene.background = new THREE.Color( 0x00051c );
-
+	addLights() {
 		this.scene.add(
 			new THREE.HemisphereLight( 0xffffff, 0x332222 ),
 			new THREE.AmbientLight( 0x999999 )
 		);
+	}
+
+	addScene() {
+		this.scene = new THREE.Scene();
+		this.scene.background = new THREE.Color( 0x333333 );
 
 		const axesHelper = new THREE.AxesHelper( 5 );
 		this.scene.add( axesHelper );
 
-		const grid = new THREE.GridHelper( 10, 10 );
+		//const grid = new THREE.GridHelper( 10, 10 );
 		//this.scene.add( grid );
 
 		/*
@@ -71,7 +95,7 @@ class App {
 
 	addCamera() {
 		this.camera = new THREE.PerspectiveCamera( 60, this.screenWidth / this.screenHeight, 0.1, 100 );
-		this.camera.position.set( 0.1, 1.6, 0 );
+		this.camera.position.set( 0, 1.6, 0 );
 	}
 
 	addRoom() {
@@ -90,7 +114,7 @@ class App {
 		const onMouseMove = ( event ) => {
 			this.mouse.x = ( event.clientX / this.screenWidth ) * 2 - 1;
 			this.mouse.y = - ( event.clientY / this.screenHeight ) * 2 + 1;
-			console.log( 'threejs canvas onMouseMove', this.mouse.x, this.mouse.y );
+			//console.log( 'threejs canvas onMouseMove', this.mouse.x, this.mouse.y );
 			this.handlerMouseRaycaster();
 		};
 
@@ -108,9 +132,17 @@ class App {
 		this.raycasterIntersects = this.mouseRaycaster.intersectObjects( this.raycasterObjects );
 		if ( this.raycasterIntersects.length !== 0 ) {
 			let firstItem = this.raycasterIntersects[ 0 ];
-			console.log( 'handlerMouseRaycaster: hovered ', firstItem.point );
-			firstItem.object.material.color.set( 0xffff00 );
+			//console.log( 'handlerMouseRaycaster: hovered ', firstItem.point, firstItem.uv, this.raycasterHoverCallbacks );
+			Object.values( this.raycasterHoverCallbacks ).map( callback => {
+				callback( firstItem );
+			} );
 		}
+	}
+
+	registerHoverCallback( handlerId, handlerFn ) {
+		console.log( 'registerHoverCallback', handlerId, handlerFn );
+		this.raycasterHoverCallbacks[ handlerId ] = handlerFn;
+		console.log( this.raycasterHoverCallbacks );
 	}
 
 	addMouseRaycaster() {

@@ -10,7 +10,7 @@ const TEMPLATE_PATH = `../${PUBLIC_PATH}/html`;
 // data in format [ JS file name => demo title in public pages ]
 let pages = [
 	[ 'tut_basic_setup', 'basic setup' ],
-	[ 'tut_simpledategui', 'simpledatgui' ],
+	//[ 'tut_simpledategui', 'simpledatgui' ],
 	[ 'tut_pixi_test', 'pixi test' ],
 	[ 'tut_three_extrude', 'three extrude' ]
 ];
