@@ -239,9 +239,17 @@
 						<%= htmlWebpackPlugin.options.pages.dev %>
 					</ul>
 					<% } %>
-						<h2>Experiences</h2>
+						<h2>three-kit</h2>
 						<ul>
-							<%= htmlWebpackPlugin.options.pages.tutorials %>
+							<%= htmlWebpackPlugin.options.pages.kit %>
+						</ul>
+						<h2>In progress</h2>
+						<ul>
+							<%= htmlWebpackPlugin.options.pages.experience %>
+						</ul>
+						<h2>Threejs tests</h2>
+						<ul>
+							<%= htmlWebpackPlugin.options.pages.three %>
 						</ul>
 			</div>
 			<div id="social-container">
@@ -269,8 +277,8 @@
 		const hash = window.location.hash.substr( 1 );
 
 		if ( hash === "" ) {
-			window.location.hash = "tut_basic_setup";
-			document.querySelector( 'li[title="tut_basic_setup"]' ).classList.add( 'selected-view' );
+			window.location.hash = "exp_basic_setup";
+			document.querySelector( 'li[title="exp_basic_setup"]' ).classList.add( 'selected-view' );
 		}
 
 		// let hash = window.location.hash.substring(1);
@@ -310,7 +318,7 @@
 		{
 			let hash = window.location.hash.substring( 1 );
 			iframe.src = `./${hash}.html`;
-			link.href = `https://github.com/innovixr/three-datgui-xr/blob/master/examples/${hash}.js`
+			link.href = `https://github.com/innovixr/three-sandbox/blob/master/examples/${hash}.js`
 		} );
 
 		//
@@ -318,7 +326,7 @@
 		function selectView( listItem )
 		{
 			iframe.src = `./${listItem.title}.html`;
-			link.href = `https://github.com/innovixr/three-datgui-xr/blob/master/examples/${listItem.title}.js`
+			link.href = `https://github.com/innovixr/three-sandbox/blob/master/examples/${listItem.title}.js`
 			window.location.hash = listItem.title;
 			document.querySelectorAll( 'li' ).forEach( ( node ) =>
 			{

@@ -20,14 +20,14 @@ class App {
 		this.addRenderer();
 		this.addCamera();
 		this.setupXR();
-		this.addLights();
-		this.addRoom();
 		this.addMouseHandler();
 		this.addMouseRaycaster();
 		//this.addOrbitControl();
 		this.addCameraControl();
-
 		this.addWindowResizeEndEvent();
+
+		this.addLights();
+		this.addRoom();
 
 		this.clock = new THREE.Clock();
 		this.loop = this.loop.bind( this );
@@ -201,7 +201,6 @@ class App {
 		this.controls.mouseButtons.wheel = CameraControls.ACTION.ZOOM;
 		this.controls.touches.two = CameraControls.ACTION.TOUCH_ZOOM_TRUCK;
 		this.controls.saveState();
-		this.controls.moveTo( 0, 1.6, 0 );
 		this.renderer.render( this.scene, this.camera );
 	}
 
@@ -243,7 +242,8 @@ class App {
 		if ( !this.raycasterMeshes.length ) return;
 		this.mouseRaycaster.setFromCamera( this.mouse, this.camera );
 		this.raycasterIntersects = this.mouseRaycaster.intersectObjects( this.raycasterMeshes );
-		if ( this.raycasterIntersects.length !== 0 ) {
+		if ( this.raycasterIntersects.length !== 0 )
+		{
 			let item = this.raycasterIntersects[ 0 ];
 			Object.values( this.raycasterEventsCallback ).map( callback => {
 				callback( item, event );
@@ -288,5 +288,5 @@ class App {
 
 }
 
-export default App;
+export { App };
 
