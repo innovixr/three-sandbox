@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import * as KIT from 'three-kit';
 
-
 window.addEventListener( 'load', () => {
 	new Experience();
 } );
