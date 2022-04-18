@@ -2,6 +2,22 @@ const path = require( 'path' );
 const HtmlWebpackPlugin = require( 'html-webpack-plugin' );
 const networkInterfaces = require( 'os' ).networkInterfaces;
 
+//
+const MODULE_NAME = 'three-sandbox';
+const PUBLIC_PATH = 'public';
+const TEMPLATE_PATH = `../${PUBLIC_PATH}/html`;
+
+// data in format [ JS file name => demo title in public pages ]
+let pages = [
+	[ 'kit_basic_setup', 'Basic setup' ],
+	[ 'exp_basic_setup', 'Basic setup' ],
+	[ 'exp_three_pixi', 'PixiJS test' ],
+	[ 'exp_three_keyboard_raw', 'Keyboard raw' ],
+	[ 'exp_three_keyboard_kit', 'Keyboard kit' ],
+	[ 'three_webgl', 'Three WebGL texture' ],
+	[ 'three_htmlmesh', 'Three HTML Mesh' ],
+];
+
 function getIpAddress( interfaceRegexp ) {
 	console.assert( interfaceRegexp instanceof RegExp );
 
@@ -34,24 +50,6 @@ function getIpAddress( interfaceRegexp ) {
 
 	return ip;
 }
-
-//
-const MODULE_NAME = 'three-sandbox';
-const PUBLIC_PATH = 'public';
-const TEMPLATE_PATH = `../${PUBLIC_PATH}/html`;
-
-// data in format [ JS file name => demo title in public pages ]
-let pages = [
-	[ 'kit_basic_setup', 'Basic setup' ],
-	[ 'exp_basic_setup', 'Basic setup' ],
-	[ 'exp_three_pixi', 'PixiJS test' ],
-	[ 'exp_three_keyboard_raw', 'Keyboard raw' ],
-	[ 'exp_three_keyboard_kit', 'Keyboard kit' ],
-	[ 'three_webgl', 'Three WebGL texture' ],
-	[ 'three_htmlmesh', 'Three HTML Mesh' ],
-
-
-];
 
 // create one config for each of the data set above
 let plugins = pages.map( ( page )=> {

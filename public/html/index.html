@@ -318,7 +318,7 @@
 		{
 			let hash = window.location.hash.substring( 1 );
 			iframe.src = `./${hash}.html`;
-			link.href = `https://github.com/innovixr/three-sandbox/blob/master/examples/${hash}.js`
+			link.href = `https://github.com/innovixr/three-sandbox/blob/master/public/${hash}.js`
 		} );
 
 		//
@@ -326,7 +326,7 @@
 		function selectView( listItem )
 		{
 			iframe.src = `./${listItem.title}.html`;
-			link.href = `https://github.com/innovixr/three-sandbox/blob/master/examples/${listItem.title}.js`
+			link.href = `https://github.com/innovixr/three-sandbox/blob/master/public/${listItem.title}.js`
 			window.location.hash = listItem.title;
 			document.querySelectorAll( 'li' ).forEach( ( node ) =>
 			{
