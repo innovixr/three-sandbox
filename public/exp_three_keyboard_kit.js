@@ -19,6 +19,7 @@ class Experience {
 
 	}
 
+	// eslint-disable-next-line no-unused-vars
 	loop( delta ) {
 		this.counter += this.increase;
 		//this.button.material.color.copy( this.color1 ).lerp( this.color2, Math.sin( this.counter ) );
@@ -125,7 +126,7 @@ class Card {
 			this.geometry = new THREE.PlaneGeometry( width, height, 2, 2 );
 		}
 
-		const vertices = this.geometry.attributes.position.array;
+		//const vertices = this.geometry.attributes.position.array;
 		//console.log( vertices );
 
 		const matFront = new THREE.MeshPhongMaterial( { color: frontColor } );

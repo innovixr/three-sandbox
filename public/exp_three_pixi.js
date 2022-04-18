@@ -32,6 +32,7 @@ function initApp() {
 	} );
 
 	gui.add();
+
 	//gui.add( myFunctions, 'RESET_EVENT' ).name( 'Reset Position' );
 
 }
