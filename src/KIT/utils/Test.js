@@ -15,6 +15,10 @@ class Test {
 		if ( value === '' ) return true;
 		return false;
 	}
+
+	static isNumber( value ) {
+		return !Number.isNaN( parseFloat( value ) );
+	}
 }
 
 export { Test };
