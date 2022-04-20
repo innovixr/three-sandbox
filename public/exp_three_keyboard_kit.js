@@ -8,7 +8,6 @@ window.addEventListener( 'load', () => {
 class Experience {
 
 	constructor() {
-		console.log( KIT );
 		this.app = new KIT.App();
 		this.scene = this.app.scene;
 

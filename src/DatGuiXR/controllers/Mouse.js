@@ -21,7 +21,7 @@ class MouseController {
 		if ( !this.config.mouseHandler ) this.config.mouseHandler = 'follow';
 
 		if ( !allowedMouseHandlers.includes( this.config.mouseHandler ) ) {
-			console.warn( `${this.constructor.name}: "config.mouseHandler" unexpected value, only 'follow' is allowed at the moment` );
+			//console.warn( `${this.constructor.name}: "config.mouseHandler" unexpected value, only 'follow' is allowed at the moment` );
 			return;
 		}
 

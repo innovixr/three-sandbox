@@ -20,15 +20,15 @@ class Experience {
 	}
 
 	loop( delta ) {
-		this.counter += this.increase;
+		//this.counter += this.increase;
 		//this.button.material.color.copy( this.color1 ).lerp( this.color2, Math.sin( this.counter ) );
-		if ( this.counter > 1 ) this.counter = 0;
+		//if ( this.counter > 10 ) this.counter = 0;
 	}
 
 	initExperience() {
 
 		const container = new Card( { name:'vkeyboard', radius: 0.01 } );
-		container.mesh.position.set( 0, 1.4, 0 );
+		container.mesh.position.set( 0, 1.6, 0.05 );
 		container.mesh.rotation.set( -0.5, 0, 0 );
 
 		this.button = new Card( { name:'key1', height: 0.02, width: 0.1, radius: 0.004, frontColor: 0x888888 } );
@@ -67,7 +67,7 @@ class Experience {
 
 		}
 
-		customFitTo();
+		//customFitTo();
 
 	}
 
@@ -88,7 +88,7 @@ class Card {
 		const width = opts.width || 0.4;
 		const height = opts.height || width * 0.36;
 		const radius = opts.radius || 0.02;
-		const frontColor = opts.frontColor || 0xAAAAAA;
+		const frontColor = opts.frontColor || 0x444444;
 		const backColor = opts.backColor || 0x000000;
 		const hoverColor = opts.hoverColor || 0x0000FF;
 		const depth = opts.depth || 0.002;

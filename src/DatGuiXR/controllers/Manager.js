@@ -1,7 +1,7 @@
 import { Raycaster } from 'three';
 import { MouseController } from './Mouse.js';
 import { XRControllers } from './XR.js';
-import { isDefined, isEmptyString } from './utils.js';
+import { Test } from '../utils/Test.js';
 
 class ControllersManager {
 
@@ -38,7 +38,7 @@ class ControllersManager {
 		};
 
 		this.xrControllers = new XRControllers( this.ctx,  controllerConfig );
-		this.mouseController = isDefined( this.config.mouseHandler ) ?  new MouseController( this.ctx, controllerConfig ) : undefined;
+		this.mouseController = Test.isDefined( this.config.mouseHandler ) ?  new MouseController( this.ctx, controllerConfig ) : undefined;
 	}
 
 	intersectInclude( instance ) {
@@ -86,7 +86,7 @@ class ControllersManager {
 	hover( instance, index = 0, uv ) {
 		const currentHoveredItem = this.getCurrentHoveredItem( index );
 
-		if ( !isDefined( uv ) ) {
+		if ( !Test.isDefined( uv ) ) {
 			if ( currentHoveredItem ) {
 				this.raycasterLeaveElement( instance, currentHoveredItem, index );
 			}
@@ -100,13 +100,13 @@ class ControllersManager {
 		//console.debug( `${this.constructor.name}: hover`, hoveredEl );
 
 		if ( hoveredEl === null ) {
-			if ( isDefined( currentHoveredItem ) ) {
+			if ( Test.isDefined( currentHoveredItem ) ) {
 				this.raycasterLeaveElement( instance, currentHoveredItem, index );
 			}
 			return;
 		}
 
-		if ( isDefined( currentHoveredItem ) ) {
+		if ( Test.isDefined( currentHoveredItem ) ) {
 			if ( currentHoveredItem.el !== hoveredEl ) {
 				this.raycasterLeaveElement( instance, currentHoveredItem, index );
 			}
@@ -172,7 +172,7 @@ class ControllersManager {
 	}
 
 	raycasterEnterElement( instance, item, index ) {
-		if ( !isDefined( item ) ) return;
+		if ( !Test.isDefined( item ) ) return;
 		console.debug( `${this.constructor.name}: raycasterEnterElement`, item );
 
 		//this.setcontrollerRepeatMode( instance.config.controllerRepeatMode );
@@ -184,7 +184,7 @@ class ControllersManager {
 	}
 
 	raycasterLeaveElement( instance, item, index ) {
-		if ( !isDefined( item ) ) return;
+		if ( !Test.isDefined( item ) ) return;
 		console.debug( `${this.constructor.name}: raycasterLeaveElement`, item.el );
 		item.el.onRaycasterLeave && item.el.onRaycasterLeave();
 		//this.setcontrollerRepeatMode();
@@ -213,7 +213,7 @@ class ControllersManager {
 
 	select( instance, index = 0 ) {
 		const hoveredEl = this.getCurrentHoveredEl( index );
-		if ( isDefined( hoveredEl ) ) {
+		if ( Test.isDefined( hoveredEl ) ) {
 			if ( hoveredEl.onSelect ) hoveredEl.onSelect();
 			if ( hoveredEl.type === 'input-text' ) {
 				instance.keyboard.visible = true;
@@ -238,7 +238,7 @@ class ControllersManager {
 	onControllerSelect( instance, event, firstTime ) {
 		const index = this.getControllerEventIndex( event );
 		const hoveredEl = this.getCurrentHoveredEl( index );
-		if ( !isDefined( hoveredEl ) ) {
+		if ( !Test.isDefined( hoveredEl ) ) {
 			//this.setcontrollerRepeatMode();
 			//console.debug( `${this.constructor.name}: onControllerSelect not select, no element hovered !` );
 			return;
@@ -268,7 +268,7 @@ class ControllersManager {
 
 		if ( hoveredEl.type == 'input-text' ) {
 			if ( instance.keyboard ) {
-				if ( isEmptyString( instance.content[ hoveredEl.contentName ] ) ) {
+				if ( Test.isEmptyString( instance.content[ hoveredEl.contentName ] ) ) {
 					// remove placeholder
 					instance.updateElement( hoveredEl.contentName, '' );
 				}
@@ -294,22 +294,22 @@ class ControllersManager {
 
 		this.previousEvent = event.type;
 
-		if ( !isDefined( this.controllerRepeatMode?.timeoutms ) ) {
-			if ( isDefined( this.controllerRepeatMode?.intervalms ) ) {
-				console.debug( `${this.constructor.name}: onControllerSelectDelayed: start repeater #1 ${this.controllerRepeatModeDefaultString} (${this.controllerRepeatMode.intervalms}ms) in ${this.controllerRepeatMode.timeoutms}ms` );
+		if ( !Test.isDefined( this.controllerRepeatMode?.timeoutms ) ) {
+			if ( Test.isDefined( this.controllerRepeatMode?.intervalms ) ) {
+				//console.debug( `${this.constructor.name}: onControllerSelectDelayed: start repeater #1 ${this.controllerRepeatModeDefaultString} (${this.controllerRepeatMode.intervalms}ms) in ${this.controllerRepeatMode.timeoutms}ms` );
 				this.timerSelectRepeat = setInterval( () => {
 					this.onControllerSelect( instance, event );
 				}, this.controllerRepeatMode.intervalms );
 				return;
 			} else {
-				console.debug( `${this.constructor.name}: onControllerSelectDelayed: execute now` );
+				//console.debug( `${this.constructor.name}: onControllerSelectDelayed: execute now` );
 				this.onControllerSelect( instance, event );
 				return;
 			}
 		}
 
 		this.timerSelect = setTimeout( () => {
-			console.debug( `${this.constructor.name}: onControllerSelectDelayed: start repeater #2 ${this.controllerRepeatModeDefaultString} (${this.controllerRepeatMode.intervalms}ms) in ${this.controllerRepeatMode.timeoutms}ms` );
+			//console.debug( `${this.constructor.name}: onControllerSelectDelayed: start repeater #2 ${this.controllerRepeatModeDefaultString} (${this.controllerRepeatMode.intervalms}ms) in ${this.controllerRepeatMode.timeoutms}ms` );
 			this.timerSelectRepeat = setInterval( () => {
 				this.onControllerSelect( instance, event );
 			}, this.controllerRepeatMode.intervalms );
@@ -338,13 +338,13 @@ class ControllersManager {
 		const hoveredEl = this.getCurrentHoveredEl( index );
 		this.selectPressed[index] = true;
 
-		if ( !isDefined( hoveredEl ) ) {
-			console.debug( `${this.constructor.name}: onControllerSelectStart: no element hovered` );
+		if ( !Test.isDefined( hoveredEl ) ) {
+			//console.debug( `${this.constructor.name}: onControllerSelectStart: no element hovered` );
 			//this.setcontrollerRepeatMode();
 			//return;
 		}
 
-		console.debug( `${this.constructor.name}: onControllerSelectStart:`, event.type, hoveredEl );
+		//console.debug( `${this.constructor.name}: onControllerSelectStart:`, event.type, hoveredEl );
 		this.handleScroll( instance, index, hoveredEl );
 	}
 
@@ -354,12 +354,12 @@ class ControllersManager {
 		this.selectPressed[index] = false;
 		//this.setcontrollerRepeatMode();
 
-		if ( !isDefined( hoveredEl ) ) {
-			console.debug( `${this.constructor.name}: onControllerSelectEnd, no element hovered` );
+		if ( !Test.isDefined( hoveredEl ) ) {
+			//console.debug( `${this.constructor.name}: onControllerSelectEnd, no element hovered` );
 			return;
 		}
 
-		console.debug( `${this.constructor.name}: onControllerSelectEnd`, event.type, hoveredEl );
+		//console.debug( `${this.constructor.name}: onControllerSelectEnd`, event.type, hoveredEl );
 		if ( hoveredEl.overflow === 'scroll' ) {
 			this.scrollData[index] = undefined;
 		}
@@ -377,8 +377,8 @@ class ControllersManager {
 		const height = instance.config.height;
 		const intersect = this.intersects[index];
 
-		if ( !isDefined( intersect ) ) return 0;
-		if ( !isDefined( intersect.uv ) ) return 0;
+		if ( !Test.isDefined( intersect ) ) return 0;
+		if ( !Test.isDefined( intersect.uv ) ) return 0;
 		return ( 1 - intersect.uv.y ) * height;
 	}
 
@@ -387,8 +387,8 @@ class ControllersManager {
 		const height = instance.config.height;
 		const intersect = this.intersects[index];
 		const pt = { x:0, y:0 };
-		if ( !isDefined( intersect ) ) return pt;
-		if ( !isDefined( intersect.uv ) ) return pt;
+		if ( !Test.isDefined( intersect ) ) return pt;
+		if ( !Test.isDefined( intersect.uv ) ) return pt;
 		pt.x = intersect.uv.x * width;
 		pt.y = ( 1 - intersect.uv.y ) * height;
 		return pt;

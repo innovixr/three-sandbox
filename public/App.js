@@ -5,6 +5,7 @@ import { BoxLineGeometry } from 'three/examples/jsm/geometries/BoxLineGeometry.j
 import CameraControls from 'camera-controls';
 
 CameraControls.install( { THREE: THREE } );
+console.clear();
 
 class App {
 	constructor( extraLoop ) {
@@ -39,10 +40,15 @@ class App {
 
 		const delta = this.clock.getDelta();
 		const elapsed = this.clock.getElapsedTime();
-		const updated = this.controls.update( delta );
 
-		this.extraLoop && this.extraLoop( delta );
-		//if ( elapsed > 30 ) { return; }
+		let updated = this.controls.update( delta );
+		if ( this.extraLoop )
+		{
+			updated = this.extraLoop( delta ) || updated;
+		}
+
+		this.meshes.room.material.needsUpdate = true;
+		this.meshes.room.needsUpdate = true;
 
 		if ( this.renderer.xr?.isPresenting || updated )
 		{
@@ -68,44 +74,46 @@ class App {
 	addLights() {
 		let container = new THREE.Object3D();
 
-		//let object3d = new THREE.AmbientLight( 0x111111, 1 );
-		//object3d.name = 'Ambient light';
-		//container.add( object3d );
+		let object3d = new THREE.AmbientLight( 0x222222, 0.1 );
+		object3d.name = 'Ambient light';
+		container.add( object3d );
 
 		const red = new THREE.PointLight( 0xFF1177, 0.1, 4, 0.5 );
 		red.position.set( -3, 2, -3 );
 		//red.castShadow = true;
-		container.add( red );
+		//container.add( red );
 
 		const blue = new THREE.PointLight( 0x1133FF, 0.1, 4, 0.5 );
 		blue.position.set( 3, 2, -3 );
 		//blue.castShadow = true;
-		container.add( blue );
+		//container.add( blue );
 
 		const back = new THREE.PointLight( 0xFFFFFF, 0.1, 10, 0.5 );
-		back.position.set( 0, 1, 0.4 );
+		back.position.set( 0, 1.3, 0.6 );
+		//back.rotation.set( 1, 0, 0 );
 		back.castShadow = true;
 		container.add( back );
 
+		//this.scene.add( new THREE.PointLightHelper( back ) );
 		this.scene.add( container );
 
 	}
 
 	addCamera() {
 		const EPS = 1e-5;
-		this.cameraDefault = new THREE.PerspectiveCamera( 60, this.screenWidth / this.screenHeight, 0.01, 100 );
+		this.cameraDefault = new THREE.PerspectiveCamera( 60, this.screenWidth / this.screenHeight, 0.001, 100 );
 		this.cameraDefault.name = 'cameraDefault';
+		this.cameraDefault.position.set( 0, EPS, 0 );
 		this.camera = this.cameraDefault;
-		this.camera.position.set( 0, EPS, 0.3 );
 		this.scene.add( this.camera );
 	}
 
 	addCameraXR() {
-		this.cameraXR = new THREE.PerspectiveCamera( 60, this.screenWidth / this.screenHeight, 0.1, 100 );
+		this.cameraXR = new THREE.PerspectiveCamera( 60, this.screenWidth / this.screenHeight, 0.001, 100 );
 		this.cameraXR.name = 'cameraXR';
 		this.cameraXRDolly = new THREE.Object3D();
 		this.cameraXRDolly.add( this.cameraXR );
-		this.cameraXRDolly.position.set( 0, 0, 0.5 );
+		this.cameraXRDolly.position.set( 0, 0, 0 );
 		this.cameraXRDolly.visible = false;
 		this.scene.add( this.cameraXRDolly );
 	}
@@ -201,7 +209,7 @@ class App {
 		this.controls.mouseButtons.wheel = CameraControls.ACTION.ZOOM;
 		this.controls.touches.two = CameraControls.ACTION.TOUCH_ZOOM_TRUCK;
 		this.controls.saveState();
-		this.controls.moveTo( 0, 1.6, 0 );
+		this.controls.moveTo( 0, 1.2, 0 );
 		this.renderer.render( this.scene, this.camera );
 	}
 

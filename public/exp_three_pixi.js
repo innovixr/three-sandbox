@@ -1,38 +1,65 @@
+import * as THREE from 'three';
 import App from './App.js';
 import DatGuiXR from 'DatGuiXR';
 
-window.addEventListener( 'load', init );
+window.addEventListener( 'load', () => {
+	new Experience();
+} );
 
-let app, camera, scene, renderer, controls, gui, raycasterObjects;
+class Experience {
+	constructor() {
+		this.app = new App( this.animate.bind( this ) );
 
-function init() {
-	app = new App( animate );
-	renderer = app.renderer;
-	camera = app.camera;
-	scene = app.scene;
-	controls = app.controls;
-	raycasterObjects = app.raycasterMeshes;
-	initApp();
-}
+		this.gui = new DatGuiXR( {
+			scene: this.app.scene,
+			camera: this.app.camera,
+			renderer: this.app.renderer,
+			controls: this.app.controls,
+			raycasterObjects: this.app.raycasterMeshes,
+			scale: 1.0,
+			panelWidth: 0.4,
+			panelHeight: 0.4 * 0.36
+			//position: new THREE.Vector3( 0, 0, 0 ),
+			//font: loaded_font,
+		} );
 
-function animate( delta ) {
-	renderer.controllersManager.xrControllers.update( delta );
-}
+		this.app.scene.add( this.gui.mesh );
+		this.gui.mesh.position.set( 0, 1.2, -0.4 );
+		this.gui.mesh.rotation.set( -0.5, 0, 0 );
 
-function initApp() {
-	gui = new DatGuiXR( {
-		scene,
-		camera,
-		renderer,
-		controls,
-		raycasterObjects,
-		//position: new THREE.Vector3( 0, 0, 0 ),
-		scale: 1.0,
-		//font: loaded_font,
-	} );
+		this.gui.add();
+		//gui.add( myFunctions, 'RESET_EVENT' ).name( 'Reset Position' );
+		this.app.controls.rotateTo( 0, 90 * THREE.MathUtils.DEG2RAD, false );
 
-	gui.add();
+		//this.customFitTo();
+	}
 
-	//gui.add( myFunctions, 'RESET_EVENT' ).name( 'Reset Position' );
+	customFitTo() {
 
+		const transition = true;
+
+		this.gui.mesh.geometry.computeBoundingBox();
+		const bb = this.gui.mesh.geometry.boundingBox.getSize( new THREE.Vector3() );
+		const width = bb.x;
+		const height = bb.y;
+		const depth = bb.z;
+
+
+		const distanceToFit = this.app.controls.getDistanceToFitBox( width, height, depth ) * 2;
+		this.app.controls.moveTo(
+			this.gui.mesh.position.x,
+			this.gui.mesh.position.y,
+			this.gui.mesh.position.z + distanceToFit,
+			transition
+		);
+
+		this.app.controls.rotateTo( 0, 90 * THREE.MathUtils.DEG2RAD, false );
+	}
+
+	animate( delta ) {
+		//console.log( 'exp_three_pixi animate' );
+		this.gui.update( delta );
+		this.app.renderer.controllersManager.xrControllers.update( delta );
+		return true;
+	}
 }

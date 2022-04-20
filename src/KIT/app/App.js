@@ -38,11 +38,10 @@ class App {
 	loop() {
 
 		const delta = this.clock.getDelta();
-		const elapsed = this.clock.getElapsedTime();
+		//const elapsed = this.clock.getElapsedTime();
 		const updated = this.controls.update( delta );
 
 		this.extraLoop && this.extraLoop( delta );
-		//if ( elapsed > 30 ) { return; }
 
 		if ( this.renderer.xr?.isPresenting || updated )
 		{
@@ -68,9 +67,9 @@ class App {
 	addLights() {
 		let container = new THREE.Object3D();
 
-		//let object3d = new THREE.AmbientLight( 0x111111, 1 );
-		//object3d.name = 'Ambient light';
-		//container.add( object3d );
+		//let ambiant = new THREE.AmbientLight( 0xFFFFFF, 1 );
+		//ambiant.name = 'Ambient light';
+		//container.add( ambiant );
 
 		const red = new THREE.PointLight( 0xFF1177, 0.1, 4, 0.5 );
 		red.position.set( -3, 2, -3 );
@@ -96,7 +95,7 @@ class App {
 		this.cameraDefault = new THREE.PerspectiveCamera( 60, this.screenWidth / this.screenHeight, 0.01, 100 );
 		this.cameraDefault.name = 'cameraDefault';
 		this.camera = this.cameraDefault;
-		this.camera.position.set( 0, EPS, 0.3 );
+		this.camera.position.set( 0, 1.6, 0.3 );
 		this.scene.add( this.camera );
 	}
 
