@@ -3,8 +3,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 import { BoxLineGeometry } from 'three/examples/jsm/geometries/BoxLineGeometry.js';
 import CameraControls from 'camera-controls';
-import * as holdEvent from 'hold-event';
-
+//import * as holdEvent from 'hold-event';
+import * as holdEvent from './hold-event.module.js';
 CameraControls.install( { THREE: THREE } );
 console.clear();
 
@@ -250,7 +250,6 @@ class App {
 		const moveAnimation = true;
 		const ratio = 0.001;
 		keyLeft.addEventListener( 'holding', event => {
-			console.log( event );
 			this.controls.truck( - ratio * event.deltaTime, 0, moveAnimation );
 		} );
 		keyRight.addEventListener( 'holding', event => {
@@ -271,8 +270,8 @@ class App {
 		const lookAnimation = true;
 		keyTurnRight.addEventListener( 'holding', event => { this.controls.rotate( - 0.1 * THREE.MathUtils.DEG2RAD * event.deltaTime, 0, lookAnimation ); } );
 		keyTurnLeft.addEventListener( 'holding', event => { this.controls.rotate( 0.1 * THREE.MathUtils.DEG2RAD * event.deltaTime, 0, lookAnimation ); } );
-		keyUp.addEventListener( 'holding', event => { this.controls.rotate( 0, - 0.05 * THREE.MathUtils.DEG2RAD * event.deltaTime, lookAnimation ); } );
-		keyDown.addEventListener( 'holding', event => { this.controls.rotate( 0, 0.05 * THREE.MathUtils.DEG2RAD * event.deltaTime, lookAnimation ); } );
+		keyDown.addEventListener( 'holding', event => { this.controls.rotate( 0, - 0.05 * THREE.MathUtils.DEG2RAD * event.deltaTime, lookAnimation ); } );
+		keyUp.addEventListener( 'holding', event => { this.controls.rotate( 0, 0.05 * THREE.MathUtils.DEG2RAD * event.deltaTime, lookAnimation ); } );
 	}
 
 	addOrbitControl() {
