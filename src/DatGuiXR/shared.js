@@ -9,7 +9,7 @@ const shared = {
 	},
 
 	defaults: {
-		resolution:1
+		resolution:3
 	}
 };
 

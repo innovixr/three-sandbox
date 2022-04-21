@@ -94,7 +94,6 @@ var Hold = (function (_super) {
             _this._deltaTime = 0;
             _this._elapsedTime = 0;
             _this._lastTime = performance.now();
-            console.log("_holdStart", event);
             _this.dispatchEvent({
                 type: HOLD_EVENT_TYPE.HOLD_START,
                 deltaTime: _this._deltaTime,

@@ -49,9 +49,9 @@ class Card {
 		//const vertices = this.geometry.attributes.position.array;
 		//console.log( vertices );
 
-		const matFront = new THREE.MeshPhongMaterial( { color: frontColor } );
-		const matBack = new THREE.MeshPhongMaterial( { color: backColor } );
-		const matHover = new THREE.MeshPhongMaterial( { color: hoverColor } );
+		const matFront = new THREE.MeshBasicMaterial( { color: frontColor } );
+		const matBack = new THREE.MeshBasicMaterial( { color: backColor } );
+		const matHover = new THREE.MeshBasicMaterial( { color: hoverColor } );
 
 		matFront.color.convertSRGBToLinear();
 		matBack.color.convertSRGBToLinear();
