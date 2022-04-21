@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
 class Object3D {
+
 	static roundedBox1( width, height, depth, radius0, smoothness ) {
 		let shape = new THREE.Shape();
 		let eps = 0.00001;
@@ -23,6 +24,7 @@ class Object3D {
 
 		return geometry;
 	}
+
 }
 
 export { Object3D };

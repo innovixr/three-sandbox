@@ -46,13 +46,13 @@ import * as PIXI from 'pixi.js-legacy';
 		{
 			if ( !this.parent ) return;
 			width = this.parent.width;
-			console.log( 'centerX width', width );
+			//console.log( 'centerX width', width );
 
 		}
 
 		if ( typeof anchorX === 'undefined' && this.anchor ) anchorX = this.anchor.x;
 		this.x = centerAxis( width, this.width, anchorX, round );
-		console.log( 'centerX this.x', this.x );
+		//console.log( 'centerX this.x', this.x );
 	};
 
 	/**

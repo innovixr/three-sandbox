@@ -11,9 +11,8 @@ const TEMPLATE_PATH = `../${PUBLIC_PATH}/html`;
 let pages = [
 	[ 'kit_basic_setup', 'Basic setup' ],
 	[ 'exp_basic_setup', 'Basic setup' ],
-	[ 'exp_three_pixi', 'PixiJS test' ],
-	[ 'exp_three_keyboard_raw', 'Keyboard raw' ],
-	[ 'exp_three_keyboard_kit', 'Keyboard kit' ],
+	[ 'datguixr_keyboard', 'Keyboard' ],
+	[ 'exp_keyboard_three', 'Threejs Keyboard' ],
 	[ 'three_webgl', 'Three WebGL texture' ],
 	[ 'three_htmlmesh', 'Three HTML Mesh' ],
 ];
@@ -65,6 +64,7 @@ let plugins = pages.map( ( page )=> {
 const allPages = {
 	kit:pages.filter( x=>x[0].indexOf( 'kit_' ) === 0 ).reduce( pageReducer, '' ),
 	experience: pages.filter( x => x[ 0 ].indexOf( 'exp_' ) === 0 ).reduce( pageReducer, '' ),
+	datguixr: pages.filter( x => x[ 0 ].indexOf( 'datguixr_' ) === 0 ).reduce( pageReducer, '' ),
 	three: pages.filter( x => x[ 0 ].indexOf( 'three_' ) === 0 ).reduce( pageReducer, '' ),
 };
 

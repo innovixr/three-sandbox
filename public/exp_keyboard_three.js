@@ -19,7 +19,7 @@ class Experience {
 		this.initExperience();
 	}
 
-	loop( delta ) {
+	loop( /*delta*/ ) {
 		//this.counter += this.increase;
 		//this.button.material.color.copy( this.color1 ).lerp( this.color2, Math.sin( this.counter ) );
 		//if ( this.counter > 10 ) this.counter = 0;
@@ -56,18 +56,18 @@ class Experience {
 
 			const transition = false;
 
-			const distanceToFit = self.controls.getDistanceToFitBox( meshBBWidth, meshBBHeight, meshBBDepth );
+			const distanceToFit = self.controls.getDistanceToFitBox( meshBBWidth, meshBBHeight, meshBBDepth ) + 0.2;
 			self.controls.moveTo(
 				container.mesh.position.x,
 				container.mesh.position.y,
 				container.mesh.position.z + distanceToFit,
 				transition
 			);
-			self.controls.rotateTo( 0, 90 * THREE.MathUtils.DEG2RAD, true );
+			self.controls.rotateTo( 0, 90 * THREE.MathUtils.DEG2RAD, false );
 
 		}
 
-		//customFitTo();
+		customFitTo();
 
 	}
 
@@ -125,7 +125,7 @@ class Card {
 			this.geometry = new THREE.PlaneGeometry( width, height, 2, 2 );
 		}
 
-		const vertices = this.geometry.attributes.position.array;
+		//const vertices = this.geometry.attributes.position.array;
 		//console.log( vertices );
 
 		const matFront = new THREE.MeshPhongMaterial( { color: frontColor } );

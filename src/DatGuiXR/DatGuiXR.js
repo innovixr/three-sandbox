@@ -1,10 +1,9 @@
-import * as THREE from 'three';
+//import * as THREE from 'three';
 import * as PIXI from 'pixi.js-legacy';
 import './pixi/center.js';
 
 import { ControllersManager } from './controllers/Manager.js';
 import { Keyboard } from './widgets/Keyboard.js';
-import { shared } from './shared.js'; //
 
 class DatGuiXR {
 

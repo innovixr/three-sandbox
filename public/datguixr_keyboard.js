@@ -25,7 +25,7 @@ class Experience {
 
 		this.app.scene.add( this.gui.mesh );
 		this.gui.mesh.position.set( 0, 1.2, -0.4 );
-		this.gui.mesh.rotation.set( -0.5, 0, 0 );
+		//this.gui.mesh.rotation.set( -0.5, 0, 0 );
 
 		this.gui.add();
 		//gui.add( myFunctions, 'RESET_EVENT' ).name( 'Reset Position' );

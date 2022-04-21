@@ -6,6 +6,7 @@ import { SmoothGraphics as Graphics } from '@pixi/graphics-smooth';
 import { Object3D } from '../three/Object3D.js';
 import { Keymap } from '../utils/Keymap.js';
 import { shared } from '../shared.js';
+import { Card } from './Card.js';
 
 class Keyboard {
 
@@ -18,20 +19,24 @@ class Keyboard {
 		this.renderer = opts.renderer;
 		this.controls = opts.controls;
 		this.raycasterObjects = opts.raycasterObjects;
-		this.panelWidth = 0.4;
-		this.panelHeight = 0.17;
+		this.scale = 1.5;
+		this.panelWidth = 0.4 * this.scale;
+		this.panelHeight = 0.165 * this.scale;
 		this.panelDepth = 0;
 		this.panelRatio = this.panelHeight / this.panelWidth;
 		this.shapeType = 'box';
 		this.scale = typeof this.scale !== 'undefined' ? this.scale : 1.0;
 		this.needsUpdate = true;
+		this.resolution = opts.resolution || shared.defaults.resolution;
 		this.backdropColor = 0x030303;
 		this.buttonColor = 0x050505;
 		this.buttonColorText = 0x444444;
 		this.buttonBaseWidth = 90;
 		this.buttonBaseHeight = 90;
+		this.buttonHeight = this.buttonBaseHeight * this.resolution;
 		this.mesh = null;
-		this.resolution = opts.resolution || shared.defaults.resolution;
+		this.meshKeyboard = null;
+
 		console.log( `Keyboard(${this.panelWidth}, ${this.panelHeight}, ratio ${this.panelRatio})` );
 
 		this.createMesh();
@@ -42,38 +47,20 @@ class Keyboard {
 	createMesh() {
 		console.log( 'Keyboard: createMesh', this.panelWidth, this.panelHeight );
 
-		this.panelMaterialDisplayPhong = new THREE.MeshPhongMaterial( {
+		// @TODO: should be in config
+
+		// setup material
+		const materialConfig = {
 			transparent: true,
 			opacity: 0.999,
 			alphaTest: 0.1,
-			//side: THREE.DoubleSide,
-			//color: 0x000000,
-			//roughness: 0.8,
-			//shininess: 1,
-			//metalness: 0.2,
-			//bumpScale: 0.0005,
-			//emissive: 0x020202,
-			//emissiveIntensity: 1,
-			//color: 0xFFFFFF
-		} );
+		};
 
-		this.panelMaterialDisplayBasic = new THREE.MeshBasicMaterial( {
-			transparent: true,
-			opacity: 0.999,
-			alphaTest: 0.1,
-			//side: THREE.DoubleSide,
-			//color: 0x000000,
-			//roughness: 0.8,
-			//shininess: 1,
-			//metalness: 0.2,
-			//bumpScale: 0.0005,
-			//emissive: 0x020202,
-			//emissiveIntensity: 1,
-			//color: 0xFFFFFF
-		} );
+		//const material = THREE.MeshPhongMaterial;
+		const material = THREE.MeshBasicMaterial;
+		this.material = new material( materialConfig );
 
-		this.panelMaterialDisplay = this.panelMaterialDisplayBasic;
-
+		// setup geometry
 		let geometry;
 
 		if ( this.panelDepth )
@@ -88,14 +75,16 @@ class Keyboard {
 				geometry = Object3D.roundedBox1( this.panelWidth, this.panelHeight, 0.01, 0.005, 1 );
 			}
 
-			this.mesh = new THREE.Mesh( geometry, [ materialBlue, materialBlue, materialBlue, materialBlue, this.panelMaterialDisplay, materialBlack ] );
+			this.meshKeyboard = new THREE.Mesh( geometry, [ materialBlue, materialBlue, materialBlue, materialBlue, this.material, materialBlack ] );
 		} else
 		{
 			geometry = new THREE.PlaneGeometry( this.panelWidth, this.panelHeight );
-			this.mesh = new THREE.Mesh( geometry, this.panelMaterialDisplay );
+			this.meshKeyboard = new THREE.Mesh( geometry, this.material );
 		}
 
-		this.raycasterObjects.push( this.mesh );
+		this.mesh = new THREE.Group();
+		this.mesh.add( this.meshKeyboard );
+		this.raycasterObjects.push( this.meshKeyboard );
 	}
 
 	get canvasResolution() {
@@ -126,9 +115,11 @@ class Keyboard {
 			//powerPreference: 'high-performance'
 		} );
 
+		/*
 		this.pixiApp.renderer.plugins.interaction.on( 'mousemove', ( event ) => {
-			//console.log( 'pixiApp.renderer.plugins.interaction.on mousemove', event );
+			console.log( 'pixiApp.renderer.plugins.interaction.on mousemove', event );
 		} );
+		*/
 
 		this.canvasTexture = new THREE.CanvasTexture( this.pixiApp.view );
 		this.canvasTexture.wrapS = THREE.RepeatWrapping;
@@ -136,35 +127,79 @@ class Keyboard {
 		this.canvasTexture.anisotropy = 16;
 		//this.canvasTexture.repeat.set( 100, 100 );
 
-		this.panelMaterialDisplay.map = this.canvasTexture;
+		this.material.map = this.canvasTexture;
 		//app.registerEvents( 'handleEvents', this.handleEvents.bind( this ) );
 
 		// backdrop
 		const backdrop = new PIXI.Graphics();
-		const paddingBackdrop = 40 * this.resolution / 2;
+		const backdropMargin = 0 * this.resolution / 2;
+		const backdropPadding = 34 * this.resolution / 2;
+		const backdropRadius = 40 * this.resolution / 2;
 		backdrop.beginFill( this.backdropColor, 0.8 );
-		backdrop.drawRoundedRect( paddingBackdrop, paddingBackdrop, this.canvasWidth - paddingBackdrop * 2, this.canvasHeight - paddingBackdrop * 2, paddingBackdrop );
+		backdrop.drawRoundedRect( backdropMargin, backdropMargin, this.canvasWidth - backdropMargin, this.canvasHeight - backdropMargin, backdropRadius );
 		backdrop.endFill();
 
 		const keyLines = Keymap.get( this.config.layout )[ 0 ];
-		const backdropPadding = 42 * this.resolution / 2;
-		let previousX;
 		const charset = 0;
+		const buttonPadding = 5 * this.resolution / 2;
 
+		const increments = {
+			x: backdropPadding,
+			y: backdropPadding
+		};
+
+		let char, width, pixiButton, threeButton, cardConfig, count;
+		count = 0;
+
+		// eslint-disable-next-line no-unused-vars
 		keyLines.map( ( keys, lineNumber ) => {
-			previousX = backdropPadding;
-			keys.map( ( key, keyNumber ) => {
-				console.log( lineNumber, keyNumber, key );
-				const width = ( key.width || 0.1 ) * 10;
-				const char = key.chars[ charset ].lowerCase || key.chars[ charset ].icon || 'undif';
-				const bt = this.createButton( char, width );
-				const btWidth = ( ( this.buttonBaseWidth * width ) + 5 ) * this.resolution ;
-				bt.position.x = previousX;
-				bt.position.y = backdropPadding + ( lineNumber * ( this.buttonBaseWidth + 5 ) * this.resolution );
-				previousX += btWidth;
+			// X coordinates of the first button on this new line
+			increments.x = backdropPadding;
+			keys.map( ( key ) => {
+				// specific local width adjustement
+				width = ( key.width || 0.1 ) * 10;
 
-				backdrop.addChild( bt );
+				// get char
+				char = key.chars[ charset ].lowerCase || key.chars[ charset ].icon || 'undif';
+
+				// create button
+				pixiButton = this.createButton( char, width );
+
+				// adjust position
+				pixiButton.position.x = increments.x;
+				pixiButton.position.y = increments.y;
+
+				//this.button = new Card( { name: 'key1', height: 0.02, width: 0.1, radius: 0.004, frontColor: 0x888888 } );
+
+				cardConfig = {
+					name: char,
+					height: 0.04,
+					width: 0.04,
+					radius:0.01
+				};
+
+				if ( count < 21 )
+				{
+
+					threeButton = new Card( cardConfig );
+					this.mesh.add( threeButton.mesh );
+
+					const d = 2048;
+					const x = ( increments.x / d ) - 0.25;
+					const y = - ( increments.y / d );
+					console.log( x, y );
+					threeButton.mesh.position.set( x, y, 0.001 );
+				}
+				backdrop.addChild( pixiButton );
+
+				// increment
+				increments.x += pixiButton.width + ( buttonPadding * 4 );
+
+				count++;
+
 			} );
+			// Add button line height;
+			increments.y += this.buttonHeight + ( buttonPadding * 4 );
 		} );
 
 		this.pixiApp.stage.addChild( backdrop );
@@ -193,18 +228,20 @@ class Keyboard {
 
 	createButton( txt, width ) {
 
-		const bt = new Graphics();
-		width = width * this.buttonBaseWidth;
-		const padding = 20 * this.resolution / 2;
-		const btWidth = width * this.resolution;
-		const btHeight = this.buttonBaseWidth * this.resolution;
-		const btLineColor = 0x000066;
+		const button = new Graphics();
+		const padding = 40 * this.resolution / 2;
+		let buttonWidth = width * this.buttonBaseWidth * this.resolution;
+		console.log( txt, 'buttonWidth before', buttonWidth );
+		buttonWidth += ( ( buttonWidth / ( this.buttonBaseWidth * this.resolution ) ) - 1 ) * ( padding / 2 ) ;
+		console.log( txt, 'buttonWidth after', buttonWidth );
+
+		//const btLineColor = 0x000066;
 		const btFillColor = this.buttonColor;
 
 		//bt.lineStyle( 2, btLineColor, 1 );
-		bt.beginFill( btFillColor, 1 );
-		bt.drawRoundedRect( padding, padding, btWidth, btHeight, 10 * this.resolution );
-		bt.endFill();
+		button.beginFill( btFillColor, 1 );
+		button.drawRoundedRect( 0, 0, buttonWidth, this.buttonHeight, 10 * this.resolution );
+		button.endFill();
 
 		const text = new PIXI.Text( txt, {
 			fontFamily: 'Arial',
@@ -213,7 +250,7 @@ class Keyboard {
 
 		text.style.fill = this.buttonColorText;
 
-		bt.addChild( text );
+		button.addChild( text );
 
 		//bt.on( 'mousemove', event => { console.log( 'bt mousemove', event ); } );
 		//bt.on( 'mousedown', ev => { console.log( 'bt mousedown', ev ); } );
@@ -223,7 +260,7 @@ class Keyboard {
 
 		text.centerXY();
 
-		return bt;
+		return button;
 
 	}
 
@@ -297,7 +334,7 @@ class Keyboard {
 		console.log( 'DatGuiXR', 'add' );
 	}
 
-	update( delta ) {
+	update( /*delta*/ ) {
 
 		//console.log( this.pixiApp );
 

@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 import { BoxLineGeometry } from 'three/examples/jsm/geometries/BoxLineGeometry.js';
 import CameraControls from 'camera-controls';
+import * as holdEvent from 'hold-event';
 
 CameraControls.install( { THREE: THREE } );
 console.clear();
@@ -39,7 +40,7 @@ class App {
 	loop() {
 
 		const delta = this.clock.getDelta();
-		const elapsed = this.clock.getElapsedTime();
+		//const elapsed = this.clock.getElapsedTime();
 
 		let updated = this.controls.update( delta );
 		if ( this.extraLoop )
@@ -203,14 +204,75 @@ class App {
 	addCameraControl() {
 		this.controls = new CameraControls( this.camera, this.renderer.domElement );
 		this.controls.minDistance = this.controls.maxDistance = 1;
-		//this.controls.azimuthRotateSpeed = - 0.3; // negative value to invert rotation direction
-		//this.controls.polarRotateSpeed = - 0.3; // negative value to invert rotation direction
-		//this.controls.truckSpeed = 10;
+		this.controls.azimuthRotateSpeed = 0.5; // negative value to invert rotation direction
+		this.controls.polarRotateSpeed = 0.5; // negative value to invert rotation direction
+		this.controls.truckSpeed = 0.01;
+		this.controls.dampingFactor = 0.2;
 		this.controls.mouseButtons.wheel = CameraControls.ACTION.ZOOM;
 		this.controls.touches.two = CameraControls.ACTION.TOUCH_ZOOM_TRUCK;
 		this.controls.saveState();
 		this.controls.moveTo( 0, 1.2, 0 );
 		this.renderer.render( this.scene, this.camera );
+		this.addCameraKeyboardControl();
+	}
+
+	addCameraKeyboardControl() {
+		const KEYCODE = {
+			arrows: {
+				left: 37,
+				up: 38,
+				right: 39,
+				down: 40,
+			},
+			fr: {
+				forward: 90,	// a
+				backward: 83,	// z
+				left: 81,		// q
+				right: 68,		// d
+
+			},
+			en: {
+				forward: 87,	// z
+				backward: 83,	// s
+				left: 65,		// q
+				right: 68		// d
+			}
+		};
+
+		const arrows = KEYCODE.arrows;
+		const keys = KEYCODE[ 'fr' ];
+
+		// handle move forward, backward, left, right
+		const keyForward = new holdEvent.KeyboardKeyHold( keys.forward, 16.666 );
+		const keyLeft = new holdEvent.KeyboardKeyHold( keys.left, 16.666 );
+		const keyBackward = new holdEvent.KeyboardKeyHold( keys.backward, 16.666 );
+		const keyRight = new holdEvent.KeyboardKeyHold( keys.right, 16.666 );
+		const moveAnimation = true;
+		const ratio = 0.001;
+		keyLeft.addEventListener( 'holding', event => {
+			console.log( event );
+			this.controls.truck( - ratio * event.deltaTime, 0, moveAnimation );
+		} );
+		keyRight.addEventListener( 'holding', event => {
+			this.controls.truck( ratio * event.deltaTime, 0, moveAnimation );
+		} );
+		keyForward.addEventListener( 'holding', event => {
+			this.controls.forward( ratio * event.deltaTime, moveAnimation );
+		} );
+		keyBackward.addEventListener( 'holding', event => {
+			this.controls.forward( - ratio * event.deltaTime, moveAnimation );
+		} );
+
+		// handle look left,right,up,down
+		const keyTurnLeft = new holdEvent.KeyboardKeyHold( arrows.left, 100 );
+		const keyTurnRight = new holdEvent.KeyboardKeyHold( arrows.right, 100 );
+		const keyUp = new holdEvent.KeyboardKeyHold( arrows.up, 100 );
+		const keyDown = new holdEvent.KeyboardKeyHold( arrows.down, 100 );
+		const lookAnimation = true;
+		keyTurnRight.addEventListener( 'holding', event => { this.controls.rotate( - 0.1 * THREE.MathUtils.DEG2RAD * event.deltaTime, 0, lookAnimation ); } );
+		keyTurnLeft.addEventListener( 'holding', event => { this.controls.rotate( 0.1 * THREE.MathUtils.DEG2RAD * event.deltaTime, 0, lookAnimation ); } );
+		keyUp.addEventListener( 'holding', event => { this.controls.rotate( 0, - 0.05 * THREE.MathUtils.DEG2RAD * event.deltaTime, lookAnimation ); } );
+		keyDown.addEventListener( 'holding', event => { this.controls.rotate( 0, 0.05 * THREE.MathUtils.DEG2RAD * event.deltaTime, lookAnimation ); } );
 	}
 
 	addOrbitControl() {
