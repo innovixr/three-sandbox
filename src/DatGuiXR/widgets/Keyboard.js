@@ -7,7 +7,7 @@ import { Object3D } from '../three/Object3D.js';
 import { Keymap } from '../utils/Keymap.js';
 import { shared } from '../shared.js';
 import { Card } from './Card.js';
-import { RoundedBoxGeometry } from './jsm/geometries/RoundedBoxGeometry.js';
+
 
 class Keyboard {
 
@@ -61,6 +61,7 @@ class Keyboard {
 		//const material = THREE.MeshPhongMaterial;
 		const material = THREE.MeshBasicMaterial;
 		this.material = new material( materialConfig );
+		this.material2 = new material( materialConfig );
 
 		// setup geometry
 		let geometry;
@@ -106,9 +107,6 @@ class Keyboard {
 		this.ratioCanvasPanelWidth = Math.round( this.ratioCanvasPanelWidth * 100 ) / 100;
 		this.ratioCanvasPanelHeight = Math.round( this.ratioCanvasPanelHeight * 100 ) / 100;
 
-		console.log( this.ratioCanvasPanelWidth );
-		console.log( this.ratioCanvasPanelHeight );
-
 		this.createCanvas( this.canvasWidth, this.canvasHeight );
 
 		console.log( 'Keyboard: createTexture', this.canvasWidth, this.canvasHeight, this.canvasEl );
@@ -133,13 +131,21 @@ class Keyboard {
 		} );
 		*/
 
-		this.canvasTexture = new THREE.CanvasTexture( this.pixiApp.view );
-		this.canvasTexture.wrapS = THREE.RepeatWrapping;
-		this.canvasTexture.wrapT = THREE.RepeatWrapping;
+		this.canvasTexture = new THREE.CanvasTexture( this.canvasEl );
+		this.canvasTexture.wrapS = THREE.ClampToEdgeWrapping;
+		this.canvasTexture.wrapT = THREE.ClampToEdgeWrapping;
 		this.canvasTexture.anisotropy = 16;
-		//this.canvasTexture.repeat.set( 100, 100 );
+
+		this.canvasTexture2 = new THREE.CanvasTexture( this.canvasEl );
+		//this.canvasTexture2.wrapS = 2000;
+		this.canvasTexture2.wrapS = THREE.ClampToEdgeWrapping;
+		this.canvasTexture2.wrapT = THREE.ClampToEdgeWrapping;
+		//this.canvasTexture2.wrapT = THREE.RepeatWrapping;
+		this.canvasTexture2.anisotropy = 16;
 
 		this.material.map = this.canvasTexture;
+		this.material2.map = this.canvasTexture;
+
 		//app.registerEvents( 'handleEvents', this.handleEvents.bind( this ) );
 
 		// backdrop
@@ -153,10 +159,10 @@ class Keyboard {
 		this.backdropPadding = backdropPadding;
 
 		backdrop.lineStyle( {
-			alignment:0,
+			alignment: 0,
 			width: 5 * this.resolution,
 			color: 0x2222FF,
-			alpha:0.05
+			alpha: 0.05
 		} );
 		backdrop.beginFill( this.backdropColor, 0.8 ); this.canvasWidth - backdropMargin;
 		backdrop.drawRoundedRect( backdropMargin, backdropMargin, backdropWidth, backdropHeight, backdropRadius );
@@ -165,6 +171,7 @@ class Keyboard {
 		const keyLines = Keymap.get( this.config.layout )[ 0 ];
 		const charset = 0;
 		const buttonPadding = 5 * this.resolution / 2;
+		const addThreeButton = true;
 
 		const increments = {
 			pixi: {
@@ -173,8 +180,7 @@ class Keyboard {
 			}
 		};
 
-		let char, width, pixiButton, threeButton;
-		let count = 0;
+		let char, count = 0;
 
 		// eslint-disable-next-line no-unused-vars
 		keyLines.map( ( keys, lineNumber ) => {
@@ -182,29 +188,49 @@ class Keyboard {
 			increments.pixi.x = backdropPadding;
 
 			keys.map( ( key ) => {
+				let bt = {};
+
 				// specific local width adjustement
-				width = ( key.width || 0.1 ) * 10;
+				bt.width = ( key.width || 0.1 ) * 10;
 
 				// get char
-				char = key.chars[ charset ].lowerCase || key.chars[ charset ].icon || 'undif';
+				bt.value = key.chars[ charset ].lowerCase || key.chars[ charset ].icon || 'undif';
 
 				// create buttons
-				pixiButton = this.createPixiButton( char, width );
-				pixiButton.position.x = increments.pixi.x;
-				pixiButton.position.y = increments.pixi.y;
+				bt.pixi = this.createPixiButton( bt );
+				bt.pixi.position.x = increments.pixi.x;
+				bt.pixi.position.y = increments.pixi.y;
+				bt.three = {};
 
-				threeButton = this.createThreeButton( char, pixiButton.width, pixiButton.height );
-				threeButton.mesh.position.x = this.convertXToMeter( pixiButton.position.x, pixiButton.width );
-				threeButton.mesh.position.y = this.convertYToMeter( pixiButton.position.y, pixiButton.height );
-				threeButton.mesh.position.z = 0.01;
-				this.mesh.add( threeButton.mesh );
+				if ( addThreeButton )
+				{
+					bt.three.x = this.convertPixelToMeterX( bt.pixi.position.x, bt.pixi.width );
+					bt.three.y = this.convertPixelToMeterY( bt.pixi.position.y, bt.pixi.height );
+					bt.three.textureOffsetX = bt.three.x;
+					bt.three.textureOffsetY = bt.three.y;
+					if ( count < 2 )
+					{
+						console.log( `pixi  button#${count} x=${bt.pixi.position.x}, y=${bt.pixi.position.y}, w=${bt.pixi.width}, h=${bt.pixi.height}` );
+						console.log( `three button#${count} x=${bt.three.x}, y=${bt.three.y}` );
+					}
+
+					bt.three.width = bt.pixi.width / this.ratioCanvasPanelWidth;
+					bt.three.height = bt.pixi.height / this.ratioCanvasPanelHeight;
+					bt.material = this.material2;
+					bt.texture = this.canvasTexture2;
+					bt.instance = this.createThreeButton( bt );
+					bt.instance.mesh.position.x = bt.three.x;
+					bt.instance.mesh.position.y = bt.three.y;
+					bt.instance.mesh.position.z = 0.1;
+					this.mesh.add( bt.instance.mesh );
+				}
+				count++;
 				//console.log( `x${count}`, pixiButton.position.x, threeButton.mesh.position.x );
 
-				count++;
-				backdrop.addChild( pixiButton );
+				backdrop.addChild( bt.pixi );
 
 				// increment
-				increments.pixi.x += pixiButton.width + ( buttonPadding * 4 );
+				increments.pixi.x += bt.pixi.width + ( buttonPadding * 4 );
 
 			} );
 			// Add button line height;
@@ -236,7 +262,7 @@ class Keyboard {
 
 	}
 
-	convertXToMeter( x, w ) {
+	convertPixelToMeterX( x, w ) {
 		return (
 			( x / this.ratioCanvasPanelWidth ) -
 			( this.panelWidth / 2 ) +
@@ -245,7 +271,7 @@ class Keyboard {
 		);
 	}
 
-	convertYToMeter( y, h ) {
+	convertPixelToMeterY( y, h ) {
 		return (
 			( this.panelHeight / 2 ) -
 			( y / this.ratioCanvasPanelHeight ) -
@@ -254,25 +280,25 @@ class Keyboard {
 		);
 	}
 
-	createThreeButton( char, width, height ) {
-
-		width = width  / this.ratioCanvasPanelWidth;
-		height = height / this.ratioCanvasPanelHeight;
+	createThreeButton( { value = '.', width = 0.1, height = 0.1, material, texture, toffsetX, toffsetY } ) {
 
 		const cardConfig = {
-			name: char,
+			name: value,
 			width,
 			height,
+			toffsetX,
+			toffsetY,
 			radius: 0.005,
-			frontColor: 0x222222
+			frontColor: 0x222222,
+			material,
+			texture
 		};
 
 		const threeButton = new Card( cardConfig );
 		return threeButton;
 	}
 
-	createPixiButton( txt, width ) {
-
+	createPixiButton( { value = '.', width = 1 } ) {
 		const button = new Graphics();
 		const padding = 40 * this.resolution / 2;
 		let buttonWidth = width * this.buttonBaseWidth * this.resolution;
@@ -284,7 +310,7 @@ class Keyboard {
 		button.drawRoundedRect( 0, 0, buttonWidth, this.buttonHeight, 10 * this.resolution );
 		button.endFill();
 
-		const text = new PIXI.Text( txt, {
+		const text = new PIXI.Text( value, {
 			fontFamily: 'Arial',
 			fontSize: 24 * this.resolution,
 		} );
@@ -383,6 +409,8 @@ class Keyboard {
 
 		// this will update the texture threejs side
 		this.canvasTexture.needsUpdate = true;
+		this.canvasTexture2.needsUpdate = true;
+
 		this.needsUpdate = false;
 
 		// this will update pixi app

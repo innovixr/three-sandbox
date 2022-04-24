@@ -20,13 +20,11 @@ class DatGuiXR {
 		this.setupEvents();
 		this.showFps();
 
-		const keyboard = new Keyboard( {
-			layout: 'fr'
-		}, opts );
-
+		const keyboard = new Keyboard( { layout: 'fr' }, opts );
 		this.mesh = keyboard.mesh;
-
 		this.components.push( keyboard );
+
+		//setInterval( () => { console.log( this.renderer.info.render.triangles ); }, 1000 );
 	}
 
 	setupControllers() {
@@ -70,7 +68,7 @@ class DatGuiXR {
 			} );
 		}
 
-		//setInterval( () => { console.log( fps ); }, 1000 );
+		//setInterval( () => { console.log( 'fps', fps ); }, 1000 );
 
 		refreshLoop();
 	}

@@ -66,7 +66,7 @@ class MouseController {
 	}
 
 	initWindowSize() {
-		this.ctx.renderer.getSize( this.renderSize );
+		this.ctx?.renderer?.getSize( this.renderSize );
 	}
 
 	onXRSessionStart() {

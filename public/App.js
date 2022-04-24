@@ -5,6 +5,8 @@ import { BoxLineGeometry } from 'three/examples/jsm/geometries/BoxLineGeometry.j
 import CameraControls from 'camera-controls';
 //import * as holdEvent from 'hold-event';
 import * as holdEvent from './hold-event.module.js';
+import Stats from 'three/examples/jsm/libs/stats.module';
+
 CameraControls.install( { THREE: THREE } );
 console.clear();
 
@@ -35,6 +37,9 @@ class App {
 		this.loop = this.loop.bind( this );
 		this.renderer.setAnimationLoop( this.loop.bind( this ) );
 
+		this.stats = Stats();
+		document.body.appendChild( this.stats.dom );
+
 	}
 
 	loop() {
@@ -55,6 +60,9 @@ class App {
 		{
 			this.renderer.render( this.scene, this.camera );
 		}
+
+		this.stats.update();
+
 	}
 
 
@@ -89,8 +97,8 @@ class App {
 		blue.castShadow = true;
 		container.add( blue );
 
-		const back = new THREE.PointLight( new THREE.Color( 0xFF0022 ), 0.1, 5, 0.5 );
-		back.position.set( 0, 1.3, -0.6 );
+		const back = new THREE.PointLight( new THREE.Color( 0xAAAAAA ), 0.3, 5, 0.5 );
+		back.position.set( 0, 1.3, 1 );
 		//back.rotation.set( 1, 0, 0 );
 		//back.castShadow = true;
 		container.add( back );

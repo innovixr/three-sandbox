@@ -1,22 +1,44 @@
 import * as THREE from 'three';
+//import { LinearMipMapLinearFilter } from 'three';
+import { GUI } from 'dat.gui';
+
+let count = 0;
+
 
 class Card {
 	constructor( opts ) {
 		opts = opts || {};
+
+		this.material = opts.material;
+		this.texture = opts.texture;
+		this.usePlane = false;
+		count += 1;
+
 		const name = opts.name || `card-${Date.now()}`;
 		const x = opts.x || 0;
 		const y = opts.y || 0;
+		const u = opts.u;
+		const v = opts.v;
 		const width = opts.width || 0.4;
 		const height = opts.height || ( width * 0.36 );
 		const radius = opts.radius || 0.02;
+
+		// @TODO: think about colors
+		// from Cat (threejs discord)
+		// "if you're trying to match an object in the scene to a #4285F4 color in your HTML/CSS,
+		// the material actually needs to be material.color.setHex( 0x4285f4 ).convertSRGBToLinear()
+		// see https://www.donmccurdy.com/2020/06/17/color-management-in-threejs/ for more"
+
 		const frontColor = opts.frontColor || 0x444444;
 		const backColor = opts.backColor || 0x000000;
 		const hoverColor = opts.hoverColor || 0x0000FF;
 		const depth = opts.depth || 0.002;
 
-		const usePlane = false;
+		if ( this.usePlane )
+		{
+			this.geometry = new THREE.PlaneGeometry( width, height, 2, 2 );
 
-		if ( !usePlane )
+		} else
 		{
 			// TODO: find a way to split quadraticCurveTo into steps
 			const shape = new THREE.Shape()
@@ -31,7 +53,9 @@ class Card {
 				.quadraticCurveTo( x, y, x, y + radius );
 
 			const extrudeSettings = {
-				steps: 0,
+				steps: 2,
+				segments: 3,
+				curveSegments: 4,
 				depth,
 				bevelEnabled: false,
 				//bevelThickness: 1,
@@ -41,15 +65,63 @@ class Card {
 			};
 
 			this.geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
-		} else
-		{
-			this.geometry = new THREE.PlaneGeometry( width, height, 2, 2 );
 		}
 
 		//const vertices = this.geometry.attributes.position.array;
 		//console.log( vertices );
 
-		const matFront = new THREE.MeshBasicMaterial( { color: frontColor } );
+		let matFront;
+
+
+		if ( this.texture )
+		{
+			matFront = new THREE.MeshBasicMaterial( {
+				map: this.texture.clone(),
+				transparent: false,
+				opacity: 0.999,
+				alphaTest: 0.1,
+				wireframe: false
+			} );
+
+			const ratio = this.texture.image.width / this.texture.image.height;
+			const scale = 1.65;
+			matFront.map.repeat.set( scale, scale * ratio );
+			matFront.map.offset.x = 0.015;
+			matFront.map.offset.y = 0.045;
+			matFront.map.offset.x = u;
+			matFront.map.offset.y = v;
+			//console.log( `u=${u}, v=${v}` );
+			//matFront.map.offset.set( 10,0 );
+
+			if ( count === 1 )
+			{
+				const f = this.gui.addFolder( 'Texture' );
+				f.add( matFront.map.repeat, 'x', -10.0, 10.0 );
+				f.add( matFront.map.repeat, 'y', -10.0, 10.0 );
+				f.add( matFront.map.offset, 'x', -1, 1, 0.0001 );
+				f.add( matFront.map.offset, 'y', -1, 1, 0.0001 );
+				f.open();
+			}
+
+		} else
+		{
+
+			matFront = new THREE.MeshBasicMaterial( { color: frontColor } );
+		}
+
+		/*
+		if ( !window.blah )
+		{
+			window.blah = setInterval( () => {
+				matFront.map.offset.x += 0.01;
+				matFront.map.offset.y -= 0.01;
+				matFront.map.repeat.x -= 0.20;
+				matFront.map.repeat.y = matFront.map.repeat.x / this.panelRatio;
+				console.log( matFront.map.offset );
+			}, 10 );
+		}
+		*/
+
 		const matBack = new THREE.MeshBasicMaterial( { color: backColor } );
 		const matHover = new THREE.MeshBasicMaterial( { color: hoverColor } );
 
@@ -59,7 +131,23 @@ class Card {
 
 		const mesh = new THREE.Mesh( this.geometry, [ matBack, matFront, matHover ] );
 
-		if ( usePlane )
+		this.assignMaterial();
+		this.geometry.center();
+		mesh.card = this;
+		mesh.name = name;
+
+		this.mesh = mesh;
+		this.material = matFront;
+
+		//this.onRaycasterEvent = this.onRaycasterEvent.bind( this );
+		//this.onRaycasterEnter = this.onRaycasterEnter.bind( this );
+		//this.onRaycasterMove = this.onRaycasterMove.bind( this );
+		//this.onRaycasterLeave = this.onRaycasterLeave.bind( this );
+	}
+
+	assignMaterial() {
+
+		if ( this.usePlane )
 		{
 			// make all faces use matBack
 			for ( let i = 0; i < this.geometry.faces.length; i++ )
@@ -79,18 +167,10 @@ class Card {
 			this.geometry.groups[ 0 ].materialIndex = 1;
 		}
 
-		this.geometry.center();
-		mesh.card = this;
-		mesh.name = name;
-
-		this.mesh = mesh;
-		this.material = matFront;
-
-		//this.onRaycasterEvent = this.onRaycasterEvent.bind( this );
-		//this.onRaycasterEnter = this.onRaycasterEnter.bind( this );
-		//this.onRaycasterMove = this.onRaycasterMove.bind( this );
-		//this.onRaycasterLeave = this.onRaycasterLeave.bind( this );
 	}
 }
+
+Card.prototype.gui = new GUI();
+Card.prototype.count = 0;
 
 export { Card };
