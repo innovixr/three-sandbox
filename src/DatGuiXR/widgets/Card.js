@@ -6,7 +6,7 @@ let count = 0;
 
 
 class Card {
-	constructor(opts) {
+	constructor( opts ) {
 		opts = opts || {};
 
 		this.material = opts.material;
@@ -20,7 +20,7 @@ class Card {
 		const u = opts.u;
 		const v = opts.v;
 		const width = opts.width || 0.4;
-		const height = opts.height || (width * 0.36);
+		const height = opts.height || ( width * 0.36 );
 		const radius = opts.radius || 0.02;
 
 		// @TODO: think about colors
@@ -34,21 +34,21 @@ class Card {
 		const hoverColor = opts.hoverColor || 0x0000FF;
 		const depth = opts.depth || 0.002;
 
-		if (this.usePlane) {
-			this.geometry = new THREE.PlaneGeometry(width, height, 2, 2);
+		if ( this.usePlane ) {
+			this.geometry = new THREE.PlaneGeometry( width, height, 2, 2 );
 
 		} else {
 			// TODO: find a way to split quadraticCurveTo into steps
 			const shape = new THREE.Shape()
-				.moveTo(x, y + radius)
-				.lineTo(x, y + height - radius)
-				.quadraticCurveTo(x, y + height, x + radius, y + height)
-				.lineTo(x + width - radius, y + height)
-				.quadraticCurveTo(x + width, y + height, x + width, y + height - radius)
-				.lineTo(x + width, y + radius)
-				.quadraticCurveTo(x + width, y, x + width - radius, y)
-				.lineTo(x + radius, y)
-				.quadraticCurveTo(x, y, x, y + radius);
+				.moveTo( x, y + radius )
+				.lineTo( x, y + height - radius )
+				.quadraticCurveTo( x, y + height, x + radius, y + height )
+				.lineTo( x + width - radius, y + height )
+				.quadraticCurveTo( x + width, y + height, x + width, y + height - radius )
+				.lineTo( x + width, y + radius )
+				.quadraticCurveTo( x + width, y, x + width - radius, y )
+				.lineTo( x + radius, y )
+				.quadraticCurveTo( x, y, x, y + radius );
 
 			const extrudeSettings = {
 				steps: 2,
@@ -62,7 +62,7 @@ class Card {
 				//bevelSegments: 1
 			};
 
-			this.geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+			this.geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
 		}
 
 		//const vertices = this.geometry.attributes.position.array;
@@ -71,18 +71,18 @@ class Card {
 		let matFront;
 
 
-		if (this.texture) {
-			matFront = new THREE.MeshBasicMaterial({
+		if ( this.texture ) {
+			matFront = new THREE.MeshBasicMaterial( {
 				map: this.texture.clone(),
 				transparent: false,
 				opacity: 0.999,
 				alphaTest: 0.1,
 				wireframe: false
-			});
+			} );
 
 			const ratio = this.texture.image.width / this.texture.image.height;
 			const scale = 1.65;
-			matFront.map.repeat.set(scale, scale * ratio);
+			matFront.map.repeat.set( scale, scale * ratio );
 			matFront.map.offset.x = 0.015;
 			matFront.map.offset.y = 0.045;
 			matFront.map.offset.x = u;
@@ -90,18 +90,18 @@ class Card {
 			//console.log( `u=${u}, v=${v}` );
 			//matFront.map.offset.set( 10,0 );
 
-			if (count === 1) {
-				const f = this.gui.addFolder('Texture');
-				f.add(matFront.map.repeat, 'x', -10.0, 10.0);
-				f.add(matFront.map.repeat, 'y', -10.0, 10.0);
-				f.add(matFront.map.offset, 'x', -1, 1, 0.0001);
-				f.add(matFront.map.offset, 'y', -1, 1, 0.0001);
+			if ( count === 1 ) {
+				const f = this.gui.addFolder( 'Texture' );
+				f.add( matFront.map.repeat, 'x', -10.0, 10.0 );
+				f.add( matFront.map.repeat, 'y', -10.0, 10.0 );
+				f.add( matFront.map.offset, 'x', -1, 1, 0.0001 );
+				f.add( matFront.map.offset, 'y', -1, 1, 0.0001 );
 				f.open();
 			}
 
 		} else {
 
-			matFront = new THREE.MeshBasicMaterial({ color: frontColor });
+			matFront = new THREE.MeshBasicMaterial( { color: frontColor } );
 		}
 
 		/*
@@ -117,14 +117,14 @@ class Card {
 		}
 		*/
 
-		const matBack = new THREE.MeshBasicMaterial({ color: backColor });
-		const matHover = new THREE.MeshBasicMaterial({ color: hoverColor });
+		const matBack = new THREE.MeshBasicMaterial( { color: backColor } );
+		const matHover = new THREE.MeshBasicMaterial( { color: hoverColor } );
 
 		matFront.color.convertSRGBToLinear();
 		matBack.color.convertSRGBToLinear();
 		matHover.color.convertSRGBToLinear();
 
-		const mesh = new THREE.Mesh(this.geometry, [matBack, matFront, matHover]);
+		const mesh = new THREE.Mesh( this.geometry, [ matBack, matFront, matHover ] );
 
 		this.assignMaterial();
 		this.geometry.center();
@@ -142,15 +142,15 @@ class Card {
 
 	assignMaterial() {
 
-		if (this.usePlane) {
+		if ( this.usePlane ) {
 			// make all faces use matBack
-			for (let i = 0; i < this.geometry.faces.length; i++) {
+			for ( let i = 0; i < this.geometry.faces.length; i++ ) {
 				this.geometry.faces[i].materialIndex = 0;
 			}
 			this.geometry.faces[0].materialIndex = 1;
 		} else {
 			// make all faces use matBack
-			for (let i = 0; i < this.geometry.groups.length; i++) {
+			for ( let i = 0; i < this.geometry.groups.length; i++ ) {
 				this.geometry.groups[i].materialIndex = 0;
 			}
 
