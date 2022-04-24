@@ -3,8 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 import { BoxLineGeometry } from 'three/examples/jsm/geometries/BoxLineGeometry.js';
 import CameraControls from 'camera-controls';
-//import * as holdEvent from 'hold-event';
-import * as holdEvent from './hold-event.module.js';
+import * as holdEvent from 'hold-event';
 import Stats from 'three/examples/jsm/libs/stats.module';
 
 CameraControls.install( { THREE: THREE } );

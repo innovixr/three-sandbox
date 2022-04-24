@@ -14,7 +14,7 @@ module.exports = {
 		sourceType: 'module',
 		allowImportExportEverywhere: true,
 		requireConfigFile: false
-    
+
 	},
 	plugins: [
 		//'@babel'
