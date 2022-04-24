@@ -37,6 +37,7 @@ class Keyboard {
 		this.buttonHeight = this.buttonBaseHeight * this.resolution;
 		this.mesh = null;
 		this.meshKeyboard = null;
+		this.useRealButtons = true;
 
 		console.log( `Keyboard(${this.panelWidth}, ${this.panelHeight}, ratio ${this.panelRatio})` );
 
@@ -137,10 +138,6 @@ class Keyboard {
 		this.canvasTexture.anisotropy = 16;
 
 		this.canvasTexture2 = new THREE.CanvasTexture( this.canvasEl );
-		//this.canvasTexture2.wrapS = 2000;
-		this.canvasTexture2.wrapS = THREE.ClampToEdgeWrapping;
-		this.canvasTexture2.wrapT = THREE.ClampToEdgeWrapping;
-		//this.canvasTexture2.wrapT = THREE.RepeatWrapping;
 		this.canvasTexture2.anisotropy = 16;
 
 		this.material.map = this.canvasTexture;
@@ -171,7 +168,6 @@ class Keyboard {
 		const keyLines = Keymap.get( this.config.layout )[ 0 ];
 		const charset = 0;
 		const buttonPadding = 5 * this.resolution / 2;
-		const addThreeButton = true;
 
 		const increments = {
 			pixi: {
@@ -180,7 +176,7 @@ class Keyboard {
 			}
 		};
 
-		let char, count = 0;
+		let count = 0;
 
 		// eslint-disable-next-line no-unused-vars
 		keyLines.map( ( keys, lineNumber ) => {
@@ -190,8 +186,14 @@ class Keyboard {
 			keys.map( ( key ) => {
 				let bt = {};
 
+				// button padding
+				bt.padding = ( 40 * this.resolution ) / 2;
+
 				// specific local width adjustement
 				bt.width = ( key.width || 0.1 ) * 10;
+				bt.width = bt.width * this.buttonBaseWidth * this.resolution;
+				bt.width += ( ( bt.width / ( this.buttonBaseWidth * this.resolution ) ) - 1 ) * ( bt.padding / 2 );
+				bt.height = this.buttonHeight;
 
 				// get char
 				bt.value = key.chars[ charset ].lowerCase || key.chars[ charset ].icon || 'undif';
@@ -202,12 +204,10 @@ class Keyboard {
 				bt.pixi.position.y = increments.pixi.y;
 				bt.three = {};
 
-				if ( addThreeButton )
+				if ( this.useRealButtons )
 				{
 					bt.three.x = this.convertPixelToMeterX( bt.pixi.position.x, bt.pixi.width );
 					bt.three.y = this.convertPixelToMeterY( bt.pixi.position.y, bt.pixi.height );
-					bt.three.textureOffsetX = bt.three.x;
-					bt.three.textureOffsetY = bt.three.y;
 					if ( count < 2 )
 					{
 						console.log( `pixi  button#${count} x=${bt.pixi.position.x}, y=${bt.pixi.position.y}, w=${bt.pixi.width}, h=${bt.pixi.height}` );
@@ -216,9 +216,15 @@ class Keyboard {
 
 					bt.three.width = bt.pixi.width / this.ratioCanvasPanelWidth;
 					bt.three.height = bt.pixi.height / this.ratioCanvasPanelHeight;
-					bt.material = this.material2;
-					bt.texture = this.canvasTexture2;
-					bt.instance = this.createThreeButton( bt );
+					bt.three.offsetX = this.convertPixelToPercentX( bt.pixi.position.x );
+					bt.three.offsetY = this.convertPixelToPercentY( bt.pixi.position.y );
+					if ( count === 0 )
+						console.log( `ICI px=${bt.pixi.position.x}, py=${bt.pixi.position.y}, ox=${bt.three.offsetX}, oy=${bt.three.offsetY} expected 0.75, cw=${this.canvasWidth}, ch=${this.canvasHeight}` );
+
+					bt.three.material = this.material2;
+					bt.three.texture = this.canvasTexture2;
+
+					bt.instance = this.createThreeButton( bt.three );
 					bt.instance.mesh.position.x = bt.three.x;
 					bt.instance.mesh.position.y = bt.three.y;
 					bt.instance.mesh.position.z = 0.1;
@@ -280,14 +286,26 @@ class Keyboard {
 		);
 	}
 
-	createThreeButton( { value = '.', width = 0.1, height = 0.1, material, texture, toffsetX, toffsetY } ) {
+	convertPixelToPercentX( x ) {
+		return (
+			( ( x * 100 )  / this.canvasWidth ) / 100
+		);
+	}
+
+	convertPixelToPercentY( y ) {
+		return (
+			1 - + ( ( ( y * 100 ) / this.canvasHeight ) / 100 )
+		);
+	}
+
+	createThreeButton( { value = '.', width = 0.1, height = 0.1, material, texture, offsetX, offsetY } ) {
 
 		const cardConfig = {
 			name: value,
 			width,
 			height,
-			toffsetX,
-			toffsetY,
+			offsetX,
+			offsetY,
 			radius: 0.005,
 			frontColor: 0x222222,
 			material,
@@ -298,26 +316,23 @@ class Keyboard {
 		return threeButton;
 	}
 
-	createPixiButton( { value = '.', width = 1 } ) {
+	createPixiButton( { value = '.', width = 270, height = 270, radius = 10 } ) {
 		const button = new Graphics();
-		const padding = 40 * this.resolution / 2;
-		let buttonWidth = width * this.buttonBaseWidth * this.resolution;
-		buttonWidth += ( ( buttonWidth / ( this.buttonBaseWidth * this.resolution ) ) - 1 ) * ( padding / 2 ) ;
 
 		//const btLineColor = 0x000066;
 		//bt.lineStyle( 2, btLineColor, 1 );
 		button.beginFill( this.buttonColor, 1 );
-		button.drawRoundedRect( 0, 0, buttonWidth, this.buttonHeight, 10 * this.resolution );
+		button.drawRoundedRect( 0, 0, width, height, radius * this.resolution );
 		button.endFill();
 
 		const text = new PIXI.Text( value, {
-			fontFamily: 'Arial',
+			fontFamily: 'Verdana',
 			fontSize: 24 * this.resolution,
 		} );
 
 		text.style.fill = this.buttonColorText;
-
 		button.addChild( text );
+		text.centerXY();
 
 		//bt.on( 'mousemove', event => { console.log( 'bt mousemove', event ); } );
 		//bt.on( 'mousedown', ev => { console.log( 'bt mousedown', ev ); } );
@@ -325,7 +340,6 @@ class Keyboard {
 		//bt.on( 'pointerdown', ev => { console.log( 'bt pointerdown', ev ); } );
 		//bt.on( 'click', ev => { console.log( 'bt clicked', ev ); } );
 
-		text.centerXY();
 
 		return button;
 

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 //import { LinearMipMapLinearFilter } from 'three';
-import { GUI } from 'dat.gui';
+import { GUI } from 'lil-gui';
 
 let count = 0;
 
@@ -17,8 +17,6 @@ class Card {
 		const name = opts.name || `card-${Date.now()}`;
 		const x = opts.x || 0;
 		const y = opts.y || 0;
-		const u = opts.u;
-		const v = opts.v;
 		const width = opts.width || 0.4;
 		const height = opts.height || ( width * 0.36 );
 		const radius = opts.radius || 0.02;
@@ -85,17 +83,21 @@ class Card {
 			matFront.map.repeat.set( scale, scale * ratio );
 			matFront.map.offset.x = 0.015;
 			matFront.map.offset.y = 0.045;
-			matFront.map.offset.x = u;
-			matFront.map.offset.y = v;
+			matFront.map.offset.x = opts.offsetX;
+			matFront.map.offset.y = opts.offsetY;
+
+			// franck
+
 			//console.log( `u=${u}, v=${v}` );
 			//matFront.map.offset.set( 10,0 );
 
 			if ( count === 1 ) {
+				console.log( matFront.map.offset );
 				const f = this.gui.addFolder( 'Texture' );
-				f.add( matFront.map.repeat, 'x', -10.0, 10.0 );
-				f.add( matFront.map.repeat, 'y', -10.0, 10.0 );
-				f.add( matFront.map.offset, 'x', -1, 1, 0.0001 );
-				f.add( matFront.map.offset, 'y', -1, 1, 0.0001 );
+				f.add( matFront.map.repeat, 'x' ).min( -10.0 ).max( 10 ).step( 0.1 );
+				f.add( matFront.map.repeat, 'y' ).min( -10.0 ).max( 10 ).step( 0.1 );
+				f.add( matFront.map.offset, 'x' ).min( -1.0 ).max( 1.0 ).step( 0.00001 );
+				f.add( matFront.map.offset, 'y' ).min( -1.0 ).max( 1.0 ).step( 0.00001 );
 				f.open();
 			}
 
