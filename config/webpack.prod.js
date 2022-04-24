@@ -122,7 +122,7 @@ module.exports = env => {
 			},
 			server: env.NODE_SSL ? 'https' : 'http',
 			port: env.NODE_SSL ? '8443' : '8080',
-			host: env.NODE_SSL ? getIpAddress( /wi-fi|eth0/i ) : 'localhost'
+			host: env.NODE_SSL ? getIpAddress( /wi-fi|eth0|Ethernet/i ) : 'localhost'
 		},
 
 		output: {
