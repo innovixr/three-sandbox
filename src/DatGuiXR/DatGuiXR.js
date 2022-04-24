@@ -20,7 +20,7 @@ class DatGuiXR {
 		this.setupEvents();
 		this.showFps();
 
-		const keyboard = new Keyboard( { layout: 'fr' }, opts );
+		const keyboard = new Keyboard( { layout: 'fr', flat:false }, opts );
 		this.mesh = keyboard.mesh;
 		this.components.push( keyboard );
 

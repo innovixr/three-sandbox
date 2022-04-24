@@ -30,7 +30,7 @@ class Card {
 		const frontColor = opts.frontColor || 0x444444;
 		const backColor = opts.backColor || 0x000000;
 		const hoverColor = opts.hoverColor || 0x0000FF;
-		const depth = opts.depth || 0.002;
+		const depth = opts.depth || 0.01;
 
 		if ( this.usePlane ) {
 			this.geometry = new THREE.PlaneGeometry( width, height, 2, 2 );

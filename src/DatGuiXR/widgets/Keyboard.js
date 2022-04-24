@@ -14,26 +14,50 @@ class Keyboard {
 	constructor( config, opts ) {
 		this.config = config || {};
 		this.config.layout = 'fr';
+		this.keyLines = Keymap.get( this.config.layout )[ 0 ];
 
 		this.scene = opts.scene;
 		this.camera = opts.camera;
 		this.renderer = opts.renderer;
 		this.controls = opts.controls;
 		this.raycasterObjects = opts.raycasterObjects;
-		this.scale = 1.5;
-		this.panelWidth = Math.round( ( 0.4 * this.scale ) * 100 ) / 100;
-		this.panelHeight = Math.round( ( 0.165 * this.scale ) * 100 ) / 100;
+		this.scale = typeof this.scale !== 'undefined' ? this.scale : 1;
+		this.depth = 0.002;
+
+		const w = 0.6;
+		const s = 0.2475 / w;
+		const h = w * s;
+
+		this.panelWidth = ( Math.round( ( w  ) * 100 ) / 100 ) * this.scale;
+		this.panelHeight = ( Math.round( ( h ) * 100 ) / 100 ) * this.scale;
 		this.panelDepth = 0;
 		this.panelRatio = this.panelHeight / this.panelWidth;
-		this.shapeType = 'box';
-		this.scale = typeof this.scale !== 'undefined' ? this.scale : 1.0;
-		this.needsUpdate = true;
 		this.resolution = opts.resolution || shared.defaults.resolution;
+		this.canvasSize = this.canvasResolution;
+		this.canvasWidth = this.canvasSize;
+		this.canvasHeight = Math.round( this.canvasSize * this.panelRatio );
+		this.ratioCanvasPanelWidth = this.canvasWidth / this.panelWidth;
+		this.ratioCanvasPanelHeight = this.canvasHeight / this.panelHeight;
+		this.ratioCanvasPanelWidth = Math.round( this.ratioCanvasPanelWidth * 100 ) / 100;
+		this.ratioCanvasPanelHeight = Math.round( this.ratioCanvasPanelHeight * 100 ) / 100;
+		this.shapeType = 'box';
+		this.needsUpdate = true;
+
 		this.backdropColor = 0x030303;
+		this.backdropMargin = 0; // not really implemented
+		this.backdropPadding = ( this.canvasHeight * 0.027 ) * this.resolution / 2;
+		this.backdropRadius = 60;
+		this.backdropWidth = this.canvasWidth - this.backdropMargin;
+		this.backdropHeight = this.canvasHeight - this.backdropMargin;
+
+		console.log( 'k', this.backdropPadding, this.canvasHeight, this.backdropRadius );
+
 		this.buttonColor = 0x050505;
 		this.buttonColorText = 0x444444;
-		this.buttonBaseWidth = 90;
-		this.buttonBaseHeight = 90;
+		this.buttonBaseHeight = this.canvasHeight / ( this.keyLines.length * this.resolution );
+		this.buttonBaseHeight -= ( this.buttonBaseHeight * 0.15 );
+		this.buttonBaseWidth = this.buttonBaseHeight;
+
 		this.buttonHeight = this.buttonBaseHeight * this.resolution;
 		this.mesh = null;
 		this.meshKeyboard = null;
@@ -56,7 +80,8 @@ class Keyboard {
 			transparent: false,
 			opacity: 0.999,
 			alphaTest: 0.1,
-			wireframe:false
+			wireframe: false,
+			visible:true
 		};
 
 		//const material = THREE.MeshPhongMaterial;
@@ -98,16 +123,6 @@ class Keyboard {
 
 	createTexture() {
 
-		this.canvasSize = this.canvasResolution;
-		this.canvasWidth = this.canvasSize;
-		this.canvasHeight = Math.round( this.canvasSize * this.panelRatio );
-
-		this.ratioCanvasPanelWidth = this.canvasWidth / this.panelWidth;
-		this.ratioCanvasPanelHeight = this.canvasHeight / this.panelHeight;
-
-		this.ratioCanvasPanelWidth = Math.round( this.ratioCanvasPanelWidth * 100 ) / 100;
-		this.ratioCanvasPanelHeight = Math.round( this.ratioCanvasPanelHeight * 100 ) / 100;
-
 		this.createCanvas( this.canvasWidth, this.canvasHeight );
 
 		console.log( 'Keyboard: createTexture', this.canvasWidth, this.canvasHeight, this.canvasEl );
@@ -147,41 +162,29 @@ class Keyboard {
 
 		// backdrop
 		const backdrop = new PIXI.Graphics();
-		const backdropMargin = 0 * this.resolution / 2;
-		const backdropPadding = 34 * this.resolution / 2;
-		const backdropRadius = 40 * this.resolution / 2;
-		const backdropWidth = this.canvasWidth - backdropMargin;
-		const backdropHeight = this.canvasHeight - backdropMargin;
 
-		this.backdropPadding = backdropPadding;
-
-		backdrop.lineStyle( {
-			alignment: 0,
-			width: 5 * this.resolution,
-			color: 0x2222FF,
-			alpha: 0.05
-		} );
-		backdrop.beginFill( this.backdropColor, 0.8 ); this.canvasWidth - backdropMargin;
-		backdrop.drawRoundedRect( backdropMargin, backdropMargin, backdropWidth, backdropHeight, backdropRadius );
+		//backdrop.lineStyle( { alignment: 0, width: 3 * this.resolution, color: 0x2222FF, alpha: 0.05 } );
+		backdrop.beginFill( this.backdropColor, 0.8 ); this.canvasWidth - this.backdropMargin;
+		backdrop.drawRoundedRect( this.backdropMargin, this.backdropMargin, this.backdropWidth, this.backdropHeight, this.backdropRadius );
 		backdrop.endFill();
 
-		const keyLines = Keymap.get( this.config.layout )[ 0 ];
 		const charset = 0;
 		const buttonPadding = 5 * this.resolution / 2;
+		//const buttonPadding = ( this.canvasWidth * 0.0015 ) * this.resolution / 2;
 
 		const increments = {
 			pixi: {
-				x: backdropPadding,
-				y: backdropPadding
+				x: this.backdropPadding,
+				y: this.backdropPadding
 			}
 		};
 
 		let count = 0;
 
 		// eslint-disable-next-line no-unused-vars
-		keyLines.map( ( keys, lineNumber ) => {
+		this.keyLines.map( ( keys, lineNumber ) => {
 			// X coordinates of the first button on this new line
-			increments.pixi.x = backdropPadding;
+			increments.pixi.x = this.backdropPadding;
 
 			keys.map( ( key ) => {
 				let bt = {};
@@ -204,22 +207,22 @@ class Keyboard {
 				bt.pixi.position.y = increments.pixi.y;
 				bt.three = {};
 
-				if ( this.useRealButtons )
+				if ( !this.config.flat )
 				{
 					bt.three.x = this.convertPixelToMeterX( bt.pixi.position.x, bt.pixi.width );
 					bt.three.y = this.convertPixelToMeterY( bt.pixi.position.y, bt.pixi.height );
+					/*
 					if ( count < 2 )
 					{
 						console.log( `pixi  button#${count} x=${bt.pixi.position.x}, y=${bt.pixi.position.y}, w=${bt.pixi.width}, h=${bt.pixi.height}` );
 						console.log( `three button#${count} x=${bt.three.x}, y=${bt.three.y}` );
 					}
-
+					*/
 					bt.three.width = bt.pixi.width / this.ratioCanvasPanelWidth;
 					bt.three.height = bt.pixi.height / this.ratioCanvasPanelHeight;
+					bt.three.depth = this.depth;
 					bt.three.offsetX = this.convertPixelToPercentX( bt.pixi.position.x );
 					bt.three.offsetY = this.convertPixelToPercentY( bt.pixi.position.y );
-					if ( count === 0 )
-						console.log( `ICI px=${bt.pixi.position.x}, py=${bt.pixi.position.y}, ox=${bt.three.offsetX}, oy=${bt.three.offsetY} expected 0.75, cw=${this.canvasWidth}, ch=${this.canvasHeight}` );
 
 					bt.three.material = this.material2;
 					bt.three.texture = this.canvasTexture2;
@@ -227,7 +230,7 @@ class Keyboard {
 					bt.instance = this.createThreeButton( bt.three );
 					bt.instance.mesh.position.x = bt.three.x;
 					bt.instance.mesh.position.y = bt.three.y;
-					bt.instance.mesh.position.z = 0.1;
+					bt.instance.mesh.position.z = bt.three.depth / 4;
 					this.mesh.add( bt.instance.mesh );
 				}
 				count++;
@@ -294,11 +297,11 @@ class Keyboard {
 
 	convertPixelToPercentY( y ) {
 		return (
-			1 - + ( ( ( y * 100 ) / this.canvasHeight ) / 100 )
+			1 - ( ( ( y * 100 ) / this.canvasHeight ) / 100 ) - 0.21
 		);
 	}
 
-	createThreeButton( { value = '.', width = 0.1, height = 0.1, material, texture, offsetX, offsetY } ) {
+	createThreeButton( { value = '.', width = 0.1, height = 0.1, depth = 0.1,  material, texture, offsetX, offsetY } ) {
 
 		const cardConfig = {
 			name: value,
@@ -306,6 +309,7 @@ class Keyboard {
 			height,
 			offsetX,
 			offsetY,
+			depth,
 			radius: 0.005,
 			frontColor: 0x222222,
 			material,
