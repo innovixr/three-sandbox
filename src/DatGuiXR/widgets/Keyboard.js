@@ -8,6 +8,7 @@ import { Keymap } from '../utils/Keymap.js';
 import { shared } from '../shared.js';
 import { Card } from './Card.js';
 
+const SCALE = 1;
 
 class Keyboard {
 
@@ -21,8 +22,7 @@ class Keyboard {
 		this.renderer = opts.renderer;
 		this.controls = opts.controls;
 		this.raycasterObjects = opts.raycasterObjects;
-		this.scale = typeof this.scale !== 'undefined' ? this.scale : 1;
-		this.depth = 0.02;
+		this.scale = typeof this.scale !== 'undefined' ? this.scale : SCALE;
 
 		const w = 0.6;
 		const s = 0.2475 / w;
@@ -41,11 +41,12 @@ class Keyboard {
 		this.ratioCanvasPanelWidth = Math.round( this.ratioCanvasPanelWidth * 100 ) / 100;
 		this.ratioCanvasPanelHeight = Math.round( this.ratioCanvasPanelHeight * 100 ) / 100;
 		this.shapeType = 'box';
-		this.needsUpdate = true;
+		this.textureSpacerZ = -0.05;
 
 		this.backdropColor = 0x030303;
-		this.backdropMargin = 0; // not really implemented
-		this.backdropPadding = ( this.canvasHeight * 0.027 ) * this.resolution / 2;
+		this.backdropMargin = 0;
+		//this.backdropPadding = ( this.canvasHeight * 0.027 );
+		this.backdropPadding = ( this.canvasHeight * 0.04 ) * this.scale;
 		this.backdropRadius = 60;
 		this.backdropWidth = this.canvasWidth - this.backdropMargin;
 		this.backdropHeight = this.canvasHeight - this.backdropMargin;
@@ -57,12 +58,15 @@ class Keyboard {
 		this.buttonBaseHeight = this.canvasHeight / ( this.keyLines.length * this.resolution );
 		this.buttonBaseHeight -= ( this.buttonBaseHeight * 0.15 );
 		this.buttonBaseWidth = this.buttonBaseHeight;
+		this.buttonDepth = 0.02;
 
 		this.buttonHeight = this.buttonBaseHeight * this.resolution;
 		this.mesh = null;
 		this.meshKeyboard = null;
+		this.meshVisible = true;
 		this.useRealButtons = true;
 
+		this.needsUpdate = true;
 		console.log( `Keyboard(${this.panelWidth}, ${this.panelHeight}, ratio ${this.panelRatio})` );
 
 		this.createMesh();
@@ -81,7 +85,7 @@ class Keyboard {
 			opacity: 0.999,
 			alphaTest: 0.1,
 			wireframe: false,
-			visible:false
+			visible: this.meshVisible
 		};
 
 		//const material = THREE.MeshPhongMaterial;
@@ -164,7 +168,7 @@ class Keyboard {
 		const backdrop = new PIXI.Graphics();
 
 		//backdrop.lineStyle( { alignment: 0, width: 3 * this.resolution, color: 0x2222FF, alpha: 0.05 } );
-		backdrop.beginFill( this.backdropColor, 0.8 ); this.canvasWidth - this.backdropMargin;
+		backdrop.beginFill( this.backdropColor, 0.8 );
 		backdrop.drawRoundedRect( this.backdropMargin, this.backdropMargin, this.backdropWidth, this.backdropHeight, this.backdropRadius );
 		backdrop.endFill();
 
@@ -220,7 +224,7 @@ class Keyboard {
 					*/
 					bt.three.width = bt.pixi.width / this.ratioCanvasPanelWidth;
 					bt.three.height = bt.pixi.height / this.ratioCanvasPanelHeight;
-					bt.three.depth = this.depth;
+					bt.three.depth = this.buttonDepth;
 					bt.three.offsetX = this.convertPixelToPercentX( bt.pixi.position.x );
 					bt.three.offsetY = this.convertPixelToPercentY( bt.pixi.position.y );
 
@@ -230,7 +234,7 @@ class Keyboard {
 					bt.instance = this.createThreeButton( bt.three );
 					bt.instance.mesh.position.x = bt.three.x;
 					bt.instance.mesh.position.y = bt.three.y;
-					bt.instance.mesh.position.z = bt.three.depth / 4;
+					bt.instance.mesh.position.z = this.textureSpacerZ;
 					this.mesh.add( bt.instance.mesh );
 				}
 				count++;
