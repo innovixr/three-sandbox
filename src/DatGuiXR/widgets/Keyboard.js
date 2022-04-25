@@ -22,7 +22,7 @@ class Keyboard {
 		this.controls = opts.controls;
 		this.raycasterObjects = opts.raycasterObjects;
 		this.scale = typeof this.scale !== 'undefined' ? this.scale : 1;
-		this.depth = 0.002;
+		this.depth = 0.02;
 
 		const w = 0.6;
 		const s = 0.2475 / w;
@@ -50,7 +50,7 @@ class Keyboard {
 		this.backdropWidth = this.canvasWidth - this.backdropMargin;
 		this.backdropHeight = this.canvasHeight - this.backdropMargin;
 
-		console.log( 'k', this.backdropPadding, this.canvasHeight, this.backdropRadius );
+		//console.log( 'k', this.backdropPadding, this.canvasHeight, this.backdropRadius );
 
 		this.buttonColor = 0x050505;
 		this.buttonColorText = 0x444444;
@@ -81,7 +81,7 @@ class Keyboard {
 			opacity: 0.999,
 			alphaTest: 0.1,
 			wireframe: false,
-			visible:true
+			visible:false
 		};
 
 		//const material = THREE.MeshPhongMaterial;
