@@ -16,7 +16,6 @@ class Experience {
 			renderer: this.app.renderer,
 			controls: this.app.controls,
 			raycasterObjects: this.app.raycasterMeshes,
-			scale: 1.0,
 			panelWidth: 0.4,
 			panelHeight: 0.4 * 0.36
 			//position: new THREE.Vector3( 0, 0, 0 ),

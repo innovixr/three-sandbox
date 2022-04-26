@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import * as PIXI from 'pixi.js-legacy';
-import '../pixi/center.js';
+import '../../pixi/center.js';
 
 import { SmoothGraphics as Graphics } from '@pixi/graphics-smooth';
-import { Object3D } from '../three/Object3D.js';
-import { Keymap } from '../utils/Keymap.js';
-import { shared } from '../shared.js';
+import { Object3D } from '../../three/Object3D.js';
+import { Keymap } from '../../utils/Keymap.js';
+import { shared } from '../../shared.js';
 import { Card } from './Card.js';
 
 const SCALE = 1;
