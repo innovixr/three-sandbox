@@ -10,7 +10,6 @@ const TEMPLATE_PATH = `../${PUBLIC_PATH}/html`;
 let pages = [
 	[ 'kit_basic_setup', 'Basic setup' ],
 	[ 'exp_basic_setup', 'Basic setup' ],
-	[ 'exp_keyboard_three', 'Keyboard (+pixi)' ],
 	[ 'three_webgl', 'THREE WebGL test' ],
 	[ 'three_htmlmesh', 'THREE.HTMLMesh test' ],
 	[ 'datguixr_keyboard', 'Keyboard' ],

@@ -7,6 +7,11 @@ window.addEventListener( 'load', () => {
 
 class Experience {
 
+	/*
+	 * first version of class Card
+	 * TODO: REMOVE ME
+  	 */
+
 	constructor() {
 		this.app = new App( this.loop.bind( this ) );
 		this.scene = this.app.scene;
@@ -128,9 +133,11 @@ class Card {
 		//const vertices = this.geometry.attributes.position.array;
 		//console.log( vertices );
 
-		const matFront = new THREE.MeshPhongMaterial( { color: frontColor } );
-		const matBack = new THREE.MeshPhongMaterial( { color: backColor } );
-		const matHover = new THREE.MeshPhongMaterial( { color: hoverColor } );
+		//const material = THREE.MeshPhongMaterial;
+		const material = THREE.MeshBasicMaterial;
+		const matFront = new material( { color: frontColor } );
+		const matBack = new material( { color: backColor } );
+		const matHover = new material( { color: hoverColor } );
 
 		matFront.color.convertSRGBToLinear();
 		matBack.color.convertSRGBToLinear();
@@ -197,7 +204,7 @@ class Card {
 	onRaycasterEnter() {
 		console.log( 'onRaycasterEnter' );
 		// make front face use matFront
-		this.geometry.groups[ 0 ].materialIndex = 2;
+		//this.geometry.groups[ 0 ].materialIndex = 2;
 	}
 
 	onRaycasterMove() {
