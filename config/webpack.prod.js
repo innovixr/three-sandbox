@@ -1,6 +1,6 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const networkInterfaces = require('os').networkInterfaces;
+const path = require( 'path' );
+const HtmlWebpackPlugin = require( 'html-webpack-plugin' );
+const networkInterfaces = require( 'os' ).networkInterfaces;
 
 const MODULE_NAME = 'three-sandbox';
 const PUBLIC_PATH = 'public';
@@ -8,28 +8,38 @@ const TEMPLATE_PATH = `../${PUBLIC_PATH}/html`;
 
 // data in format [ JS file name => demo title in public pages ]
 let pages = [
-	['kit_basic_setup', 'Basic setup'],
-	['exp_basic_setup', 'Basic setup'],
-	['datguixr_keyboard', 'Keyboard'],
-	['exp_keyboard_three', 'Threejs Keyboard'],
-	['three_webgl', 'Three WebGL texture'],
-	['three_htmlmesh', 'Three HTML Mesh'],
+	[ 'kit_basic_setup', 'Basic setup' ],
+	[ 'exp_basic_setup', 'Basic setup' ],
+	[ 'exp_keyboard_three', 'Keyboard (+pixi)' ],
+	[ 'three_webgl', 'THREE WebGL test' ],
+	[ 'three_htmlmesh', 'THREE.HTMLMesh test' ],
+	[ 'datguixr_keyboard', 'Keyboard' ],
+	[ 'pixi_layout', 'Layout' ],
 ];
 
-function getIpAddress(interfaceRegexp) {
-	console.assert(interfaceRegexp instanceof RegExp);
+const keys = [
+	'exp',
+	'kit',
+	'datguixr',
+	'three',
+	'pixi'
+];
+
+
+function getIpAddress( interfaceRegexp ) {
+	console.assert( interfaceRegexp instanceof RegExp );
 
 	const nets = networkInterfaces();
-	const keys = Object.keys(nets);
+	const keys = Object.keys( nets );
 	let ip, name, net;
 
-	for (name of keys) {
-		for (net of nets[name]) {
+	for ( name of keys ) {
+		for ( net of nets[name] ) {
 			// Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
 			if (
 				net.family === 'IPv4'
 				&& !net.internal
-				&& name.match(interfaceRegexp)
+				&& name.match( interfaceRegexp )
 			) {
 				ip = net.address;
 			}
@@ -38,45 +48,43 @@ function getIpAddress(interfaceRegexp) {
 
 	}
 
-	if (!ip) {
-		throw new Error('Error: could not fetch private IP address');
+	if ( !ip ) {
+		throw new Error( 'Error: could not fetch private IP address' );
 	}
 
 	return ip;
 }
 
 // create one config for each of the data set above
-let plugins = pages.map((page) => {
-	return new HtmlWebpackPlugin({
+let plugins = pages.map( ( page ) => {
+	return new HtmlWebpackPlugin( {
 		title: page[0],
 		filename: page[0] + '.html',
-		template: path.resolve(__dirname, `${TEMPLATE_PATH}/template.html`),
-		chunks: [page[0], MODULE_NAME],
+		template: path.resolve( __dirname, `${TEMPLATE_PATH}/template.html` ),
+		chunks: [ page[0], MODULE_NAME ],
 		inject: true
-	});
-});
+	} );
+} );
 
-const allPages = {
-	kit: pages.filter(x => x[0].indexOf('kit_') === 0).reduce(pageReducer, ''),
-	experience: pages.filter(x => x[0].indexOf('exp_') === 0).reduce(pageReducer, ''),
-	datguixr: pages.filter(x => x[0].indexOf('datguixr_') === 0).reduce(pageReducer, ''),
-	three: pages.filter(x => x[0].indexOf('three_') === 0).reduce(pageReducer, ''),
-};
+const allPages = {};
 
-function pageReducer(accu, page) {
+for ( let key of keys )
+	allPages[ key ] = pages.filter( x => x[ 0 ].indexOf( `${key}_` ) === 0 ).reduce( pageReducer, '' );
+
+function pageReducer( accu, page ) {
 	return accu + `<li title="${page[0]}">${page[1]}</li>`;
 }
 
-const indexConfig = new HtmlWebpackPlugin({
+const indexConfig = new HtmlWebpackPlugin( {
 	pages: allPages,
 	environment: {
 		production: false
 	},
 	filename: 'index.html',
-	template: path.resolve(__dirname, `${TEMPLATE_PATH}/index.html`),
+	template: path.resolve( __dirname, `${TEMPLATE_PATH}/index.html` ),
 	inject: false
-});
-plugins.push(indexConfig);
+} );
+plugins.push( indexConfig );
 
 module.exports = env => {
 
@@ -84,24 +92,24 @@ module.exports = env => {
 	let devtool = 'eval-source-map';
 
 	// Prod environment
-	if (env.NODE_ENV === 'prod') {
+	if ( env.NODE_ENV === 'prod' ) {
 		devtool = false;
 		mode = 'production';
 	}
 
 	const entry = {};
 	entry[`../dist/${MODULE_NAME}`] = `./src/${MODULE_NAME}.js`;
-	for (let page of pages) {
+	for ( let page of pages ) {
 		entry[page[0]] = `./${PUBLIC_PATH}/${page[0]}.js`;
 	}
 
 	const alias = {};
 	// add an alias of for itself in order to make examples more real-case
 	// scenario and avoiding ../src/..;
-	alias[`${MODULE_NAME}/${PUBLIC_PATH}`] = path.resolve(__dirname, `../${PUBLIC_PATH}/`);
-	alias[`${MODULE_NAME}`] = path.resolve(__dirname, `../src/${MODULE_NAME}.js`);
-	alias['DatGuiXR'] = path.resolve(__dirname, '../src/DatGuiXR/DatGuiXR.js');
-	alias['three-kit'] = path.resolve(__dirname, '../src/KIT/KIT.js');
+	alias[`${MODULE_NAME}/${PUBLIC_PATH}`] = path.resolve( __dirname, `../${PUBLIC_PATH}/` );
+	alias[`${MODULE_NAME}`] = path.resolve( __dirname, `../src/${MODULE_NAME}.js` );
+	alias['DatGuiXR'] = path.resolve( __dirname, '../src/DatGuiXR/DatGuiXR.js' );
+	alias['three-kit'] = path.resolve( __dirname, '../src/KIT/KIT.js' );
 
 	//alias[ `/assets/`] = path.resolve( __dirname, `../${PUBLIC_PATH}/assets/` );
 
@@ -112,17 +120,17 @@ module.exports = env => {
 		plugins,
 		devServer: {
 			static: {
-				directory: path.join(__dirname, `../${PUBLIC_PATH}/assets/`),
+				directory: path.join( __dirname, `../${PUBLIC_PATH}/assets/` ),
 				publicPath: '/assets',
 			},
 			server: env.NODE_SSL ? 'https' : 'http',
 			port: env.NODE_SSL ? '8443' : '8080',
-			host: env.NODE_SSL ? getIpAddress(/wi-fi|eth0|Ethernet/i) : 'localhost'
+			host: env.NODE_SSL ? getIpAddress( /wi-fi|eth0|Ethernet/i ) : 'localhost'
 		},
 
 		output: {
 			filename: '[name].js',
-			path: path.resolve(__dirname, '../dist')
+			path: path.resolve( __dirname, '../dist' )
 		},
 
 		resolve: {
@@ -133,7 +141,7 @@ module.exports = env => {
 			rules: [
 				{
 					test: /\.(png|svg|jpg|gif)$/,
-					use: ['file-loader'],
+					use: [ 'file-loader' ],
 				}
 			],
 		}
