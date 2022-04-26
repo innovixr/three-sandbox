@@ -14,7 +14,7 @@ let pages = [
 	[ 'three_webgl', 'THREE WebGL test' ],
 	[ 'three_htmlmesh', 'THREE.HTMLMesh test' ],
 	[ 'datguixr_keyboard', 'Keyboard' ],
-	[ 'pixi_layout', 'Layout' ],
+	[ 'pixi_keyboard', 'Keyboard' ],
 ];
 
 const keys = [
@@ -62,7 +62,7 @@ let plugins = pages.map( ( page ) => {
 		filename: page[0] + '.html',
 		template: path.resolve( __dirname, `${TEMPLATE_PATH}/template.html` ),
 		chunks: [ page[0], MODULE_NAME ],
-		inject: true
+		inject: true,
 	} );
 } );
 

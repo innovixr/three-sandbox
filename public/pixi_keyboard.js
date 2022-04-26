@@ -3,6 +3,7 @@
 //import KIT from 'three-kit';
 
 import * as PIXI from 'pixi.js-legacy';
+import { AdvancedBloomFilter } from '@pixi/filter-advanced-bloom';
 import '../src/DatGuiXR/pixi/center.js';
 
 window.addEventListener( 'load', init );
@@ -71,8 +72,18 @@ class Keyboard {
 		this.buttonBaseHeight = this.buttonBaseWidth;
 		this.buttonColor = 0x444444;
 		this.buttonColorText = 0xFFFFFF;
-		this.buttonFont = { fontFamily: 'Verdana', fontSize: this.canvasWidth / 30 };
+		this.buttonFont = { fontFamily: 'Verdana', fontSize: this.canvasWidth / 40 };
 		this.canvasHeight = this.getCanvasHeight();
+		this.filters = {
+			bloom: {
+				enable: false,
+				threshold: 0.3,
+				bloomScale: 1,
+				brightness: 1,
+				blur: 2,
+				quality: 4
+			}
+		};
 
 		this.createCanvas( this.canvasWidth, this.canvasHeight, opts.showCanvas );
 		this.createPixiApp();
@@ -194,6 +205,12 @@ class Keyboard {
 
 	createButton( width, height, radius, fillColor, str ) {
 		const button = this.createPanel( width, height, radius, fillColor );
+
+		if ( this.filters?.bloom )
+		{
+			button.filters = [ new AdvancedBloomFilter( this.filters.bloom ) ];
+		}
+
 		const text = new PIXI.Text( str, this.buttonFont );
 		text.style.fill = this.buttonColorText;
 		button.addChild( text );
