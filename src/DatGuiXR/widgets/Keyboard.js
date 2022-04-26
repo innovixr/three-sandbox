@@ -183,7 +183,7 @@ class Keyboard {
 			}
 		};
 
-		let count = 0;
+		//let count = 0;
 
 		// eslint-disable-next-line no-unused-vars
 		this.keyLines.map( ( keys, lineNumber ) => {
@@ -237,7 +237,7 @@ class Keyboard {
 					bt.instance.mesh.position.z = this.textureSpacerZ;
 					this.mesh.add( bt.instance.mesh );
 				}
-				count++;
+				//count++;
 				//console.log( `x${count}`, pixiButton.position.x, threeButton.mesh.position.x );
 
 				backdrop.addChild( bt.pixi );
