@@ -18,7 +18,7 @@ class Keyboard {
 		this.canvasWidth = config.width || 4096;
 		this.layout = config.layout || 'fr';
 		this.showCanvas = config.showCanvas || false;
-		this.scale = config.scale || 1;
+		this.scale = config.scale || 1.5;
 		this.keysDepth = config.keysDepth || 0.002;
 
 		// tmp
@@ -149,8 +149,9 @@ class Keyboard {
 
 			matFront.map.wrapS = matFront.map.wrapT = THREE.RepeatWrapping;
 
-			const ratio = texture.image.width / texture.image.height;
-			const scale = 1.65; // ?????
+			let ratio = texture.image.width / texture.image.height;
+			let scale = 1.65 / this.scale; // ?????
+
 			matFront.map.repeat.set( scale, scale * ratio );
 			matFront.map.offset.x = this.pixelToPercentX( bt.position.x );
 			matFront.map.offset.y = this.pixelToPercentY( bt.position.y );
@@ -174,7 +175,10 @@ class Keyboard {
 
 		} );
 
-		group.position.x = 0.32;
+		if ( this.decal )
+		{
+			group.position.x = 0.32 * this.scale;
+		}
 	}
 
 
@@ -236,7 +240,7 @@ class Keyboard {
 		const extrudeSettings = {
 			steps: 2,
 			segments: 3,
-			curveSegments: 6,
+			curveSegments: 4,
 			depth,
 			bevelEnabled: false,
 			//bevelThickness: 1,
@@ -453,7 +457,7 @@ class Keyboard {
 
 		this.mesh = new THREE.Group();
 		this.mesh.add( this.meshKeyboard );
-		if ( this.decal ) this.meshKeyboard.position.x -= 0.3;
+		if ( this.decal ) this.meshKeyboard.position.x -= 0.3 * this.scale;
 		this.context?.raycasterObjects.push( this.meshKeyboard );
 	}
 
