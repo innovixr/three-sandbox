@@ -33,6 +33,8 @@ class Keyboard {
 		// pixi
 		///////////////
 
+		this.pixiButtons = [];
+
 		this.backdropPadding = this.getCanvasPercentWidth( 1.3 );
 		this.backdropRadius = this.getCanvasPercentWidth( 2 );
 
@@ -73,6 +75,12 @@ class Keyboard {
 		this.panelHeight = ( Math.round( ( h ) * 100 ) / 100 );
 		this.panelDepth = 0;
 		this.panelRatio = this.panelHeight / this.panelWidth;
+
+		this.ratioCanvasPanelWidth = this.canvasWidth / this.panelWidth;
+		this.ratioCanvasPanelHeight = this.canvasHeight / this.panelHeight;
+		this.ratioCanvasPanelWidth = Math.round( this.ratioCanvasPanelWidth * 100 ) / 100;
+		this.ratioCanvasPanelHeight = Math.round( this.ratioCanvasPanelHeight * 100 ) / 100;
+
 		this.meshVisible = true;
 		this.textureSpacerZ = -0.05;
 
@@ -82,6 +90,31 @@ class Keyboard {
 
 		this.needsUpdate = true;
 
+	}
+
+	createThreeButtons() {
+		console.log( 'createThreeButtons', this.pixiButtons.lengh );
+		const material = new THREE.MeshBasicMaterial( { color: 0xFF0000 } );
+		const geometry = new THREE.PlaneGeometry( 0.01, 0.01 );
+
+
+		this.pixiButtons.forEach( ( bt, idx ) => {
+
+			// first convert pixel coordinates into threejs coordinates
+			// max = canvas width
+
+			console.log( `bt${idx}, x=${bt.position.x}, y = ${bt.position.y}, w=${bt.width}, h=${bt.height} ` );
+
+			const positionX = this.convertPixelToMeterX( bt.position.x, bt.width );
+			const positionY = this.convertPixelToMeterX( bt.position.y, bt.height );
+
+			const plane = new THREE.Mesh( geometry, material );
+
+			console.log( positionX, positionY );
+
+
+
+		} );
 	}
 
 	getButtonBaseWidth() {
@@ -139,7 +172,7 @@ class Keyboard {
 	}
 
 	createPixiBackdrop( width, height, radius, fillColor ) {
-		this.backdrop = this.createPanel( width, height, radius, fillColor );
+		this.backdrop = this.createPixiPanel( width, height, radius, fillColor );
 		this.pixiApp.stage.addChild( this.backdrop );
 	}
 
@@ -158,7 +191,11 @@ class Keyboard {
 		this.keyLines.forEach( ( line ) => {
 			firstKey = true;
 			line.forEach( ( key ) => {
+
+				// if it's the first line, take backdrop padding as the first Y position
 				if ( firstLine ) accumulateY = this.backdropPadding;
+
+				// if it's the first key, take backdrop padding as the first X position
 				if ( firstKey ) accumulateX = this.backdropPadding;
 
 				// compute button width
@@ -166,45 +203,17 @@ class Keyboard {
 				width = this.buttonBaseWidth * ( key.width );
 				width += this.buttonMargin * ( key.width - 1 );
 
-				// create button
+				// create pixi button
 				const str = key.chars[ charset ].lowerCase || key.chars[ charset ].icon || 'undif';
-				button = this.createButton( width, height, radius, this.buttonColor, str );
+				button = this.createPixiButton( width, height, radius, this.buttonColor, str );
 
-				// position the button
+				// move the button
 				button.position.x = accumulateX;
 				button.position.y = accumulateY;
 
+				this.pixiButtons.push( button );
 				// add the button to his container
 				this.backdrop.addChild( button );
-
-				const tbt = {};
-
-				if ( !this.config.flat )
-				{
-					tbt.x = this.convertPixelToMeterX( button.position.x, button.width );
-					tbt.y = this.convertPixelToMeterY( button.position.y, button.height );
-					/*
-					if ( count < 2 )
-					{
-						console.log( `pixi  button#${count} x=${bt.pixi.position.x}, y=${bt.pixi.position.y}, w=${bt.pixi.width}, h=${bt.pixi.height}` );
-						console.log( `three button#${count} x=${bt.three.x}, y=${bt.three.y}` );
-					}
-					*/
-					tbt.width = button.width / this.ratioCanvasPanelWidth;
-					tbt.height = button.height / this.ratioCanvasPanelHeight;
-					tbt.depth = this.buttonDepth;
-					tbt.offsetX = this.convertPixelToPercentX( button.position.x );
-					tbt.offsetY = this.convertPixelToPercentY( button.position.y );
-
-					tbt.material = this.materialKeys;
-					tbt.texture = this.canvasTextureKeys;
-
-					tbt.instance = this.createThreeButton( tbt );
-					tbt.instance.mesh.position.x = tbt.x;
-					tbt.instance.mesh.position.y = tbt.y;
-					tbt.instance.mesh.position.z = this.textureSpacerZ;
-					this.mesh.add( tbt.instance.mesh );
-				}
 
 				firstKey = false;
 				accumulateX += width + this.buttonMargin;
@@ -216,6 +225,9 @@ class Keyboard {
 
 
 	convertPixelToMeterX( x, w ) {
+
+
+
 		return (
 			( x / this.ratioCanvasPanelWidth ) -
 			( this.panelWidth / 2 ) +
@@ -245,7 +257,7 @@ class Keyboard {
 		);
 	}
 
-	createPanel( width, height, radius, fillColor ) {
+	createPixiPanel( width, height, radius, fillColor ) {
 		const panel = new PIXI.Graphics();
 		//panel.lineStyle( { alignment: 0, width: 5, color: 0x2222FF, alpha: 0.2 } );
 		panel.beginFill( fillColor, 0.8 );
@@ -254,8 +266,8 @@ class Keyboard {
 		return panel;
 	}
 
-	createButton( width, height, radius, fillColor, str ) {
-		const button = this.createPanel( width, height, radius, fillColor );
+	createPixiButton( width, height, radius, fillColor, str ) {
+		const button = this.createPixiPanel( width, height, radius, fillColor );
 
 		if ( this.filters?.bloom )
 		{
@@ -278,29 +290,6 @@ class Keyboard {
 			if ( tmp > max ) max = tmp;
 		} );
 		return max;
-	}
-
-	createThreeButton( { value = '.', width = 0.1, height = 0.1, depth = 0.1, material, texture, offsetX, offsetY } ) {
-		return {
-			mesh: {
-				position: {}
-			}
-		};
-		const cardConfig = {
-			name: value,
-			width,
-			height,
-			offsetX,
-			offsetY,
-			depth,
-			radius: 0.005,
-			frontColor: 0x222222,
-			material,
-			texture
-		};
-
-		const threeButton = new Card( cardConfig );
-		return threeButton;
 	}
 
 	createThreeMesh() {
@@ -363,11 +352,6 @@ class Keyboard {
 		//this.materialKeys.map = this.canvasTextureKeys;
 
 	}
-
-	createThreeButtons() {
-
-	}
-
 
 	/*
 	round2( v ) {
