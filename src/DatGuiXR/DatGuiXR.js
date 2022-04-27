@@ -17,7 +17,6 @@ class DatGuiXR {
 		this.setupControllers();
 		this.setupPIXI();
 		this.setupEvents();
-		this.showFps();
 
 		const keyboard = new Keyboard( { layout: 'fr', flat:false }, opts );
 		this.mesh = keyboard.mesh;
@@ -47,29 +46,6 @@ class DatGuiXR {
 
 	setupEvents() {
 		window.addEventListener( 'resizeend', this.onWindowResizeEnd.bind( this ) );
-	}
-
-	showFps() {
-
-		const times = [];
-		let fps;
-
-		function refreshLoop() {
-			window.requestAnimationFrame( () => {
-				const now = performance.now();
-				while ( times.length > 0 && times[ 0 ] <= now - 1000 )
-				{
-					times.shift();
-				}
-				times.push( now );
-				fps = times.length;
-				refreshLoop();
-			} );
-		}
-
-		//setInterval( () => { console.log( 'fps', fps ); }, 1000 );
-
-		refreshLoop();
 	}
 
 	onWindowResizeEnd() {

@@ -10,7 +10,7 @@ PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
 class Keyboard {
 
-	constructor( config, context ) {
+	constructor( config ) {
 
 		config = config || {};
 		this.config = config;
