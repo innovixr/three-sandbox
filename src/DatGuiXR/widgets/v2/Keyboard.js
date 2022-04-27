@@ -15,9 +15,11 @@ class Keyboard {
 		config = config || {};
 		this.config = config;
 
-		this.canvasWidth = config.width || 8192;
+		this.canvasWidth = config.width || 4096;
 		this.layout = config.layout || 'fr';
 		this.showCanvas = config.showCanvas || false;
+		this.scale = config.scale || 1;
+		this.keysDepth = config.keysDepth || 0.001;
 
 		// load keyboard layout
 		this.keyLayout = Keymap.get( this.layout );
@@ -58,7 +60,7 @@ class Keyboard {
 
 		this.canvasHeight = this.getCanvasHeight();
 
-		this.createCanvas( this.canvasWidth, this.canvasHeight );
+		this.createCanvas( this.canvasWidth, this.canvasHeight, false );
 		this.createPixiApp();
 		this.createPixiBackdrop( this.canvasWidth, this.canvasHeight, this.backdropRadius, this.backdropColor );
 		this.createPixiButtons();
@@ -67,12 +69,8 @@ class Keyboard {
 		// threejs
 		///////////////
 
-		const w = 0.6;
-		const s = 0.2475 / w;
-		const h = w * s;
-
-		this.panelWidth = ( Math.round( ( w ) * 100 ) / 100 );
-		this.panelHeight = ( Math.round( ( h ) * 100 ) / 100 );
+		this.panelWidth = 0.6 * this.scale;
+		this.panelHeight = 0.2475 * this.scale;
 		this.panelDepth = 0;
 		this.panelRatio = this.panelHeight / this.panelWidth;
 
@@ -84,8 +82,8 @@ class Keyboard {
 		this.meshVisible = true;
 		this.textureSpacerZ = -0.05;
 
-		this.createThreeMaterials();
-		this.createThreeMesh();
+		this.createKeyboardMaterials();
+		this.createKeyboardMesh();
 		this.createThreeButtons();
 
 		this.needsUpdate = true;
@@ -94,27 +92,142 @@ class Keyboard {
 
 	createThreeButtons() {
 		console.log( 'createThreeButtons', this.pixiButtons.lengh );
-		const material = new THREE.MeshBasicMaterial( { color: 0xFF0000 } );
-		const geometry = new THREE.PlaneGeometry( 0.01, 0.01 );
 
+		const group = new THREE.Group();
 
-		this.pixiButtons.forEach( ( bt, idx ) => {
+		this.mesh.add( group );
 
-			// first convert pixel coordinates into threejs coordinates
-			// max = canvas width
+		this.pixiButtons.forEach( bt => {
 
-			console.log( `bt${idx}, x=${bt.position.x}, y = ${bt.position.y}, w=${bt.width}, h=${bt.height} ` );
+			let x = this.pixelToThreeDimensionX( bt.position.x ) / 2 ;
+			let y = this.pixelToThreeDimensionY( bt.position.y ) / 2;
+			let width = this.pixelToThreeDimensionX( bt.width );
+			let height = this.pixelToThreeDimensionY( bt.height );
+			let radius = this.pixelToThreeDimensionY( this.buttonRadius );
 
-			const positionX = this.convertPixelToMeterX( bt.position.x, bt.width );
-			const positionY = this.convertPixelToMeterX( bt.position.y, bt.height );
+			x = x - ( this.panelWidth / 4 );
+			y = y - ( this.panelHeight / 4 );
 
-			const plane = new THREE.Mesh( geometry, material );
+			// inverse y
+			y = - y - ( height / 2 );
 
-			console.log( positionX, positionY );
+			const backColor = 0xFF0000;
+			const hoverColor = 0xFF00FF;
 
+			const texture = this.canvasTextureKeys.clone();
+			let matFront = new THREE.MeshBasicMaterial( {
+				map: texture,
+				transparent: true,
+				opacity: 0.5,
+				alphaTest: 0.1,
+				wireframe: false
+			} );
+
+			matFront.map.wrapS = matFront.map.wrapT = THREE.RepeatWrapping;
+
+			const ratio = texture.image.width / texture.image.height;
+			const scale = 1.65;
+			console.log( ratio );
+			matFront.map.repeat.set( scale, scale * ratio );
+			//matFront.map.repeat.set( scale, scale * ratio );
+			//matFront.map.offset.x = this.pixelToPercentX( bt.position.x );
+			//matFront.map.offset.y = this.pixelToPercentY( bt.position.y );
+
+			/*
+			console.log( 'offsetX', matFront.map.offset );
+			console.log( 'offsetX', matFront.map.repeat );
+			*/
+			const matBack = new THREE.MeshBasicMaterial( { color: backColor } );
+			const matHover = new THREE.MeshBasicMaterial( { color: hoverColor } );
+
+			//matFront.color.convertSRGBToLinear();
+			//matBack.color.convertSRGBToLinear();
+			//matHover.color.convertSRGBToLinear();
+
+			const geometry = this.createButtonExtrudedGeometry( x, y, width, height, radius, this.keysDepth );
+			const keyMesh = new THREE.Mesh( geometry, [ matBack, matFront, matHover ] );
+			//keyMesh.geometry.center();
+			group.add( keyMesh );
+			keyMesh.position.x = x;
+			keyMesh.position.y = y;
+			//keyMesh.position.z = -this.textureSpacerZ;
+			this.assignMaterial( geometry );
 
 
 		} );
+
+		group.position.x = 0.32;
+	}
+
+
+	pixelToPercentX( x ) {
+		return (
+			( ( x * 100 ) / this.canvasWidth ) / 100
+		);
+	}
+
+	pixelToPercentY( y ) {
+		return (
+			1 - ( ( ( y * 100 ) / this.canvasHeight ) / 100 ) - 0.21
+		);
+	}
+
+	assignMaterial( geometry ) {
+		if ( this.usePlane )
+		{
+			// make all faces use matBack
+			for ( let i = 0; i < geometry.faces.length; i++ )
+				geometry.faces[ i ].materialIndex = 0;
+			geometry.faces[ 0 ].materialIndex = 1;
+			return;
+		}
+
+		// make all faces use matBack
+		for ( let i = 0; i < geometry.groups.length; i++ )
+			geometry.groups[ i ].materialIndex = 0;
+
+		// make front face use matFront
+		geometry.groups[ 0 ].materialIndex = 1;
+	}
+
+	pixelToThreeDimensionX( v ) {
+		let percentV = ( 100 * v ) / this.canvasWidth;
+		v = ( percentV * this.panelWidth ) / 100;
+		return v;
+	}
+
+	pixelToThreeDimensionY( v ) {
+		let percentV = ( 100 * v ) / this.canvasHeight;
+		v = ( percentV * this.panelHeight ) / 100;
+		return v;
+	}
+
+	createButtonExtrudedGeometry( x, y, width, height, radius, depth ) {
+		const shape = new THREE.Shape();
+		shape.moveTo( x, y + radius );
+		shape.lineTo( x, y + height - radius );
+		shape.quadraticCurveTo( x, y + height, x + radius, y + height );
+		shape.lineTo( x + width - radius, y + height );
+		shape.quadraticCurveTo( x + width, y + height, x + width, y + height - radius );
+		shape.lineTo( x + width, y + radius );
+		shape.quadraticCurveTo( x + width, y, x + width - radius, y );
+		shape.lineTo( x + radius, y );
+		shape.quadraticCurveTo( x, y, x, y + radius );
+
+		const extrudeSettings = {
+			steps: 2,
+			segments: 3,
+			curveSegments: 4,
+			depth,
+			bevelEnabled: false,
+			//bevelThickness: 1,
+			//bevelSize: 1,
+			//bevelOffset: 0,
+			//bevelSegments: 1
+		};
+
+		const geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+		return geometry;
 	}
 
 	getButtonBaseWidth() {
@@ -144,7 +257,7 @@ class Keyboard {
 		let style = '';
 		style += `position:absolute;width:${width}px;height:${height}px;`;
 		style += 'margin:auto; top:0; left:0; right:0; bottom:0;';
-		style += 'background-color: transparent; opacity: 0.999;';
+		style += 'background-color: red; opacity: 0.999;';
 		//style += 'zoom: 0.5;';
 		if ( !show )
 			style += 'visibility:hidden; z-index: 1000;';
@@ -211,9 +324,9 @@ class Keyboard {
 				button.position.x = accumulateX;
 				button.position.y = accumulateY;
 
-				this.pixiButtons.push( button );
 				// add the button to his container
 				this.backdrop.addChild( button );
+				this.pixiButtons.push( button );
 
 				firstKey = false;
 				accumulateX += width + this.buttonMargin;
@@ -221,40 +334,6 @@ class Keyboard {
 			firstLine = false;
 			accumulateY += height + this.buttonMargin;
 		} );
-	}
-
-
-	convertPixelToMeterX( x, w ) {
-
-
-
-		return (
-			( x / this.ratioCanvasPanelWidth ) -
-			( this.panelWidth / 2 ) +
-			( this.backdropPadding / this.ratioCanvasPanelWidth ) +
-			( ( ( w - 100 ) / 2 ) / this.ratioCanvasPanelWidth )
-		);
-	}
-
-	convertPixelToMeterY( y, h ) {
-		return (
-			( this.panelHeight / 2 ) -
-			( y / this.ratioCanvasPanelHeight ) -
-			( this.backdropPadding / this.ratioCanvasPanelHeight ) -
-			( ( ( h - 100 ) / 2 ) / this.ratioCanvasPanelHeight )
-		);
-	}
-
-	convertPixelToPercentX( x ) {
-		return (
-			( ( x * 100 )  / this.canvasWidth ) / 100
-		);
-	}
-
-	convertPixelToPercentY( y ) {
-		return (
-			1 - ( ( ( y * 100 ) / this.canvasHeight ) / 100 ) - 0.21
-		);
 	}
 
 	createPixiPanel( width, height, radius, fillColor ) {
@@ -292,10 +371,7 @@ class Keyboard {
 		return max;
 	}
 
-	createThreeMesh() {
-		console.log( 'Keyboard: createMesh', this.panelWidth, this.panelHeight );
-
-		// setup geometry
+	createKeyboardMesh() {
 		let geometry;
 
 		if ( this.panelDepth )
@@ -319,10 +395,11 @@ class Keyboard {
 
 		this.mesh = new THREE.Group();
 		this.mesh.add( this.meshKeyboard );
+		this.meshKeyboard.position.x -= 0.3;
 		this.context?.raycasterObjects.push( this.meshKeyboard );
 	}
 
-	createThreeMaterials() {
+	createKeyboardMaterials() {
 
 		// setup material
 		const materialConfig = {
