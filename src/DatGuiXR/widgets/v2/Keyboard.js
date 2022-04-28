@@ -18,7 +18,7 @@ class Keyboard {
 		this.canvasWidth = config.width || 4096;
 		this.layout = config.layout || 'fr';
 		this.showCanvas = config.showCanvas || false;
-		this.scale = config.scale || 1.5;
+		this.scale = config.scale || 1.2;
 		this.keysDepth = config.keysDepth || 0.002;
 
 		// tmp
@@ -295,6 +295,7 @@ class Keyboard {
 		this.pixiApp = new PIXI.Application( {
 			view: this.canvasEl,
 			backgroundAlpha: 0,
+			autoStart:false,
 			backgroundColor: 0x000000,
 			width: this.canvasWidth,
 			height: this.canvasHeight,
@@ -490,8 +491,6 @@ class Keyboard {
 	*/
 
 	update( /*delta*/ ) {
-
-		//console.log( this.pixiApp );
 
 		if ( !this.needsUpdate ) return false;
 
