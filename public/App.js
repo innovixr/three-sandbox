@@ -32,7 +32,7 @@ class App {
 
 		this.addWindowResizeEndEvent();
 
-		this.clock = new THREE.Clock();
+		//this.clock = new THREE.Clock();
 		this.loop = this.loop.bind( this );
 		this.renderer.setAnimationLoop( this.loop.bind( this ) );
 
@@ -41,21 +41,19 @@ class App {
 
 	}
 
-	loop() {
+	loop( delta ) {
 
-		const delta = this.clock.getDelta();
+		//const delta = this.clock.getDelta();
 		//const elapsed = this.clock.getElapsedTime();
 
 		let updated = this.controls.update( delta );
 		if ( this.extraLoop )
-		{
 			updated = this.extraLoop( delta ) || updated;
-		}
 
-		this.meshes.room.material.needsUpdate = true;
-		this.meshes.room.needsUpdate = true;
+		//this.meshes.room.material.needsUpdate = true;
+		//this.meshes.room.needsUpdate = true;
 
-		if ( this.renderer.xr?.isPresenting || updated )
+		if ( updated || this.renderer.xr?.isPresenting )
 		{
 			this.renderer.render( this.scene, this.camera );
 		}
