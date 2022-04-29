@@ -277,6 +277,8 @@
 
 	<script>
 
+		console.clear();
+
 		const root = document.documentElement;
 		const btn = document.getElementById( 'toggle-btn' );
 		const link = document.getElementById( 'github-link' );
@@ -287,12 +289,10 @@
 		const hash = window.location.hash.substr( 1 );
 
 		if ( hash === "" ) {
-			window.location.hash = "exp_basic_setup";
-			document.querySelector( `li[title="${window.location.hash}"]` ).classList.add( 'selected-view' );
+			let hash = 'exp_basic_setup';
+			window.location.hash = hash;
+			document.querySelector( `li[title="${hash}"]` ).classList.add( 'selected-view' );
 		}
-
-		// let hash = window.location.hash.substring(1);
-		//console.log( hash )
 
 		function toggleNavbar()
 		{
