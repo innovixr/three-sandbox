@@ -8,7 +8,6 @@ import * as holdEvent from 'hold-event';
 import Stats from 'three/examples/jsm/libs/stats.module';
 
 CameraControls.install( { THREE: THREE } );
-console.clear();
 
 class App {
 	constructor( extraLoop ) {
