@@ -119,6 +119,9 @@ class Keyboard {
 		const canvasEl = document.createElement( 'canvas' );
 		canvasEl.width = width;
 		canvasEl.height = height;
+
+		//const context = canvasEl.getContext( 'bitmaprenderer' );
+
 		let style = '';
 		style += `position:absolute;width:${width}px;height:${height}px;`;
 		style += 'margin:auto; top:0; left:0; right:0; bottom:0;';

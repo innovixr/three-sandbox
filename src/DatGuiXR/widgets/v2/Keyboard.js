@@ -15,7 +15,7 @@ class Keyboard {
 		config = config || {};
 		this.config = config;
 
-		this.canvasWidth = config.width || 4096;
+		this.canvasWidth = config.width || 1024 * 1;
 		this.layout = config.layout || 'fr';
 		this.showCanvas = config.showCanvas || false;
 		this.scale = config.scale || 1.5;
@@ -53,20 +53,21 @@ class Keyboard {
 
 		this.buttonFont = { fontFamily: 'Verdana', fontSize: this.canvasWidth / 40 };
 
+		// filters can't work in canvas context !
 		this.filters = {
 			bloom: {
 				enable: false,
-				threshold: 0.3,
-				bloomScale: 1,
+				threshold: 0,
+				bloomScale: 0,
 				brightness: 1,
-				blur: 2,
-				quality: 4
+				blur: 0,
+				quality: 0
 			}
 		};
 
 		this.canvasHeight = this.getCanvasHeight();
 
-		this.createCanvas( this.canvasWidth, this.canvasHeight, false );
+		this.createCanvas( this.canvasWidth, this.canvasHeight, this.showCanvas );
 		this.createPixiApp();
 		this.createPixiBackdrop( this.canvasWidth, this.canvasHeight, this.backdropRadius, this.backdropColor );
 		this.createPixiButtons();
@@ -106,15 +107,31 @@ class Keyboard {
 
 
 	onPointerMove( ev ) {
-		// console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
+		console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
+
+		if ( this.movedOn != ev.target )
+		{
+
+			if ( this.movedOn ) this.onPointerLeave( this.movedOn );
+			this.movedOn = ev.target;
+			this.onPointerEnter( this.movedOn );
+		}
 	}
 
 	onPointerDown( ev ) {
-		// console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
+		console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
 	}
 
 	onPointerUp( ev ) {
-		// console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
+		console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
+	}
+
+	onPointerEnter( threeEl ) {
+		console.log( `Keyboard.js: ${Date.now()} pointerenter ${threeEl.name} ` );
+	}
+
+	onPointerLeave( threeEl ) {
+		console.log( `Keyboard.js: ${Date.now()} pointerleave ${threeEl.name} ` );
 	}
 
 	createThreeButtons() {
@@ -123,6 +140,8 @@ class Keyboard {
 		this.onPointerMove = this.onPointerMove.bind( this );
 		this.onPointerDown = this.onPointerDown.bind( this );
 		this.onPointerUp = this.onPointerUp.bind( this );
+		this.onPointerEnter = this.onPointerEnter.bind( this );
+		this.onPointerLeave = this.onPointerLeave.bind( this );
 
 		const group = new InteractiveGroup( this.context.renderer, this.context.camera );
 
@@ -139,7 +158,7 @@ class Keyboard {
 
 		const geometry = new THREE.PlaneGeometry( this.panelWidth, this.panelHeight );
 		const keyboardPlane = new THREE.Mesh( geometry, material );
-		keyboardPlane.name = 'keyboardPlane';
+		keyboardPlane.name = 'plane';
 
 		keyboardPlane.addEventListener( 'pointerdown', this.onPointerDown );
 		keyboardPlane.addEventListener( 'pointerup', this.onPointerUp );
@@ -311,13 +330,20 @@ class Keyboard {
 		const canvasEl = document.createElement( 'canvas' );
 		canvasEl.width = width;
 		canvasEl.height = height;
+
+		/*
+		const ctx = canvasEl.getContext( '2d' );
+		ctx.globalAlpha = 1;
+		ctx.globalCompositeOperation = 'lighter';
+		*/
+
 		let style = '';
 		style += `position:absolute;width:${width}px;height:${height}px;`;
 		style += 'margin:auto; top:0; left:0; right:0; bottom:0;';
 		style += 'background-color: red; opacity: 0.999;';
 		//style += 'zoom: 0.5;';
-		if ( !show )
-			style += 'visibility:hidden; z-index: 1000;';
+		if ( !show ) style += 'visibility:hidden; z-index: 1000;';
+
 		canvasEl.style = style;
 
 		document.body.appendChild( canvasEl );
@@ -445,17 +471,19 @@ class Keyboard {
 		panel.beginFill( fillColor, 0.8 );
 		panel.drawRoundedRect( 0, 0, width, height, radius );
 		panel.endFill();
+
+		panel.filters = [];
+		if ( this.filters?.bloom && this.filters?.bloom.enable )
+		{
+			console.log( 'adding bloom', this.filters.bloom );
+			panel.filters.push( new AdvancedBloomFilter( this.filters.bloom ) );
+		}
+
 		return panel;
 	}
 
 	createPixiButton( width, height, radius, fillColor, str ) {
 		const button = this.createPixiPanel( width, height, radius, fillColor );
-
-		if ( this.filters?.bloom )
-		{
-			button.filters = [ new AdvancedBloomFilter( this.filters.bloom ) ];
-		}
-
 		const text = new PIXI.Text( str, this.buttonFont );
 		text.style.fill = this.buttonColorText;
 		button.addChild( text );
@@ -503,8 +531,6 @@ class Keyboard {
 	}
 
 	createKeyboardMaterials() {
-
-		//const material = THREE.MeshPhongMaterial;
 		const material = THREE.MeshBasicMaterial;
 
 		// material for main plane
@@ -519,9 +545,6 @@ class Keyboard {
 		this.materialKeys = new material( this.materialPixiKeyboardConfig );
 		this.canvasTextureKeys = new THREE.CanvasTexture( this.canvasEl );
 		this.canvasTextureKeys.anisotropy = 16;
-		//this.materialKeys.map = this.canvasTexture;
-		//this.materialKeys.map = this.canvasTextureKeys;
-
 	}
 
 	/*
