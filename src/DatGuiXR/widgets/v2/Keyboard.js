@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 import { AdvancedBloomFilter } from '@pixi/filter-advanced-bloom';
 import { Keymap } from '../../utils/Keymap.js';
 import { Object3D } from '../../three/Object3D.js';

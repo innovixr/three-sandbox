@@ -2,7 +2,7 @@
 //import App from './App.js';
 //import KIT from 'three-kit';
 
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 import { AdvancedBloomFilter } from '@pixi/filter-advanced-bloom';
 import '../src/DatGuiXR/pixi/center.js';
 

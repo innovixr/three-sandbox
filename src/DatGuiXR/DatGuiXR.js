@@ -1,5 +1,5 @@
 //import * as THREE from 'three';
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 
 import { ControllersManager } from './controllers/Manager.js';
 import { Keyboard } from './widgets/v2/Keyboard.js';

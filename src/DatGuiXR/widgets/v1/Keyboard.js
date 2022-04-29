@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import * as PIXI from 'pixi.js-legacy';
+import * as PIXI from 'pixi.js';
 import '../../pixi/center.js';
 
 import { SmoothGraphics as Graphics } from '@pixi/graphics-smooth';
@@ -28,7 +28,7 @@ class Keyboard {
 		const s = 0.2475 / w;
 		const h = w * s;
 
-		this.panelWidth = ( Math.round( ( w  ) * 100 ) / 100 ) * this.scale;
+		this.panelWidth = ( Math.round( ( w ) * 100 ) / 100 ) * this.scale;
 		this.panelHeight = ( Math.round( ( h ) * 100 ) / 100 ) * this.scale;
 		this.panelDepth = 0;
 		this.panelRatio = this.panelHeight / this.panelWidth;
@@ -295,7 +295,7 @@ class Keyboard {
 
 	convertPixelToPercentX( x ) {
 		return (
-			( ( x * 100 )  / this.canvasWidth ) / 100
+			( ( x * 100 ) / this.canvasWidth ) / 100
 		);
 	}
 
@@ -305,7 +305,7 @@ class Keyboard {
 		);
 	}
 
-	createThreeButton( { value = '.', width = 0.1, height = 0.1, depth = 0.1,  material, texture, offsetX, offsetY } ) {
+	createThreeButton( { value = '.', width = 0.1, height = 0.1, depth = 0.1, material, texture, offsetX, offsetY } ) {
 
 		const cardConfig = {
 			name: value,

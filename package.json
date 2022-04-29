@@ -42,7 +42,7 @@
     "debug": "4.3.4",
     "hold-event": "0.2.0",
     "lil-gui": "0.16.1",
-    "pixi.js-legacy": "6.3.0",
+    "pixi.js": "6.3.0",
     "three": "0.139"
   }
 }
