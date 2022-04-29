@@ -226,6 +226,11 @@ class App {
 		this.controls.touches.two = CameraControls.ACTION.TOUCH_ZOOM_TRUCK;
 		this.controls.saveState();
 		this.controls.moveTo( 0, 1.2, 0 );
+
+		const center = new THREE.Object3D();
+		center.position.set( 0, 1.2, -4 );
+		this.scene.add( center );
+		this.controls.setTarget( center.position.x, center.position.y, center.position.z );
 		this.renderer.render( this.scene, this.camera );
 		this.addCameraKeyboardControl();
 	}

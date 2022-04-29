@@ -24,7 +24,7 @@ class DatGuiXR {
 
 		if ( this.controls )
 		{
-			this.controls.target = this.mesh.position;
+			//this.controls.target = this.mesh.position;
 		}
 
 
