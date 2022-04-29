@@ -334,6 +334,7 @@ class Keyboard {
 		this.pixiApp = new PIXI.Application( {
 			view: this.canvasEl,
 			backgroundAlpha: 0,
+			autoStart:false,
 			backgroundColor: 0x000000,
 			width: this.canvasWidth,
 			height: this.canvasHeight,
@@ -530,8 +531,6 @@ class Keyboard {
 	*/
 
 	update( /*delta*/ ) {
-
-		//console.log( this.pixiApp );
 
 		if ( !this.needsUpdate ) return false;
 

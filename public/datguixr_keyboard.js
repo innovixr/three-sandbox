@@ -67,9 +67,6 @@ class Experience {
 	}
 
 	animate( delta ) {
-		//console.log( 'exp_three_pixi animate' );
-		this.gui.update( delta );
-		this.app.renderer.controllersManager.xrControllers.update( delta );
-		return true;
+		return this.gui.update( delta ) || this.app.renderer.controllersManager.xrControllers.update( delta );
 	}
 }

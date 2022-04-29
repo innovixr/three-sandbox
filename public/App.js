@@ -33,7 +33,7 @@ class App {
 
 		this.addWindowResizeEndEvent();
 
-		this.clock = new THREE.Clock();
+		//this.clock = new THREE.Clock();
 		this.loop = this.loop.bind( this );
 		this.renderer.setAnimationLoop( this.loop.bind( this ) );
 
@@ -42,9 +42,9 @@ class App {
 
 	}
 
-	loop() {
+	loop( delta ) {
 
-		const delta = this.clock.getDelta();
+		//const delta = this.clock.getDelta();
 		//const elapsed = this.clock.getElapsedTime();
 
 		let updated = false;
@@ -55,14 +55,12 @@ class App {
 		}
 
 		if ( this.extraLoop )
-		{
 			updated = this.extraLoop( delta ) || updated;
-		}
 
-		this.meshes.room.material.needsUpdate = true;
-		this.meshes.room.needsUpdate = true;
+		//this.meshes.room.material.needsUpdate = true;
+		//this.meshes.room.needsUpdate = true;
 
-		if ( this.renderer.xr?.isPresenting || updated )
+		if ( updated || this.renderer.xr?.isPresenting )
 		{
 			this.renderer.render( this.scene, this.camera );
 		}
@@ -93,18 +91,18 @@ class App {
 		object3d.name = 'Ambient light';
 		container.add( object3d );
 
-		const red = new THREE.PointLight( new THREE.Color( 0xAA2200 ), 0.1, 4, 0.5 );
-		red.position.set( -3, 2, -3 );
+		//const red = new THREE.PointLight( new THREE.Color( 0xAA2200 ), 0.1, 4, 0.5 );
+		//red.position.set( -3, 2, -3 );
 		//red.castShadow = true;
 		//container.add( red );
 
 		const blue = new THREE.PointLight( new THREE.Color( 0x1133FF ), 0.3, 10, 0.5 );
 		blue.position.set( 3, 2, -3 );
 		//blue.castShadow = true;
-		container.add( blue );
+		//container.add( blue );
 
-		const back = new THREE.PointLight( new THREE.Color( 0xAAAAAA ), 0.3, 5, 0.5 );
-		back.position.set( 0, 1.3, 1 );
+		//const back = new THREE.PointLight( new THREE.Color( 0xAAAAAA ), 0.3, 5, 0.5 );
+		//back.position.set( 0, 1.3, 1 );
 		//back.rotation.set( 1, 0, 0 );
 		//back.castShadow = true;
 		//container.add( back );
