@@ -4,13 +4,13 @@ import { AdvancedBloomFilter } from '@pixi/filter-advanced-bloom';
 import { Keymap } from '../../utils/Keymap.js';
 import { Object3D } from '../../three/Object3D.js';
 import '../../pixi/center.js';
-
+import { InteractiveGroup } from './InteractiveGroup.js';
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
 class Keyboard {
 
-	constructor( config ) {
+	constructor( config, context ) {
 
 		config = config || {};
 		this.config = config;
@@ -19,7 +19,10 @@ class Keyboard {
 		this.layout = config.layout || 'fr';
 		this.showCanvas = config.showCanvas || false;
 		this.scale = config.scale || 1.5;
-		this.keysDepth = config.keysDepth || 0.002;
+		this.keysDepth = config.keysDepth || 0.01;
+
+		// threejs context i.e scene, camera, renderer, controls
+		this.context = context;
 
 		// tmp
 		this.decal = true;
@@ -101,8 +104,27 @@ class Keyboard {
 
 	}
 
+
+	onPointerMove( ev ) {
+		// console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
+	}
+
+	onPointerDown( ev ) {
+		// console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
+	}
+
+	onPointerUp( ev ) {
+		// console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
+	}
+
 	createThreeButtons() {
-		console.log( 'createThreeButtons', this.pixiButtons.lengh );
+		// console.log( 'createThreeButtons', this.pixiButtons.lengh );
+
+		this.onPointerMove = this.onPointerMove.bind( this );
+		this.onPointerDown = this.onPointerDown.bind( this );
+		this.onPointerUp = this.onPointerUp.bind( this );
+
+		const group = new InteractiveGroup( this.context.renderer, this.context.camera );
 
 		const texture = this.canvasTextureKeys.clone();
 		let material = new THREE.MeshBasicMaterial( {
@@ -116,9 +138,16 @@ class Keyboard {
 		material.map.wrapS = material.map.wrapT = THREE.RepeatWrapping;
 
 		const geometry = new THREE.PlaneGeometry( this.panelWidth, this.panelHeight );
-		const group = new THREE.Mesh( geometry, material );
+		const keyboardPlane = new THREE.Mesh( geometry, material );
+		keyboardPlane.name = 'keyboardPlane';
 
+		keyboardPlane.addEventListener( 'pointerdown', this.onPointerDown );
+		keyboardPlane.addEventListener( 'pointerup', this.onPointerUp );
+		keyboardPlane.addEventListener( 'pointermove', this.onPointerMove );
+
+		group.add( keyboardPlane );
 		this.mesh.add( group );
+
 
 		const backColor = 0xFF0000;
 		const hoverColor = 0xFF00FF;
@@ -165,8 +194,13 @@ class Keyboard {
 
 			const geometry = this.createButtonExtrudedGeometry( 0, 0, width, height, radius, this.keysDepth );
 			const keyMesh = new THREE.Mesh( geometry, [ matBack, matFront, matHover ] );
-
+			keyMesh.name = `key ${bt.value}`;
 			group.add( keyMesh );
+
+			keyMesh.addEventListener( 'pointerdown', this.onPointerDown );
+			keyMesh.addEventListener( 'pointerup', this.onPointerUp );
+			keyMesh.addEventListener( 'pointermove', this.onPointerMove );
+
 			keyMesh.position.x = x;
 			keyMesh.position.y = y;
 			//keyMesh.position.z = -this.textureSpacerZ;
@@ -288,6 +322,11 @@ class Keyboard {
 
 		document.body.appendChild( canvasEl );
 		this.canvasEl = canvasEl;
+
+		// https://github.com/yomotsu/camera-controls/issues/80
+		// canvasEl.setAttribute( 'tabindex', '0' );
+		// canvasEl.focus();
+
 		return canvasEl;
 	}
 
@@ -346,6 +385,7 @@ class Keyboard {
 				// move the top left button position
 				button.position.x = accumulateX;
 				button.position.y = accumulateY;
+				button.value = str;
 
 				// add the button to his container
 				this.backdrop.addChild( button );
