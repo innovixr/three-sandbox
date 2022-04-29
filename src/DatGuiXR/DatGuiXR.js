@@ -22,6 +22,12 @@ class DatGuiXR {
 		this.mesh = keyboard.mesh;
 		this.components.push( keyboard );
 
+		if ( this.controls )
+		{
+			this.controls.target = this.mesh.position;
+		}
+
+
 		//setInterval( () => { console.log( this.renderer.info.render.triangles ); }, 1000 );
 	}
 
