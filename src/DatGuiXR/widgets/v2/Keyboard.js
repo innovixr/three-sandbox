@@ -15,11 +15,11 @@ class Keyboard {
 		config = config || {};
 		this.config = config;
 
-		this.canvasWidth = config.width || 1024 * 1;
+		this.canvasWidth = config.width || 1024 * 8; // max multiplier = 12
 		this.layout = config.layout || 'fr';
 		this.showCanvas = config.showCanvas || false;
 		this.scale = config.scale || 1.5;
-		this.keysDepth = config.keysDepth || 0.01;
+		this.keysDepth = config.keysDepth || 0.005;
 
 		// threejs context i.e scene, camera, renderer, controls
 		this.context = context;
@@ -50,18 +50,16 @@ class Keyboard {
 		this.buttonBaseWidth = this.getButtonBaseWidth();
 		this.buttonRadius = this.getCanvasPercentWidth( 1 );
 		this.buttonBaseHeight = this.buttonBaseWidth;
-
 		this.buttonFont = { fontFamily: 'Verdana', fontSize: this.canvasWidth / 40 };
 
-		// filters can't work in canvas context !
 		this.filters = {
 			bloom: {
-				enable: false,
-				threshold: 0,
-				bloomScale: 0,
+				enable: true,
+				threshold: 0.1,
+				bloomScale: 0.5,
 				brightness: 1,
-				blur: 0,
-				quality: 0
+				blur:8,
+				quality: 4
 			}
 		};
 
@@ -145,16 +143,24 @@ class Keyboard {
 
 		const group = new InteractiveGroup( this.context.renderer, this.context.camera );
 
-		const texture = this.canvasTextureKeys.clone();
+		let texture;
+		//texture = this.canvasTextureKeys.clone();
+
 		let material = new THREE.MeshBasicMaterial( {
 			map: texture,
 			transparent: true,
-			opacity: 0.999,
+			opacity: 0.7,
 			alphaTest: 0.1,
 			wireframe: false
 		} );
 
-		material.map.wrapS = material.map.wrapT = THREE.RepeatWrapping;
+		if ( material.map )
+		{
+			material.map.wrapS = material.map.wrapT = THREE.RepeatWrapping;
+		} else
+		{
+			material.color = new THREE.Color( 0x000000 );
+		}
 
 		const geometry = new THREE.PlaneGeometry( this.panelWidth, this.panelHeight );
 		const keyboardPlane = new THREE.Mesh( geometry, material );
@@ -185,7 +191,8 @@ class Keyboard {
 			y = - y - ( height / 2 );			// inverse y
 			y -= height / 2;					// adjust center
 
-			const texture = this.canvasTextureKeys.clone();
+			let texture;
+			texture = this.canvasTextureKeys.clone();
 
 			const matFront = new THREE.MeshBasicMaterial( {
 				map: texture,
@@ -195,14 +202,22 @@ class Keyboard {
 				wireframe: false
 			} );
 
-			matFront.map.wrapS = matFront.map.wrapT = THREE.RepeatWrapping;
+			if ( matFront.map )
+			{
 
-			let ratio = texture.image.width / texture.image.height;
-			let scale = 1.65 / this.scale; // ?????
+				let ratio = texture.image.width / texture.image.height;
+				let scale = 1.5 / this.scale; // ?????
 
-			matFront.map.repeat.set( scale, scale * ratio );
-			matFront.map.offset.x = this.pixelToPercentX( bt.position.x );
-			matFront.map.offset.y = this.pixelToPercentY( bt.position.y );
+				matFront.map.wrapS = THREE.RepeatWrapping;
+				matFront.map.wrapT = THREE.RepeatWrapping;
+
+				matFront.map.repeat.set( scale, scale * ratio );
+				matFront.map.offset.x = this.pixelToPercentX( bt.position.x );
+				matFront.map.offset.y = this.pixelToPercentY( bt.position.y );
+			} else
+			{
+				matFront.color = new THREE.Color( 0x222222 );
+			}
 
 			const matBack = new THREE.MeshBasicMaterial( { color: backColor } );
 			const matHover = new THREE.MeshBasicMaterial( { color: hoverColor } );
@@ -331,17 +346,15 @@ class Keyboard {
 		canvasEl.width = width;
 		canvasEl.height = height;
 
-		/*
-		const ctx = canvasEl.getContext( '2d' );
+		const ctx = canvasEl.getContext( 'webgl' );
 		ctx.globalAlpha = 1;
 		ctx.globalCompositeOperation = 'lighter';
-		*/
 
 		let style = '';
 		style += `position:absolute;width:${width}px;height:${height}px;`;
 		style += 'margin:auto; top:0; left:0; right:0; bottom:0;';
-		style += 'background-color: red; opacity: 0.999;';
-		//style += 'zoom: 0.5;';
+		style += 'border:1px solid rgba(255, 255, 255, 0.5);background-color: red; opacity: 0.999;';
+		style += 'zoom: 0.3;';
 		if ( !show ) style += 'visibility:hidden; z-index: 1000;';
 
 		canvasEl.style = style;
@@ -371,6 +384,9 @@ class Keyboard {
 			//autoResize: true,
 			//powerPreference: 'high-performance'
 		} );
+
+		const ctx = this.canvasEl.getContext( 'webgl' );
+
 	}
 
 	createPixiBackdrop( width, height, radius, fillColor ) {
