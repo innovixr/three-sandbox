@@ -99,7 +99,7 @@ class App {
 		const blue = new THREE.PointLight( new THREE.Color( 0x1133FF ), 0.3, 10, 0.5 );
 		blue.position.set( 3, 2, -3 );
 		//blue.castShadow = true;
-		//container.add( blue );
+		container.add( blue );
 
 		//const back = new THREE.PointLight( new THREE.Color( 0xAAAAAA ), 0.3, 5, 0.5 );
 		//back.position.set( 0, 1.3, 1 );
@@ -170,9 +170,12 @@ class App {
 		return cube;
 	}
 
-	addRoomSegments( width, height ) {
+	addRoomSegments( width, height, depth ) {
+		if ( !height ) height = width;
+		if ( !depth ) depth = width;
+
 		const room = new THREE.LineSegments(
-			new BoxLineGeometry( width, width, width, width, width, width ),
+			new BoxLineGeometry( width, height, depth, width, height, depth ),
 			new THREE.LineBasicMaterial( { color: 0x808080 } )
 		);
 		room.geometry.center();
