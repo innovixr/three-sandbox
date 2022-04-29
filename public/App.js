@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 import { BoxLineGeometry } from 'three/examples/jsm/geometries/BoxLineGeometry.js';
 import CameraControls from 'camera-controls';
+
 import * as holdEvent from 'hold-event';
 import Stats from 'three/examples/jsm/libs/stats.module';
 
@@ -46,7 +47,13 @@ class App {
 		const delta = this.clock.getDelta();
 		//const elapsed = this.clock.getElapsedTime();
 
-		let updated = this.controls.update( delta );
+		let updated = false;
+
+		if ( this.controls )
+		{
+			updated = this.controls.update( delta );
+		}
+
 		if ( this.extraLoop )
 		{
 			updated = this.extraLoop( delta ) || updated;
@@ -294,6 +301,7 @@ class App {
 		this.controls.enableDamping = true;
 		this.controls.enableZoom = true;
 		this.controls.maxDistance = 0.45;
+		this.camera.position.y = 1.2;
 	}
 
 	addWindowResizeEndEvent() {
