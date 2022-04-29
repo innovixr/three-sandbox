@@ -28,9 +28,20 @@ class Experience {
 
 		this.gui.add();
 		//gui.add( myFunctions, 'RESET_EVENT' ).name( 'Reset Position' );
-		this.app.controls.rotateTo( 0, 90 * THREE.MathUtils.DEG2RAD, false );
+		if ( this.app.controls )
+		{
+			if ( this.app.controls.rotateTo )
+			{
+				// camera controls
+				this.app.controls.rotateTo( 0, 90 * THREE.MathUtils.DEG2RAD, false );
+				//this.customFitTo();
 
-		//this.customFitTo();
+			} else
+			{
+				// orbit control
+				throw new Error( 'orbit controls not implemented' );
+			}
+		}
 	}
 
 	customFitTo() {
