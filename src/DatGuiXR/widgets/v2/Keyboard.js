@@ -5,6 +5,7 @@ import { Keymap } from '../../utils/Keymap.js';
 import { Object3D } from '../../three/Object3D.js';
 import '../../pixi/center.js';
 import { InteractiveGroup } from './InteractiveGroup.js';
+import { GUI } from 'lil-gui';
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
@@ -54,16 +55,16 @@ class Keyboard {
 
 		this.filters = {
 			bloom: {
-				enable: true,
 				threshold: 0.1,
-				bloomScale: 2.9,
+				bloomScale: 0.7,
 				brightness: 1,
 				blur:8,
-				quality: 4
+				quality: 15
 			}
 		};
 
 		this.canvasHeight = this.getCanvasHeight();
+		this.bloomEffect = new AdvancedBloomFilter( this.filters.bloom );
 
 		this.createCanvas( this.canvasWidth, this.canvasHeight, this.showCanvas );
 		this.createPixiApp();
@@ -73,6 +74,8 @@ class Keyboard {
 		///////////////
 		// threejs
 		///////////////
+
+		this.threeButtons = [];
 
 		// keyboard pixi materials
 		this.materialPixiKeyboardConfig = {
@@ -101,8 +104,49 @@ class Keyboard {
 
 		this.needsUpdate = true;
 
+		this.showDebugPanel();
 	}
 
+	showDebugPanel() {
+
+		const self = this;
+		const filterBloomAttributes = Object.keys( self.filters.bloom );
+		let pixiBtInstance;
+
+		function onChange( attrName, value ) {
+			// loop on all keyboard keys (threejs instances)
+			self.threeButtons.map( bt => {
+
+				if ( !bt || !bt.pixiEl || typeof bt.pixiEl.filters != 'object' ) return;
+				pixiBtInstance = bt.pixiEl;
+				pixiBtInstance.filters.map( filter => {
+					if ( filter instanceof AdvancedBloomFilter )
+					{
+						filterBloomAttributes.map( ( attr ) => {
+							if ( attr === attrName )
+							{
+								pixiBtInstance.filters[ 0 ][ attr ] = value;
+							}
+						} );
+					}
+				} );
+				bt.texture.needsUpdate = true;
+			} );
+
+			self.pixiApp.renderer.render( self.pixiApp.stage, { clear: true } );
+			self.needsUpdate = true;
+
+		}
+
+		const f = this.debugPanel.addFolder( 'Texture' );
+		f.add( this.filters.bloom, 'threshold' ).min( 0 ).max( 1.0 ).step( 0.001 ).onChange( v => { onChange( 'threshold', v ); } );
+		f.add( this.filters.bloom, 'bloomScale' ).min( 0 ).max( 5 ).step( 0.01 ).onChange( v => { onChange( 'bloomScale', v ); } );
+		f.add( this.filters.bloom, 'brightness' ).min( 0 ).max( 5 ).step( 0.01 ).onChange( v => { onChange( 'brightness', v ); } );
+		f.add( this.filters.bloom, 'blur' ).min( -20.0 ).max( 100.0 ).step( 1 ).onChange( v => { onChange( 'blur', v ); } );
+		f.add( this.filters.bloom, 'quality' ).min( -1 ).max( 50 ).step( 0.1 ).onChange( v => { onChange( 'quality', v ); } );
+		// TODO: this.keysDepth
+		f.open();
+	}
 
 	onPointerMove( ev ) {
 		//console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
@@ -129,16 +173,14 @@ class Keyboard {
 
 		const button = threeEl.pixiEl;
 		if ( !button ) return;
+
 		button.filters = [];
-		if ( this.filters?.bloom && this.filters?.bloom.enable )
+		if ( this.filters?.bloom )
 		{
-			console.log( 'adding bloom', this.filters.bloom );
 			button.filters.push( new AdvancedBloomFilter( this.filters.bloom ) );
-			//this.pixiApp.renderer.render( this.pixiApp.stage, { clear: true } );
 			threeEl.texture.needsUpdate = true;
 			this.needsUpdate = true;
 		}
-
 	}
 
 	onPointerLeave( threeEl ) {
@@ -146,8 +188,8 @@ class Keyboard {
 		const button = threeEl.pixiEl;
 		if ( !button ) return;
 		button.filters = [];
-		this.needsUpdate = true;
 		threeEl.texture.needsUpdate = true;
+		this.needsUpdate = true;
 	}
 
 	onSelect() {
@@ -302,6 +344,8 @@ class Keyboard {
 			//keyMesh.position.z = -this.textureSpacerZ;
 			this.assignMaterial( geometry );
 
+			this.threeButtons.push( keyMesh );
+
 
 			if ( idx === 0 )
 			{
@@ -314,7 +358,7 @@ class Keyboard {
 						this.onPointerLeave( keyMesh );
 						toggle = false;
 					}
-				}, 1000 );
+				}, 5000 );
 			}
 
 		} );
@@ -478,6 +522,7 @@ class Keyboard {
 		let radius = this.buttonRadius;
 
 		const charset = 0;
+		const useBloomForTest = false;
 
 		this.keyLines.forEach( ( line ) => {
 			firstKey = true;
@@ -502,6 +547,13 @@ class Keyboard {
 				button.position.x = accumulateX;
 				button.position.y = accumulateY;
 				button.value = str;
+
+				if ( useBloomForTest )
+				{
+					button.filters = [ this.bloomEffect ];
+					//threeEl.texture.needsUpdate = true;
+					//this.needsUpdate = true;
+				}
 
 				// add the button to his container
 				this.backdrop.addChild( button );
@@ -649,5 +701,7 @@ class Keyboard {
 		return true;
 	}
 }
+
+Keyboard.prototype.debugPanel = new GUI();
 
 export { Keyboard };
