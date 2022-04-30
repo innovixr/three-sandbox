@@ -169,10 +169,11 @@ class Keyboard {
 	}
 
 	onPointerEnter( threeEl ) {
+		if ( threeEl.name === 'plane' ) return;
 		console.log( `Keyboard.js: ${Date.now()} pointerenter ${threeEl.name} `, threeEl.pixiEl );
-
 		const button = threeEl.pixiEl;
 		if ( !button ) return;
+		this.context.renderer.domElement.style.cursor = 'pointer';
 
 		button.filters = [];
 		if ( this.filters?.bloom )
@@ -184,7 +185,9 @@ class Keyboard {
 	}
 
 	onPointerLeave( threeEl ) {
+		if ( threeEl.name === 'plane' ) return;
 		console.log( `Keyboard.js: ${Date.now()} pointerleave ${threeEl.name} ` );
+		this.context.renderer.domElement.style.cursor = 'auto';
 		const button = threeEl.pixiEl;
 		if ( !button ) return;
 		button.filters = [];
@@ -347,6 +350,7 @@ class Keyboard {
 			this.threeButtons.push( keyMesh );
 
 
+			/*
 			if ( idx === 0 )
 			{
 				let toggle = false;
@@ -360,6 +364,7 @@ class Keyboard {
 					}
 				}, 5000 );
 			}
+			*/
 
 		} );
 
@@ -689,8 +694,6 @@ class Keyboard {
 	update( /*delta*/ ) {
 
 		if ( !this.needsUpdate ) return false;
-
-		console.log( 'updating' );
 
 		// this will update the texture threejs side
 		this.canvasTexture.needsUpdate = true;
