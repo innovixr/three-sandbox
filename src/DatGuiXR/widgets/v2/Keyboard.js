@@ -10,6 +10,8 @@ import { TWEEN } from 'three/examples/jsm/libs/tween.module.min';
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
+console.clear();
+
 class Keyboard {
 
 	constructor( config, context ) {
@@ -21,7 +23,7 @@ class Keyboard {
 		this.layout = config.layout || 'fr';
 		this.showCanvas = config.showCanvas || false;
 		this.scale = config.scale || 1.5;
-		this.keysScaleZ = 2;
+		this.keysScaleZ = 1.2;
 		this.keysDepth = ( config.keysDepth || 0.005 ) * this.keysScaleZ;
 		this.debugTexture = false;
 
@@ -29,7 +31,7 @@ class Keyboard {
 		this.context = context;
 
 		// tmp
-		this.displayBothCanvasAndThreeKeyboard = true;
+		this.displayBothCanvasAndThreeKeyboard = false;
 
 		// load keyboard layout
 		this.keyLayout = Keymap.get( this.layout );
@@ -37,9 +39,10 @@ class Keyboard {
 		this.keyLines = Keymap.get( this.layout )[ 0 ];
 
 		// colors
-		this.backdropColor = 0x030303;
-		this.buttonColor = 0x050505;
-		this.buttonColorText = 0x444444;
+		this.backdropColor = new THREE.Color().setHex( 0x333333 ).convertSRGBToLinear();
+		this.buttonColor = new THREE.Color().setHex( 0x333333 ).convertSRGBToLinear();
+		this.buttonFontColor = new THREE.Color().setHex( 0x0f2bff ).convertSRGBToLinear();
+		this.buttonBorderColor = new THREE.Color().setHex( 0x1b1f55 ).convertSRGBToLinear();
 
 		///////////////
 		// pixi
@@ -57,13 +60,15 @@ class Keyboard {
 		this.buttonFont = { fontFamily: 'Verdana', fontSize: this.canvasWidth / 40 };
 
 		this.filters = {
+			/*
 			bloom: {
 				threshold: 0.1,
-				bloomScale: 0.7,
+				bloomScale: 1,
 				brightness: 1,
-				blur:8,
-				quality: 15
+				blur: 25,
+				quality: 25
 			}
+			*/
 		};
 
 		this.canvasHeight = this.getCanvasHeight();
@@ -71,7 +76,7 @@ class Keyboard {
 
 		this.createCanvas( this.canvasWidth, this.canvasHeight, this.showCanvas );
 		this.createPixiApp();
-		this.createPixiBackdrop( this.canvasWidth, this.canvasHeight, this.backdropRadius, this.backdropColor );
+		this.createPixiBackdrop( this.canvasWidth, this.canvasHeight, this.backdropRadius, this.backdropColor.getHex() );
 		this.createPixiButtons();
 
 		///////////////
@@ -101,6 +106,8 @@ class Keyboard {
 
 		this.textureSpacerZ = -0.05;
 
+		this.buttonMaterialBorder = new THREE.MeshBasicMaterial( { color: this.buttonBorderColor.convertSRGBToLinear() } );
+
 		this.createKeyboardMaterials();
 		this.createKeyboardMesh();
 		this.createThreeButtons();
@@ -113,6 +120,14 @@ class Keyboard {
 	showDebugPanel() {
 
 		const self = this;
+
+		const itemKeys = this.debugPanel.addFolder( 'Keys' );
+		itemKeys.add( this, 'keysScaleZ' ).min( 0 ).max( 10.0 ).step( 0.001 ).onChange( v => { onChangeKeysPropertie( 'keysScaleZ', v ); } );
+		itemKeys.addColor( { buttonBorderColor: this.buttonBorderColor.convertSRGBToLinear().getHex() }, 'buttonBorderColor' ).onChange( onChangeButtonBorderColor );
+		itemKeys.addColor( { buttonFontColor: this.buttonFontColor.convertSRGBToLinear().getHex() }, 'buttonFontColor' ).onChange( onChangeButtonFontColor );
+
+		if ( !self.filters.bloom ) return;
+
 		const filterBloomAttributes = Object.keys( self.filters.bloom );
 		let pixiBtInstance;
 
@@ -138,11 +153,26 @@ class Keyboard {
 			self.needsUpdate = true;
 		}
 
-		function onChangeKeys( attrName, value ) {
+		function onChangeKeysPropertie( attrName, value ) {
 			self.threeButtons.map( bt => {
 				bt.scale.z = value;
 			} );
-			self.pixiApp.renderer.render( self.pixiApp.stage, { clear: true } );
+			self.needsUpdate = true;
+		}
+
+		function onChangeButtonBorderColor( value ) {
+			self.buttonBorderColor = value;
+			self.buttonMaterialBorder.color = new THREE.Color().setHex( value ).convertSRGBToLinear();
+			self.needsUpdate = true;
+		}
+
+		function onChangeButtonFontColor( value ) {
+			console.log( 'onChangeButtonFontColor', value );
+			self.buttonFontColor = new THREE.Color().setHex( value ).convertSRGBToLinear();
+			self.threeButtons.map( bt => {
+				bt.pixiEl.text.style.fill = self.buttonFontColor.getHex();
+				bt.texture.needsUpdate = true;
+			} );
 			self.needsUpdate = true;
 		}
 
@@ -156,9 +186,6 @@ class Keyboard {
 			itemTexture.add( this.filters.bloom, 'quality' ).min( -1 ).max( 50 ).step( 0.1 ).onChange( v => { onChangeTexture( 'quality', v ); } );
 			itemTexture.open();
 		}
-
-		const itemKeys = this.debugPanel.addFolder( 'Keys' );
-		itemKeys.add( this, 'keysScaleZ' ).min( 0 ).max( 10.0 ).step( 0.001 ).onChange( v => { onChangeKeys( 'keysScaleZ', v ); } );
 	}
 
 	onPointerMove( ev ) {
@@ -174,6 +201,7 @@ class Keyboard {
 	}
 
 	onPointerDown( ev ) {
+		if ( ev.target.name === 'plane' ) return;
 		console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
 		this.selectedKeyMesh = ev.target;
 		new TWEEN.Tween( this.selectedKeyMesh.scale ).to( { z: 0.4 }, 50 ).start();
@@ -181,6 +209,8 @@ class Keyboard {
 	}
 
 	onPointerUp( ev ) {
+		if ( ev.target.name === 'plane' ) return;
+		if ( !this.selectedKeyMesh ) return;
 		console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
 		new TWEEN.Tween( this.selectedKeyMesh.scale ).to( { z: 1 }, 50 ).start();
 		this.selectedKeyMesh = null;
@@ -276,7 +306,6 @@ class Keyboard {
 			material.color = new THREE.Color( 0x000000 );
 		}
 
-		//const geometry = new THREE.PlaneGeometry( this.panelWidth, this.panelHeight );
 		const geometry = this.createButtonExtrudedGeometry( 0, 0, this.panelWidth, this.panelHeight, 0.01, 0.005 );
 		geometry.center();
 
@@ -295,9 +324,9 @@ class Keyboard {
 		group.add( keyboardPlane );
 		this.mesh.add( group );
 
-		const backColor = 0xFF0000;
 		const hoverColor = 0xFF00FF;
 
+		// eslint-disable-next-line no-unused-vars
 		this.pixiButtons.forEach( ( bt, idx ) => {
 
 			let x = this.pixelToThreeDimensionX( bt.position.x );
@@ -340,15 +369,9 @@ class Keyboard {
 				matFront.color = new THREE.Color( 0x222222 );
 			}
 
-			const matBack = new THREE.MeshBasicMaterial( { color: backColor } );
 			const matHover = new THREE.MeshBasicMaterial( { color: hoverColor } );
-
-			matFront.color.convertSRGBToLinear();
-			matBack.color.convertSRGBToLinear();
-			matHover.color.convertSRGBToLinear();
-
 			const geometry = this.createButtonExtrudedGeometry( 0, 0, width, height, radius, this.keysDepth );
-			const keyMesh = new THREE.Mesh( geometry, [ matBack, matFront, matHover ] );
+			const keyMesh = new THREE.Mesh( geometry, [ this.buttonMaterialBorder, matFront, matHover ] );
 			keyMesh.name = `key ${bt.value}`;
 			keyMesh.pixiEl = bt;
 			keyMesh.texture = texture;
@@ -393,7 +416,6 @@ class Keyboard {
 			group.position.x = 0.32 * this.scale;
 		}
 	}
-
 
 	pixelToPercentX( x ) {
 		return (
@@ -565,7 +587,7 @@ class Keyboard {
 
 				// create pixi button
 				const str = key.chars[ charset ].lowerCase || key.chars[ charset ].icon || 'undif';
-				button = this.createPixiButton( width, height, radius, this.buttonColor, str );
+				button = this.createPixiButton( width, height, radius, this.buttonColor.getHex(), str );
 
 				// move the top left button position
 				button.position.x = accumulateX;
@@ -629,7 +651,6 @@ class Keyboard {
 
 	}
 
-
 	createPixiPanel( width, height, radius, fillColor ) {
 		const panel = new PIXI.Graphics();
 		//panel.lineStyle( { alignment: 0, width: 5, color: 0x2222FF, alpha: 0.2 } );
@@ -642,8 +663,9 @@ class Keyboard {
 	createPixiButton( width, height, radius, fillColor, str ) {
 		const button = this.createPixiPanel( width, height, radius, fillColor );
 		const text = new PIXI.Text( str, this.buttonFont );
-		text.style.fill = this.buttonColorText;
+		text.style.fill = this.buttonFontColor.getHex();
 		button.addChild( text );
+		button.text = text;
 		text.anchor.set( 0.5 );
 		text.centerXY();
 		return button;
