@@ -384,9 +384,6 @@ class Keyboard {
 			//autoResize: true,
 			//powerPreference: 'high-performance'
 		} );
-
-		const ctx = this.canvasEl.getContext( 'webgl' );
-
 	}
 
 	createPixiBackdrop( width, height, radius, fillColor ) {
