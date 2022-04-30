@@ -5,7 +5,8 @@ import { Keymap } from '../../utils/Keymap.js';
 import { Object3D } from '../../three/Object3D.js';
 import '../../pixi/center.js';
 import { InteractiveGroup } from './InteractiveGroup.js';
-import { GUI } from 'lil-gui';
+import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
+import { TWEEN } from 'three/examples/jsm/libs/tween.module.min';
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
@@ -162,19 +163,25 @@ class Keyboard {
 
 	onPointerDown( ev ) {
 		console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
+		this.selectedKeyMesh = ev.target;
+		new TWEEN.Tween( this.selectedKeyMesh.scale ).to( { z: 0.4 }, 50 ).start();
+		this.needsUpdate = true;
 	}
 
 	onPointerUp( ev ) {
 		console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
+		new TWEEN.Tween( this.selectedKeyMesh.scale ).to( { z: 1 }, 50 ).start();
+		this.selectedKeyMesh = null;
+		this.needsUpdate = true;
 	}
 
 	onPointerEnter( threeEl ) {
+		if ( this.selectedKeyMesh ) return;
 		if ( threeEl.name === 'plane' ) return;
 		console.log( `Keyboard.js: ${Date.now()} pointerenter ${threeEl.name} `, threeEl.pixiEl );
 		const button = threeEl.pixiEl;
 		if ( !button ) return;
 		this.context.renderer.domElement.style.cursor = 'pointer';
-
 		button.filters = [];
 		if ( this.filters?.bloom )
 		{
@@ -185,6 +192,7 @@ class Keyboard {
 	}
 
 	onPointerLeave( threeEl ) {
+		if ( this.selectedKeyMesh ) return;
 		if ( threeEl.name === 'plane' ) return;
 		console.log( `Keyboard.js: ${Date.now()} pointerleave ${threeEl.name} ` );
 		this.context.renderer.domElement.style.cursor = 'auto';
@@ -685,13 +693,9 @@ class Keyboard {
 		this.canvasTextureKeys.anisotropy = 16;
 	}
 
-	/*
-	round2( v ) {
-		return Math.round( v * 100 ) / 100;
-	}
-	*/
+	update() {
 
-	update( /*delta*/ ) {
+		this.needsUpdate = this.needsUpdate || TWEEN.update();
 
 		if ( !this.needsUpdate ) return false;
 
