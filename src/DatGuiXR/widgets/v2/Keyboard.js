@@ -21,13 +21,15 @@ class Keyboard {
 		this.layout = config.layout || 'fr';
 		this.showCanvas = config.showCanvas || false;
 		this.scale = config.scale || 1.5;
-		this.keysDepth = config.keysDepth || 0.005;
+		this.keysScaleZ = 2;
+		this.keysDepth = ( config.keysDepth || 0.005 ) * this.keysScaleZ;
+		this.debugTexture = false;
 
 		// threejs context i.e scene, camera, renderer, controls
 		this.context = context;
 
 		// tmp
-		this.decal = true;
+		this.displayBothCanvasAndThreeKeyboard = true;
 
 		// load keyboard layout
 		this.keyLayout = Keymap.get( this.layout );
@@ -114,11 +116,10 @@ class Keyboard {
 		const filterBloomAttributes = Object.keys( self.filters.bloom );
 		let pixiBtInstance;
 
-		function onChange( attrName, value ) {
-			// loop on all keyboard keys (threejs instances)
+		function onChangeTexture( attrName, value ) {
 			self.threeButtons.map( bt => {
 
-				if ( !bt || !bt.pixiEl || typeof bt.pixiEl.filters != 'object' ) return;
+				if ( !bt || !bt.pixiEl || !bt.pixiEl.filters?.length ) return;
 				pixiBtInstance = bt.pixiEl;
 				pixiBtInstance.filters.map( filter => {
 					if ( filter instanceof AdvancedBloomFilter )
@@ -133,20 +134,31 @@ class Keyboard {
 				} );
 				bt.texture.needsUpdate = true;
 			} );
-
 			self.pixiApp.renderer.render( self.pixiApp.stage, { clear: true } );
 			self.needsUpdate = true;
-
 		}
 
-		const f = this.debugPanel.addFolder( 'Texture' );
-		f.add( this.filters.bloom, 'threshold' ).min( 0 ).max( 1.0 ).step( 0.001 ).onChange( v => { onChange( 'threshold', v ); } );
-		f.add( this.filters.bloom, 'bloomScale' ).min( 0 ).max( 5 ).step( 0.01 ).onChange( v => { onChange( 'bloomScale', v ); } );
-		f.add( this.filters.bloom, 'brightness' ).min( 0 ).max( 5 ).step( 0.01 ).onChange( v => { onChange( 'brightness', v ); } );
-		f.add( this.filters.bloom, 'blur' ).min( -20.0 ).max( 100.0 ).step( 1 ).onChange( v => { onChange( 'blur', v ); } );
-		f.add( this.filters.bloom, 'quality' ).min( -1 ).max( 50 ).step( 0.1 ).onChange( v => { onChange( 'quality', v ); } );
-		// TODO: this.keysDepth
-		f.open();
+		function onChangeKeys( attrName, value ) {
+			self.threeButtons.map( bt => {
+				bt.scale.z = value;
+			} );
+			self.pixiApp.renderer.render( self.pixiApp.stage, { clear: true } );
+			self.needsUpdate = true;
+		}
+
+		if ( this.debugTexture )
+		{
+			const itemTexture = this.debugPanel.addFolder( 'Texture' );
+			itemTexture.add( this.filters.bloom, 'threshold' ).min( 0 ).max( 1.0 ).step( 0.001 ).onChange( v => { onChangeTexture( 'threshold', v ); } );
+			itemTexture.add( this.filters.bloom, 'bloomScale' ).min( 0 ).max( 5 ).step( 0.01 ).onChange( v => { onChangeTexture( 'bloomScale', v ); } );
+			itemTexture.add( this.filters.bloom, 'brightness' ).min( 0 ).max( 5 ).step( 0.01 ).onChange( v => { onChangeTexture( 'brightness', v ); } );
+			itemTexture.add( this.filters.bloom, 'blur' ).min( -20.0 ).max( 100.0 ).step( 1 ).onChange( v => { onChangeTexture( 'blur', v ); } );
+			itemTexture.add( this.filters.bloom, 'quality' ).min( -1 ).max( 50 ).step( 0.1 ).onChange( v => { onChangeTexture( 'quality', v ); } );
+			itemTexture.open();
+		}
+
+		const itemKeys = this.debugPanel.addFolder( 'Keys' );
+		itemKeys.add( this, 'keysScaleZ' ).min( 0 ).max( 10.0 ).step( 0.001 ).onChange( v => { onChangeKeys( 'keysScaleZ', v ); } );
 	}
 
 	onPointerMove( ev ) {
@@ -376,7 +388,7 @@ class Keyboard {
 
 		} );
 
-		if ( this.decal )
+		if ( this.displayBothCanvasAndThreeKeyboard )
 		{
 			group.position.x = 0.32 * this.scale;
 		}
@@ -535,7 +547,6 @@ class Keyboard {
 		let radius = this.buttonRadius;
 
 		const charset = 0;
-		const useBloomForTest = false;
 
 		this.keyLines.forEach( ( line ) => {
 			firstKey = true;
@@ -561,7 +572,7 @@ class Keyboard {
 				button.position.y = accumulateY;
 				button.value = str;
 
-				if ( useBloomForTest )
+				if ( this.debugTexture )
 				{
 					button.filters = [ this.bloomEffect ];
 					//threeEl.texture.needsUpdate = true;
@@ -672,7 +683,7 @@ class Keyboard {
 
 		this.mesh = new THREE.Group();
 		this.mesh.add( this.meshKeyboard );
-		if ( this.decal ) this.meshKeyboard.position.x -= 0.3 * this.scale;
+		if ( this.displayBothCanvasAndThreeKeyboard ) this.meshKeyboard.position.x -= 0.3 * this.scale;
 		this.context?.raycasterObjects.push( this.meshKeyboard );
 	}
 
