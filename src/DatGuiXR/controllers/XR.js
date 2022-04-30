@@ -44,7 +44,6 @@ class XRControllers {
 		this.mat4.identity().extractRotation( controller.matrixWorld );
 		this.raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
 		this.raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( this.mat4 );
-
 		window.canvasUIManager.testRaycasterIntersects( this.ctx, index );
 	}
 

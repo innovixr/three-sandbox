@@ -67,6 +67,7 @@ class Experience {
 	}
 
 	animate( delta ) {
-		return this.gui.update( delta ) || this.app.renderer.controllersManager.xrControllers.update( delta );
+		return this.gui.update( delta );
+		//return this.gui.update( delta ) || this.app.renderer.controllersManager.xrControllers.update( delta );
 	}
 }

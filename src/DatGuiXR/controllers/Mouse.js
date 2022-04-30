@@ -9,6 +9,8 @@ class MouseController {
 		this.config = config;
 		this.isMouseDown = false;
 
+		this.bindMethods();
+
 		console.assert( typeof config === 'object', `${this.constructor.name}: "config" should be an object` );
 		console.assert( this.ctx.camera instanceof Camera, `${this.constructor.name}: "config.camera" should be an instance of THREE.Camera` );
 		console.assert( this.ctx.renderer instanceof WebGLRenderer, `${this.constructor.name}: "config.renderer" should be an instance of THREE.Renderer` );
@@ -61,8 +63,8 @@ class MouseController {
 	}
 
 	installXRListener() {
-		this.ctx.renderer.xr.addEventListener( 'sessionstart', this.onXRSessionStart );
-		this.ctx.renderer.xr.addEventListener( 'sessionend', this.onXRSessionEnd );
+		this.ctx.renderer.xr.addEventListener( 'sessionstart', this.onXRSessionStart.bind( this ) );
+		this.ctx.renderer.xr.addEventListener( 'sessionend', this.onXRSessionEnd.bind( this ) );
 	}
 
 	initWindowSize() {
@@ -70,11 +72,11 @@ class MouseController {
 	}
 
 	onXRSessionStart() {
-		this.removeMouseListeners();
+		//this.removeMouseListeners();
 	}
 
 	onXRSessionEnd() {
-		this.installMouseListeners();
+		//this.installMouseListeners();
 	}
 
 	handleMouse( event ) {

@@ -37,8 +37,8 @@ class ControllersManager {
 			selectend: this.onControllerSelectEnd.bind( this )
 		};
 
-		this.xrControllers = new XRControllers( this.ctx,  controllerConfig );
-		this.mouseController = Test.isDefined( this.config.mouseHandler ) ?  new MouseController( this.ctx, controllerConfig ) : undefined;
+		//this.xrControllers = new XRControllers( this.ctx,  controllerConfig );
+		//this.mouseController = Test.isDefined( this.config.mouseHandler ) ?  new MouseController( this.ctx, controllerConfig ) : undefined;
 	}
 
 	intersectInclude( instance ) {

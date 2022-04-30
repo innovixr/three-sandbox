@@ -14,7 +14,7 @@ class DatGuiXR {
 		this.raycasterObjects = opts.raycasterObjects;
 		this.components = [];
 
-		this.setupControllers();
+		//this.setupControllers();
 		this.setupPIXI();
 		this.setupEvents();
 

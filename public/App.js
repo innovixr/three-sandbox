@@ -6,6 +6,7 @@ import CameraControls from 'camera-controls';
 
 import * as holdEvent from 'hold-event';
 import Stats from 'three/examples/jsm/libs/stats.module';
+import XRControl from './XR.js';
 
 CameraControls.install( { THREE: THREE } );
 
@@ -25,7 +26,7 @@ class App {
 		this.setupXR();
 		this.addLights();
 		this.addRoom();
-		this.addMouseHandler();
+		//this.addMouseHandler();
 		this.addMouseRaycaster();
 		//this.addOrbitControl();
 		this.addCameraControl();
@@ -64,7 +65,10 @@ class App {
 			this.renderer.render( this.scene, this.camera );
 		}
 
-		this.stats.update();
+		if ( !this.renderer.xr?.isPresenting )
+		{
+			this.stats.update();
+		}
 
 	}
 
@@ -137,6 +141,12 @@ class App {
 		//this.renderer.xr.setReferenceSpaceType( 'local-floor' );
 		this.renderer.xr.addEventListener( 'sessionstart', this.onXRSessionStart.bind( this ) );
 		document.body.appendChild( VRButton.createButton( this.renderer ) );
+
+		this.xrControl = new XRControl( this.renderer, this.cameraXR, this.scene );
+		this.scene.add( this.xrControl.controllerGrips[ 0 ] );
+		this.scene.add( this.xrControl.controllers[ 0 ] );
+		this.scene.add( this.xrControl.controllerGrips[ 1 ] );
+		this.scene.add( this.xrControl.controllers[ 1 ] );
 	}
 
 	addRoom() {

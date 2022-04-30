@@ -56,7 +56,7 @@ class Keyboard {
 			bloom: {
 				enable: true,
 				threshold: 0.1,
-				bloomScale: 0.5,
+				bloomScale: 2.9,
 				brightness: 1,
 				blur:8,
 				quality: 4
@@ -105,7 +105,7 @@ class Keyboard {
 
 
 	onPointerMove( ev ) {
-		console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
+		//console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
 
 		if ( this.movedOn != ev.target )
 		{
@@ -125,11 +125,45 @@ class Keyboard {
 	}
 
 	onPointerEnter( threeEl ) {
-		console.log( `Keyboard.js: ${Date.now()} pointerenter ${threeEl.name} ` );
+		console.log( `Keyboard.js: ${Date.now()} pointerenter ${threeEl.name} `, threeEl.pixiEl );
+
+		const button = threeEl.pixiEl;
+		if ( !button ) return;
+		button.filters = [];
+		if ( this.filters?.bloom && this.filters?.bloom.enable )
+		{
+			console.log( 'adding bloom', this.filters.bloom );
+			button.filters.push( new AdvancedBloomFilter( this.filters.bloom ) );
+			//this.pixiApp.renderer.render( this.pixiApp.stage, { clear: true } );
+			threeEl.texture.needsUpdate = true;
+			this.needsUpdate = true;
+		}
+
 	}
 
 	onPointerLeave( threeEl ) {
 		console.log( `Keyboard.js: ${Date.now()} pointerleave ${threeEl.name} ` );
+		const button = threeEl.pixiEl;
+		if ( !button ) return;
+		button.filters = [];
+		this.needsUpdate = true;
+		threeEl.texture.needsUpdate = true;
+	}
+
+	onSelect() {
+		console.log( 'onSelect' );
+	}
+
+	onSelectStart() {
+		console.log( 'onSelectStart' );
+	}
+
+	onSelectEnd() {
+		console.log( 'onSelectEnd' );
+	}
+
+	onMove() {
+		console.log( 'onMove' );
 	}
 
 	createThreeButtons() {
@@ -140,6 +174,10 @@ class Keyboard {
 		this.onPointerUp = this.onPointerUp.bind( this );
 		this.onPointerEnter = this.onPointerEnter.bind( this );
 		this.onPointerLeave = this.onPointerLeave.bind( this );
+		this.onSelect = this.onSelect.bind( this );
+		this.onSelectStart = this.onSelectStart.bind( this );
+		this.onSelectEnd = this.onSelectEnd.bind( this );
+		this.onMove = this.onMove.bind( this );
 
 		const group = new InteractiveGroup( this.context.renderer, this.context.camera );
 
@@ -156,28 +194,46 @@ class Keyboard {
 
 		if ( material.map )
 		{
-			material.map.wrapS = material.map.wrapT = THREE.RepeatWrapping;
+			material.opacity = 0.999;
+
+			// not good
+			let ratio = texture.image.width / texture.image.height;
+			let scale1 = this.scale * 0.715; // ?????
+			let scale2 = scale1 * ratio;
+
+			material.map.wrapS = THREE.RepeatWrapping;
+			material.map.wrapT = THREE.RepeatWrapping;
+			material.map.repeat.set( scale1, scale2 );
+			material.map.offset.x = 0;
+			material.map.offset.y = 0.02;
 		} else
 		{
 			material.color = new THREE.Color( 0x000000 );
 		}
 
-		const geometry = new THREE.PlaneGeometry( this.panelWidth, this.panelHeight );
+		//const geometry = new THREE.PlaneGeometry( this.panelWidth, this.panelHeight );
+		const geometry = this.createButtonExtrudedGeometry( 0, 0, this.panelWidth, this.panelHeight, 0.01, 0.005 );
+		geometry.center();
+
 		const keyboardPlane = new THREE.Mesh( geometry, material );
+		keyboardPlane.position.z = -0.002;
 		keyboardPlane.name = 'plane';
 
 		keyboardPlane.addEventListener( 'pointerdown', this.onPointerDown );
 		keyboardPlane.addEventListener( 'pointerup', this.onPointerUp );
 		keyboardPlane.addEventListener( 'pointermove', this.onPointerMove );
+		keyboardPlane.addEventListener( 'select', this.onSelect );
+		keyboardPlane.addEventListener( 'selectstart', this.onSelectStart );
+		keyboardPlane.addEventListener( 'selectend', this.onSelectEnd );
+		keyboardPlane.addEventListener( 'move', this.onMove );
 
 		group.add( keyboardPlane );
 		this.mesh.add( group );
 
-
 		const backColor = 0xFF0000;
 		const hoverColor = 0xFF00FF;
 
-		this.pixiButtons.forEach( bt => {
+		this.pixiButtons.forEach( ( bt, idx ) => {
 
 			let x = this.pixelToThreeDimensionX( bt.position.x );
 			let y = this.pixelToThreeDimensionY( bt.position.y );
@@ -229,17 +285,37 @@ class Keyboard {
 			const geometry = this.createButtonExtrudedGeometry( 0, 0, width, height, radius, this.keysDepth );
 			const keyMesh = new THREE.Mesh( geometry, [ matBack, matFront, matHover ] );
 			keyMesh.name = `key ${bt.value}`;
+			keyMesh.pixiEl = bt;
+			keyMesh.texture = texture;
 			group.add( keyMesh );
 
 			keyMesh.addEventListener( 'pointerdown', this.onPointerDown );
 			keyMesh.addEventListener( 'pointerup', this.onPointerUp );
 			keyMesh.addEventListener( 'pointermove', this.onPointerMove );
+			keyMesh.addEventListener( 'select', this.onSelect );
+			keyMesh.addEventListener( 'selectstart', this.onSelectStart );
+			keyMesh.addEventListener( 'selectend', this.onSelectEnd );
+			keyMesh.addEventListener( 'move', this.onMove );
 
 			keyMesh.position.x = x;
 			keyMesh.position.y = y;
 			//keyMesh.position.z = -this.textureSpacerZ;
 			this.assignMaterial( geometry );
 
+
+			if ( idx === 0 )
+			{
+				let toggle = false;
+				setInterval( () => {
+					if ( !toggle ) {
+						this.onPointerEnter( keyMesh );
+						toggle = true;
+					} else {
+						this.onPointerLeave( keyMesh );
+						toggle = false;
+					}
+				}, 1000 );
+			}
 
 		} );
 
@@ -354,7 +430,7 @@ class Keyboard {
 		style += `position:absolute;width:${width}px;height:${height}px;`;
 		style += 'margin:auto; top:0; left:0; right:0; bottom:0;';
 		style += 'border:1px solid rgba(255, 255, 255, 0.5);background-color: red; opacity: 0.999;';
-		style += 'zoom: 0.3;';
+		style += 'zoom: 0.1;';
 		if ( !show ) style += 'visibility:hidden; z-index: 1000;';
 
 		canvasEl.style = style;
@@ -487,14 +563,6 @@ class Keyboard {
 		panel.beginFill( fillColor, 0.8 );
 		panel.drawRoundedRect( 0, 0, width, height, radius );
 		panel.endFill();
-
-		panel.filters = [];
-		if ( this.filters?.bloom && this.filters?.bloom.enable )
-		{
-			console.log( 'adding bloom', this.filters.bloom );
-			panel.filters.push( new AdvancedBloomFilter( this.filters.bloom ) );
-		}
-
 		return panel;
 	}
 
@@ -573,10 +641,10 @@ class Keyboard {
 
 		if ( !this.needsUpdate ) return false;
 
+		console.log( 'updating' );
+
 		// this will update the texture threejs side
 		this.canvasTexture.needsUpdate = true;
-		this.canvasTextureKeys.needsUpdate = true;
-
 		this.needsUpdate = false;
 
 		// this will update pixi app
