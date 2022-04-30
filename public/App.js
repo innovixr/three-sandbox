@@ -281,6 +281,7 @@ class App {
 		const ratio = 0.001;
 		const walkSpeed = 0.5;
 		const runSpeed = 2;
+
 		keyLeft.addEventListener( 'holding', event => {
 			const multiplier = event.originalEvent.shiftKey ? runSpeed : walkSpeed;
 			this.controls.truck( - ( ratio * multiplier ) * event.deltaTime, 0, moveAnimation );
@@ -304,6 +305,7 @@ class App {
 		const keyUp = new holdEvent.KeyboardKeyHold( arrows.up, 100 );
 		const keyDown = new holdEvent.KeyboardKeyHold( arrows.down, 100 );
 		const lookAnimation = true;
+
 		keyTurnRight.addEventListener( 'holding', event => { this.controls.rotate( - 0.1 * THREE.MathUtils.DEG2RAD * event.deltaTime, 0, lookAnimation ); } );
 		keyTurnLeft.addEventListener( 'holding', event => { this.controls.rotate( 0.1 * THREE.MathUtils.DEG2RAD * event.deltaTime, 0, lookAnimation ); } );
 		keyDown.addEventListener( 'holding', event => { this.controls.rotate( 0, - 0.05 * THREE.MathUtils.DEG2RAD * event.deltaTime, lookAnimation ); } );
