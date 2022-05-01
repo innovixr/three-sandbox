@@ -21,18 +21,16 @@ class Keyboard {
 
 		this.canvasWidth = config.width || 1024 * 8; // max multiplier = 12
 		this.layout = config.layout || 'fr';
-		this.scale = config.scale || 0.6; // 1.5 for webxr
+		this.scale = config.scale || 0.8; // 1.5 for webxr
 		this.keysScaleZ = 1.2;
 		this.keysDepth = ( config.keysDepth || 0.003 ) * this.keysScaleZ;
 		this.debugPixiCanvas = config.debugPixiCanvas || false;
 		this.debugTexture = config.debugTexture || false;
-		this.debugThreeCanvas = true;
+		this.debugThreeCanvas = false;
+		this.debugThreeTexture = config.debugThreeTexture || false;
 
 		// threejs context i.e scene, camera, renderer, controls
 		this.context = context;
-
-		// tmp
-
 
 		// load keyboard layout
 		this.keyLayout = Keymap.get( this.layout );
@@ -41,11 +39,11 @@ class Keyboard {
 
 		// colors
 		const mainColor = 0x121eca;
-		const backgroundColor = 0x010101;
+		const buttonColor = 0x010101;
 		const backdropColor = 0x000000;
 
 		this.backdropColor = this.colorToThree( backdropColor );
-		this.buttonColor = this.colorToThree( backgroundColor );
+		this.buttonColor = this.colorToThree( buttonColor );
 		this.buttonBorderColor = this.colorToThree( mainColor );
 		this.buttonFontColor = this.colorToThree( mainColor );
 
@@ -68,7 +66,7 @@ class Keyboard {
 		this.filters = {
 			bloom: {
 				threshold: 0.09,
-				bloomScale: 5,
+				bloomScale: 1,
 				brightness: 1,
 				blur: 40,
 				quality: 9
@@ -111,7 +109,7 @@ class Keyboard {
 		this.ratioCanvasPanelWidth = Math.round( this.ratioCanvasPanelWidth * 100 ) / 100;
 		this.ratioCanvasPanelHeight = Math.round( this.ratioCanvasPanelHeight * 100 ) / 100;
 
-		this.textureSpacerZ = 0;
+		this.textureSpacerZ = -0.0001;
 		//this.textureSpacerZ = -0.05;
 
 		this.buttonMaterialBorder = new THREE.MeshBasicMaterial( { color: this.buttonBorderColor.convertSRGBToLinear() } );
@@ -129,8 +127,8 @@ class Keyboard {
 
 	drawThreeElements() {
 		this.createKeyboardMaterials();
-		this.createKeyboardMesh();
-		this.createKeyboardButtons();
+		this.createPixiBaseKeyboard();
+		this.createThreeKeyboard();
 	}
 
 	colorToThree( color ) {
@@ -296,7 +294,7 @@ class Keyboard {
 		console.log( 'onMove' );
 	}
 
-	createKeyboardButtons() {
+	createThreeKeyboard() {
 		// console.log( 'createThreeButtons', this.pixiButtons.lengh );
 
 		this.onPointerMove = this.onPointerMove.bind( this );
@@ -311,47 +309,38 @@ class Keyboard {
 
 		const group = new InteractiveGroup( this.context.renderer, this.context.camera );
 
-		let texture;
-		texture = this.canvasTextureKeys.clone();
-		//texture.encoding = THREE.sRGBEncoding;
+		////////////////////////////////////
+		// keyboard panel background
+		////////////////////////////////////
 
-		let material = new THREE.MeshBasicMaterial( {
+		let texture = this.canvasTexture;
+		const material = new THREE.MeshBasicMaterial( {
 			map: texture,
-			transparent: true,
-			opacity: 0,
-			alphaTest: 1,
+			transparent: true, // for rounded corner
+			//opacity: 1,
+			//alphaTest: 0.1,
 			wireframe: false
 		} );
 
+
 		if ( material.map )
 		{
-			let ratio = texture.image.width / texture.image.height;
-
-			let scale1 = this.scale * 0.715; // ?????
-			let scale2 = scale1 * ratio;
-
-			console.log( `ratio=${ratio}, scale1=${scale1}, scale2=${scale2}` );
-
-			material.opacity = 0.999;
-			material.map.wrapS = THREE.RepeatWrapping;
-			material.map.wrapT = THREE.RepeatWrapping;
-			material.map.repeat.set( scale1, scale2 );
-			material.map.offset.x = 0;
-			material.map.offset.y = 0.02;
+			//material.transparent = true;
+			//material.opacity = 0.8;
 		}
 
 		let geometry;
-		if ( this.keyboardDepth > 0 ) {
+		if ( this.keyboardDepth > 0 )
+		{
 			geometry = this.createButtonExtrudedGeometry( 0, 0, this.panelWidth, this.panelHeight, this.keyboardRadius, this.keyboardDepth );
 			geometry.center();
 		} else
 		{
 			geometry = new THREE.PlaneGeometry( this.panelWidth, this.panelHeight );
-
 		}
 
 		const keyboardPlane = new THREE.Mesh( geometry, material );
-		keyboardPlane.position.z = -0.002;
+		keyboardPlane.position.z = -0.001;
 		keyboardPlane.name = 'plane';
 
 		keyboardPlane.addEventListener( 'pointerdown', this.onPointerDown );
@@ -362,13 +351,20 @@ class Keyboard {
 		keyboardPlane.addEventListener( 'selectend', this.onSelectEnd );
 		keyboardPlane.addEventListener( 'move', this.onMove );
 
-		console.log( keyboardPlane );
-
 		group.add( keyboardPlane );
 		this.mesh.add( group );
 
-		const hoverColor = 0xFF00FF;
+		if ( this.debugThreeCanvas )
+			group.position.y = 0.1 * this.scale;
 
+		if ( this.debugThreeTexture )
+			return;
+
+		//////////////
+		// keys
+		/////////////
+
+		const hoverColor = 0xFF00FF;
 		// eslint-disable-next-line no-unused-vars
 		this.pixiButtons.forEach( ( bt, idx ) => {
 
@@ -384,21 +380,22 @@ class Keyboard {
 			y = - y - ( height / 2 );			// inverse y
 			y -= height / 2;					// adjust center
 
-			let texture = this.canvasTextureKeys.clone();
+			let texture = this.canvasTexture.clone();
 
 			const matFront = new THREE.MeshBasicMaterial( {
 				map: texture,
-				transparent: true,
-				opacity: 0.99,
-				alphaTest: 0.16,
+				transparent: false,
+				opacity: 1,
+				alphaTest: 0.01,
 				wireframe: false
 			} );
 
 			if ( matFront.map )
 			{
 				let ratio = texture.image.width / texture.image.height;
-				let scale = 1.6 / this.scale; // ????? i don't understand why i need this
+				let scale = this.scale * ratio;
 
+				console.log( 'scale', scale );
 				matFront.map.wrapS = THREE.RepeatWrapping;
 				matFront.map.wrapT = THREE.RepeatWrapping;
 
@@ -407,7 +404,7 @@ class Keyboard {
 				matFront.map.offset.y = this.pixelToPercentY( bt.position.y );
 			} else
 			{
-				matFront.color = new THREE.Color( 0x222222 ).getHex();
+				matFront.color = new THREE.Color( 0xFFFFFF );
 			}
 
 			const matHover = new THREE.MeshBasicMaterial( { color: hoverColor } );
@@ -451,23 +448,18 @@ class Keyboard {
 			*/
 
 		} );
-
-		if ( this.debugThreeCanvas )
-		{
-			group.position.y = 0.1 * this.scale;
-		}
 	}
 
 	pixelToPercentX( x ) {
 		return (
-			( ( x * 100 ) / this.canvasWidth ) / 100
+			( ( ( x * 100 ) / this.canvasWidth ) / 100 ) + 0.0035
 		);
 	}
 
 	pixelToPercentY( y ) {
 		return (
 			//( ( ( y * 100 ) / this.canvasHeight ) / 100 )
-			( ( ( y * 100 ) / this.canvasHeight ) / 100 ) - 0.25
+			( ( ( ( this.canvasHeight - y - ( this.backdropRadius * 4 ) ) * 100 ) / this.canvasHeight ) / 100 ) - 0.0148
 		);
 	}
 
@@ -682,7 +674,7 @@ class Keyboard {
 
 	createPixiPanel( width, height, radius, fillColor ) {
 		const panel = new PIXI.Graphics();
-		panel.lineStyle( { alignment: 0, width: 20, color: 0xFF2200, alpha: 0.9 } );
+		//panel.lineStyle( { alignment: 0, width: 3, color: this.buttonBorderColor.getHex(), alpha: 0.9 } );
 		panel.beginFill( fillColor, 0.8 );
 		panel.drawRoundedRect( 0, 0, width, height, radius );
 		panel.endFill();
@@ -710,7 +702,7 @@ class Keyboard {
 		return max;
 	}
 
-	createKeyboardMesh() {
+	createPixiBaseKeyboard() {
 		let geometry;
 
 		if ( this.panelDepth )
@@ -752,13 +744,9 @@ class Keyboard {
 		const material = THREE.MeshBasicMaterial;
 
 		// material for main plane
-		this.keyboardMaterial = new material( this.materialPixiKeyboardConfig );
 		this.canvasTexture = new THREE.CanvasTexture( this.canvasEl );
+		this.keyboardMaterial = new material( this.materialPixiKeyboardConfig );
 		this.keyboardMaterial.map = this.canvasTexture;
-
-		// material for keys
-		this.keysMaterial = new material( this.materialPixiKeyboardConfig );
-		this.canvasTextureKeys = new THREE.CanvasTexture( this.canvasEl );
 	}
 
 	update() {
@@ -771,6 +759,7 @@ class Keyboard {
 		this.canvasTexture.needsUpdate = true;
 		this.needsUpdate = false;
 
+		console.log( 'updating' );
 		// this will update pixi app
 		this.pixiApp.renderer.render( this.pixiApp.stage, { clear: true } );
 		return true;
