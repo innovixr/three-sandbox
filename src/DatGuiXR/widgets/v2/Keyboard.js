@@ -21,17 +21,18 @@ class Keyboard {
 
 		this.canvasWidth = config.width || 1024 * 8; // max multiplier = 12
 		this.layout = config.layout || 'fr';
-		this.scale = config.scale || 1.5;
+		this.scale = config.scale || 0.6; // 1.5 for webxr
 		this.keysScaleZ = 1.2;
 		this.keysDepth = ( config.keysDepth || 0.003 ) * this.keysScaleZ;
-		this.debugCanvas = config.debugCanvas || false;
+		this.debugPixiCanvas = config.debugPixiCanvas || false;
 		this.debugTexture = config.debugTexture || false;
+		this.debugThreeCanvas = true;
 
 		// threejs context i.e scene, camera, renderer, controls
 		this.context = context;
 
 		// tmp
-		this.displayBothCanvasAndThreeKeyboard = false;
+
 
 		// load keyboard layout
 		this.keyLayout = Keymap.get( this.layout );
@@ -41,7 +42,9 @@ class Keyboard {
 		// colors
 		const mainColor = 0x121eca;
 		const backgroundColor = 0x010101;
-		this.backdropColor = this.colorToThree( backgroundColor );
+		const backdropColor = 0x000000;
+
+		this.backdropColor = this.colorToThree( backdropColor );
 		this.buttonColor = this.colorToThree( backgroundColor );
 		this.buttonBorderColor = this.colorToThree( mainColor );
 		this.buttonFontColor = this.colorToThree( mainColor );
@@ -60,6 +63,7 @@ class Keyboard {
 		this.buttonRadius = this.getCanvasPercentWidth( 1 );
 		this.buttonBaseHeight = this.buttonBaseWidth;
 		this.buttonFont = { fontFamily: 'Verdana', fontSize: this.canvasWidth / 40 };
+		this.canvasHeight = this.getCanvasHeight();
 
 		this.filters = {
 			bloom: {
@@ -71,13 +75,13 @@ class Keyboard {
 			}
 		};
 
-		this.canvasHeight = this.getCanvasHeight();
+
 		this.bloomEffect = new AdvancedBloomFilter( this.filters.bloom );
 
-		this.createCanvas( this.canvasWidth, this.canvasHeight, this.debugCanvas );
-		this.createPixiApp();
-		this.createPixiBackdrop( this.canvasWidth, this.canvasHeight, this.backdropRadius, this.backdropColor.getHex() );
-		this.createPixiButtons();
+		this.canvasEl = this.createCanvas( this.canvasWidth, this.canvasHeight );
+		document.body.appendChild( this.canvasEl );
+
+		this.drawPixiElements();
 
 		///////////////
 		// threejs
@@ -107,17 +111,26 @@ class Keyboard {
 		this.ratioCanvasPanelWidth = Math.round( this.ratioCanvasPanelWidth * 100 ) / 100;
 		this.ratioCanvasPanelHeight = Math.round( this.ratioCanvasPanelHeight * 100 ) / 100;
 
-		this.textureSpacerZ = -0.05;
+		this.textureSpacerZ = 0;
+		//this.textureSpacerZ = -0.05;
 
 		this.buttonMaterialBorder = new THREE.MeshBasicMaterial( { color: this.buttonBorderColor.convertSRGBToLinear() } );
 
+		this.drawThreeElements();
+		this.showDebugPanel();
+		this.needsUpdate = true;
+	}
+
+	drawPixiElements() {
+		this.createPixiApp();
+		this.createPixiBackdrop( this.canvasWidth, this.canvasHeight, this.backdropRadius, this.backdropColor.getHex() );
+		this.createPixiButtons();
+	}
+
+	drawThreeElements() {
 		this.createKeyboardMaterials();
 		this.createKeyboardMesh();
 		this.createKeyboardButtons();
-
-		this.needsUpdate = true;
-
-		this.showDebugPanel();
 	}
 
 	colorToThree( color ) {
@@ -179,10 +192,12 @@ class Keyboard {
 		function onChangeButtonColor( value ) {
 			console.log( 'onChangeButtonColor', value );
 			self.buttonColor = new THREE.Color().setHex( value );
+			self.drawPixiElements();
 			self.threeButtons.map( bt => {
-				bt.pixiEl.fill.color = self.buttonColor.getHex();
 				bt.texture.needsUpdate = true;
 			} );
+
+
 			self.needsUpdate = true;
 		}
 
@@ -297,13 +312,13 @@ class Keyboard {
 		const group = new InteractiveGroup( this.context.renderer, this.context.camera );
 
 		let texture;
-		//texture = this.canvasTextureKeys.clone();
+		texture = this.canvasTextureKeys.clone();
 		//texture.encoding = THREE.sRGBEncoding;
 
 		let material = new THREE.MeshBasicMaterial( {
 			map: texture,
 			transparent: true,
-			opacity: 0.9999,
+			opacity: 0,
 			alphaTest: 1,
 			wireframe: false
 		} );
@@ -311,8 +326,11 @@ class Keyboard {
 		if ( material.map )
 		{
 			let ratio = texture.image.width / texture.image.height;
+
 			let scale1 = this.scale * 0.715; // ?????
 			let scale2 = scale1 * ratio;
+
+			console.log( `ratio=${ratio}, scale1=${scale1}, scale2=${scale2}` );
 
 			material.opacity = 0.999;
 			material.map.wrapS = THREE.RepeatWrapping;
@@ -329,6 +347,7 @@ class Keyboard {
 		} else
 		{
 			geometry = new THREE.PlaneGeometry( this.panelWidth, this.panelHeight );
+
 		}
 
 		const keyboardPlane = new THREE.Mesh( geometry, material );
@@ -342,6 +361,8 @@ class Keyboard {
 		keyboardPlane.addEventListener( 'selectstart', this.onSelectStart );
 		keyboardPlane.addEventListener( 'selectend', this.onSelectEnd );
 		keyboardPlane.addEventListener( 'move', this.onMove );
+
+		console.log( keyboardPlane );
 
 		group.add( keyboardPlane );
 		this.mesh.add( group );
@@ -376,7 +397,7 @@ class Keyboard {
 			if ( matFront.map )
 			{
 				let ratio = texture.image.width / texture.image.height;
-				let scale = 1.5 / this.scale; // ?????
+				let scale = 1.6 / this.scale; // ????? i don't understand why i need this
 
 				matFront.map.wrapS = THREE.RepeatWrapping;
 				matFront.map.wrapT = THREE.RepeatWrapping;
@@ -431,9 +452,9 @@ class Keyboard {
 
 		} );
 
-		if ( this.displayBothCanvasAndThreeKeyboard )
+		if ( this.debugThreeCanvas )
 		{
-			group.position.x = 0.32 * this.scale;
+			group.position.y = 0.1 * this.scale;
 		}
 	}
 
@@ -445,20 +466,12 @@ class Keyboard {
 
 	pixelToPercentY( y ) {
 		return (
-			1 - ( ( ( y * 100 ) / this.canvasHeight ) / 100 ) - 0.21
+			//( ( ( y * 100 ) / this.canvasHeight ) / 100 )
+			( ( ( y * 100 ) / this.canvasHeight ) / 100 ) - 0.25
 		);
 	}
 
 	assignMaterial( geometry ) {
-		if ( this.usePlane )
-		{
-			// make all faces use matBack
-			for ( let i = 0; i < geometry.faces.length; i++ )
-				geometry.faces[ i ].materialIndex = 0;
-			geometry.faces[ 0 ].materialIndex = 1;
-			return;
-		}
-
 		// make all faces use matBack
 		for ( let i = 0; i < geometry.groups.length; i++ )
 			geometry.groups[ i ].materialIndex = 0;
@@ -520,43 +533,39 @@ class Keyboard {
 		const totalPaddingCanvas = ( this.backdropPadding * 2 );
 		const totalPaddingLines = this.buttonMargin * ( this.keyLines.length - 1 );
 		const buttonsHeight = this.buttonBaseHeight * this.keyLines.length;
-		const canvasHeight = totalPaddingCanvas + totalPaddingLines + buttonsHeight;
-		return canvasHeight;
+		return totalPaddingCanvas + totalPaddingLines + buttonsHeight;
 	}
 
 	getCanvasPercentWidth( percent ) {
 		return ( percent * this.canvasWidth / 100 );
 	}
 
-	createCanvas( width, height, show ) {
+	createCanvas( width, height ) {
 		const canvasEl = document.createElement( 'canvas' );
 		canvasEl.width = width;
 		canvasEl.height = height;
 
-		const ctx = canvasEl.getContext( 'webgl' );
-		ctx.globalAlpha = 1;
-		ctx.globalCompositeOperation = 'lighter';
-
 		let style = '';
 		style += `position:absolute;width:${width}px;height:${height}px;`;
-		style += 'margin:auto; top:0; left:0; right:0; bottom:0;';
-		style += 'border:1px solid rgba(255, 255, 255, 0.5);background-color: red; opacity: 0.999;';
-		style += 'zoom: 0.1;';
-		if ( !show ) style += 'visibility:hidden; z-index: 1000;';
-
+		style += 'margin-left:auto; ;margin-right:auto; top:10%; left:0; right:0; ';
+		style += 'border:1px solid rgba(255, 255, 255, 0.5);background-color: white; opacity: 0.999;z-index: 10;';
+		style += 'zoom: 0.07;';
+		if ( !this.debugPixiCanvas )
+			style += 'visibility:hidden;';
 		canvasEl.style = style;
-
-		document.body.appendChild( canvasEl );
 		this.canvasEl = canvasEl;
-
-		// https://github.com/yomotsu/camera-controls/issues/80
-		// canvasEl.setAttribute( 'tabindex', '0' );
-		// canvasEl.focus();
-
 		return canvasEl;
 	}
 
 	createPixiApp() {
+
+		if ( this.pixiApp )
+		{
+			for ( let i = this.pixiApp.stage.children.length - 1; i >= 0; i-- ) { this.pixiApp.stage.removeChild( this.pixiApp.stage.children[ i ] ); };
+			this.pixiApp.renderer.render( this.pixiApp.stage, { clear: true } );
+			return;
+		}
+
 		this.pixiApp = new PIXI.Application( {
 			view: this.canvasEl,
 			backgroundAlpha: 0,
@@ -607,7 +616,7 @@ class Keyboard {
 
 				// create pixi button
 				const str = key.chars[ charset ].lowerCase || key.chars[ charset ].icon || 'undif';
-				button = this.createPixiButton( width, height, radius, this.buttonColor.getHex(), str );
+				button = this.createPixiButton( width, height, radius, this.buttonColor, str );
 
 				// move the top left button position
 				button.position.x = accumulateX;
@@ -673,7 +682,7 @@ class Keyboard {
 
 	createPixiPanel( width, height, radius, fillColor ) {
 		const panel = new PIXI.Graphics();
-		//panel.lineStyle( { alignment: 0, width: 5, color: 0x2222FF, alpha: 0.2 } );
+		panel.lineStyle( { alignment: 0, width: 20, color: 0xFF2200, alpha: 0.9 } );
 		panel.beginFill( fillColor, 0.8 );
 		panel.drawRoundedRect( 0, 0, width, height, radius );
 		panel.endFill();
@@ -681,7 +690,7 @@ class Keyboard {
 	}
 
 	createPixiButton( width, height, radius, fillColor, str ) {
-		const button = this.createPixiPanel( width, height, radius, fillColor );
+		const button = this.createPixiPanel( width, height, radius, fillColor.getHex() );
 		const text = new PIXI.Text( str, this.buttonFont );
 		text.style.fill = this.buttonFontColor.getHex();
 		button.addChild( text );
@@ -724,12 +733,16 @@ class Keyboard {
 		}
 
 		this.meshKeyboard.visible = false;
+		if ( this.debugThreeCanvas )
+		{
+			this.meshKeyboard.visible = true;
+		}
 		this.mesh = new THREE.Group();
 		this.mesh.add( this.meshKeyboard );
 
-		if ( this.displayBothCanvasAndThreeKeyboard )
+		if ( this.debugThreeCanvas )
 		{
-			this.meshKeyboard.position.x -= 0.3 * this.scale;
+			this.meshKeyboard.position.y -= 0.17 * this.scale;
 		}
 
 		this.context?.raycasterObjects.push( this.meshKeyboard );
