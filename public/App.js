@@ -167,6 +167,7 @@ class App {
 		const material = new THREE.MeshPhongMaterial( {
 			color: 0x999999,
 			side: THREE.DoubleSide,
+			dithering:true
 			//roughness: 0.8,
 			//metalness: 0.2,
 			//bumpScale: 0.0005
@@ -207,8 +208,10 @@ class App {
 		//this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
 		//this.renderer.toneMapping = THREE.LinearToneMapping;
 		//this.renderer.toneMapping = THREE.ReinhardToneMapping;
-		this.renderer.toneMapping = THREE.CineonToneMapping;
-		this.renderer.toneMappingExposure = 2.2;
+		//this.renderer.toneMapping = THREE.CineonToneMapping;
+		//this.renderer.toneMappingExposure = 2.2;
+		this.renderer.colorManagement = true;
+		this.renderer.physicallyCorrectLights = false;
 		this.renderer.outputEncoding = THREE.sRGBEncoding;
 
 		document.body.appendChild( this.renderer.domElement );
