@@ -21,11 +21,11 @@ class Keyboard {
 
 		this.canvasWidth = config.width || 1024 * 8; // max multiplier = 12
 		this.layout = config.layout || 'fr';
-		this.showCanvas = config.showCanvas || false;
 		this.scale = config.scale || 1.5;
 		this.keysScaleZ = 1.2;
-		this.keysDepth = ( config.keysDepth || 0.005 ) * this.keysScaleZ;
-		this.debugTexture = false;
+		this.keysDepth = ( config.keysDepth || 0.003 ) * this.keysScaleZ;
+		this.debugCanvas = config.debugCanvas || false;
+		this.debugTexture = config.debugTexture || false;
 
 		// threejs context i.e scene, camera, renderer, controls
 		this.context = context;
@@ -39,10 +39,12 @@ class Keyboard {
 		this.keyLines = Keymap.get( this.layout )[ 0 ];
 
 		// colors
-		this.backdropColor = new THREE.Color().setHex( 0x333333 ).convertSRGBToLinear();
-		this.buttonColor = new THREE.Color().setHex( 0x333333 ).convertSRGBToLinear();
-		this.buttonFontColor = new THREE.Color().setHex( 0x0f2bff ).convertSRGBToLinear();
-		this.buttonBorderColor = new THREE.Color().setHex( 0x1b1f55 ).convertSRGBToLinear();
+		const mainColor = 0x121eca;
+		const backgroundColor = 0x010101;
+		this.backdropColor = this.colorToThree( backgroundColor );
+		this.buttonColor = this.colorToThree( backgroundColor );
+		this.buttonBorderColor = this.colorToThree( mainColor );
+		this.buttonFontColor = this.colorToThree( mainColor );
 
 		///////////////
 		// pixi
@@ -60,21 +62,19 @@ class Keyboard {
 		this.buttonFont = { fontFamily: 'Verdana', fontSize: this.canvasWidth / 40 };
 
 		this.filters = {
-			/*
 			bloom: {
-				threshold: 0.1,
-				bloomScale: 1,
+				threshold: 0.09,
+				bloomScale: 5,
 				brightness: 1,
-				blur: 25,
-				quality: 25
+				blur: 40,
+				quality: 9
 			}
-			*/
 		};
 
 		this.canvasHeight = this.getCanvasHeight();
 		this.bloomEffect = new AdvancedBloomFilter( this.filters.bloom );
 
-		this.createCanvas( this.canvasWidth, this.canvasHeight, this.showCanvas );
+		this.createCanvas( this.canvasWidth, this.canvasHeight, this.debugCanvas );
 		this.createPixiApp();
 		this.createPixiBackdrop( this.canvasWidth, this.canvasHeight, this.backdropRadius, this.backdropColor.getHex() );
 		this.createPixiButtons();
@@ -99,6 +99,9 @@ class Keyboard {
 		this.panelDepth = 0;
 		this.panelRatio = this.panelHeight / this.panelWidth;
 
+		this.keyboardRadius = 0.001;
+		this.keyboardDepth = 0;
+
 		this.ratioCanvasPanelWidth = this.canvasWidth / this.panelWidth;
 		this.ratioCanvasPanelHeight = this.canvasHeight / this.panelHeight;
 		this.ratioCanvasPanelWidth = Math.round( this.ratioCanvasPanelWidth * 100 ) / 100;
@@ -110,21 +113,29 @@ class Keyboard {
 
 		this.createKeyboardMaterials();
 		this.createKeyboardMesh();
-		this.createThreeButtons();
+		this.createKeyboardButtons();
 
 		this.needsUpdate = true;
 
 		this.showDebugPanel();
 	}
 
+	colorToThree( color ) {
+		return new THREE.Color( color ).convertLinearToSRGB();
+	}
+
+	colorToScreen( color ) {
+		return color.getHex();
+	}
+
 	showDebugPanel() {
 
 		const self = this;
-
 		const itemKeys = this.debugPanel.addFolder( 'Keys' );
 		itemKeys.add( this, 'keysScaleZ' ).min( 0 ).max( 10.0 ).step( 0.001 ).onChange( v => { onChangeKeysPropertie( 'keysScaleZ', v ); } );
-		itemKeys.addColor( { buttonBorderColor: this.buttonBorderColor.convertSRGBToLinear().getHex() }, 'buttonBorderColor' ).onChange( onChangeButtonBorderColor );
-		itemKeys.addColor( { buttonFontColor: this.buttonFontColor.convertSRGBToLinear().getHex() }, 'buttonFontColor' ).onChange( onChangeButtonFontColor );
+		itemKeys.addColor( { buttonColor: this.colorToScreen( this.buttonColor ) }, 'buttonColor' ).onChange( onChangeButtonColor );
+		itemKeys.addColor( { buttonBorderColor: this.colorToScreen( this.buttonBorderColor ) }, 'buttonBorderColor' ).onChange( onChangeButtonBorderColor );
+		itemKeys.addColor( { buttonFontColor: this.colorToScreen( this.buttonFontColor ) }, 'buttonFontColor' ).onChange( onChangeButtonFontColor );
 
 		if ( !self.filters.bloom ) return;
 
@@ -149,7 +160,6 @@ class Keyboard {
 				} );
 				bt.texture.needsUpdate = true;
 			} );
-			self.pixiApp.renderer.render( self.pixiApp.stage, { clear: true } );
 			self.needsUpdate = true;
 		}
 
@@ -161,14 +171,24 @@ class Keyboard {
 		}
 
 		function onChangeButtonBorderColor( value ) {
-			self.buttonBorderColor = value;
-			self.buttonMaterialBorder.color = new THREE.Color().setHex( value ).convertSRGBToLinear();
+			self.buttonBorderColor = new THREE.Color().setHex( value );
+			self.buttonMaterialBorder.color = new THREE.Color().setHex( value );
+			self.needsUpdate = true;
+		}
+
+		function onChangeButtonColor( value ) {
+			console.log( 'onChangeButtonColor', value );
+			self.buttonColor = new THREE.Color().setHex( value );
+			self.threeButtons.map( bt => {
+				bt.pixiEl.fill.color = self.buttonColor.getHex();
+				bt.texture.needsUpdate = true;
+			} );
 			self.needsUpdate = true;
 		}
 
 		function onChangeButtonFontColor( value ) {
 			console.log( 'onChangeButtonFontColor', value );
-			self.buttonFontColor = new THREE.Color().setHex( value ).convertSRGBToLinear();
+			self.buttonFontColor = new THREE.Color().setHex( value );
 			self.threeButtons.map( bt => {
 				bt.pixiEl.text.style.fill = self.buttonFontColor.getHex();
 				bt.texture.needsUpdate = true;
@@ -181,7 +201,7 @@ class Keyboard {
 			const itemTexture = this.debugPanel.addFolder( 'Texture' );
 			itemTexture.add( this.filters.bloom, 'threshold' ).min( 0 ).max( 1.0 ).step( 0.001 ).onChange( v => { onChangeTexture( 'threshold', v ); } );
 			itemTexture.add( this.filters.bloom, 'bloomScale' ).min( 0 ).max( 5 ).step( 0.01 ).onChange( v => { onChangeTexture( 'bloomScale', v ); } );
-			itemTexture.add( this.filters.bloom, 'brightness' ).min( 0 ).max( 5 ).step( 0.01 ).onChange( v => { onChangeTexture( 'brightness', v ); } );
+			//itemTexture.add( this.filters.bloom, 'brightness' ).min( 0 ).max( 5 ).step( 0.01 ).onChange( v => { onChangeTexture( 'brightness', v ); } );
 			itemTexture.add( this.filters.bloom, 'blur' ).min( -20.0 ).max( 100.0 ).step( 1 ).onChange( v => { onChangeTexture( 'blur', v ); } );
 			itemTexture.add( this.filters.bloom, 'quality' ).min( -1 ).max( 50 ).step( 0.1 ).onChange( v => { onChangeTexture( 'quality', v ); } );
 			itemTexture.open();
@@ -261,7 +281,7 @@ class Keyboard {
 		console.log( 'onMove' );
 	}
 
-	createThreeButtons() {
+	createKeyboardButtons() {
 		// console.log( 'createThreeButtons', this.pixiButtons.lengh );
 
 		this.onPointerMove = this.onPointerMove.bind( this );
@@ -278,36 +298,38 @@ class Keyboard {
 
 		let texture;
 		//texture = this.canvasTextureKeys.clone();
+		//texture.encoding = THREE.sRGBEncoding;
 
 		let material = new THREE.MeshBasicMaterial( {
 			map: texture,
 			transparent: true,
-			opacity: 0.7,
-			alphaTest: 0.1,
+			opacity: 0.9999,
+			alphaTest: 1,
 			wireframe: false
 		} );
 
 		if ( material.map )
 		{
-			material.opacity = 0.999;
-
-			// not good
 			let ratio = texture.image.width / texture.image.height;
 			let scale1 = this.scale * 0.715; // ?????
 			let scale2 = scale1 * ratio;
 
+			material.opacity = 0.999;
 			material.map.wrapS = THREE.RepeatWrapping;
 			material.map.wrapT = THREE.RepeatWrapping;
 			material.map.repeat.set( scale1, scale2 );
 			material.map.offset.x = 0;
 			material.map.offset.y = 0.02;
-		} else
-		{
-			material.color = new THREE.Color( 0x000000 );
 		}
 
-		const geometry = this.createButtonExtrudedGeometry( 0, 0, this.panelWidth, this.panelHeight, 0.01, 0.005 );
-		geometry.center();
+		let geometry;
+		if ( this.keyboardDepth > 0 ) {
+			geometry = this.createButtonExtrudedGeometry( 0, 0, this.panelWidth, this.panelHeight, this.keyboardRadius, this.keyboardDepth );
+			geometry.center();
+		} else
+		{
+			geometry = new THREE.PlaneGeometry( this.panelWidth, this.panelHeight );
+		}
 
 		const keyboardPlane = new THREE.Mesh( geometry, material );
 		keyboardPlane.position.z = -0.002;
@@ -341,20 +363,18 @@ class Keyboard {
 			y = - y - ( height / 2 );			// inverse y
 			y -= height / 2;					// adjust center
 
-			let texture;
-			texture = this.canvasTextureKeys.clone();
+			let texture = this.canvasTextureKeys.clone();
 
 			const matFront = new THREE.MeshBasicMaterial( {
 				map: texture,
-				transparent: false,
-				opacity: 0.999,
-				alphaTest: 0.6,
+				transparent: true,
+				opacity: 0.99,
+				alphaTest: 0.16,
 				wireframe: false
 			} );
 
 			if ( matFront.map )
 			{
-
 				let ratio = texture.image.width / texture.image.height;
 				let scale = 1.5 / this.scale; // ?????
 
@@ -366,7 +386,7 @@ class Keyboard {
 				matFront.map.offset.y = this.pixelToPercentY( bt.position.y );
 			} else
 			{
-				matFront.color = new THREE.Color( 0x222222 );
+				matFront.color = new THREE.Color( 0x222222 ).getHex();
 			}
 
 			const matHover = new THREE.MeshBasicMaterial( { color: hoverColor } );
@@ -387,7 +407,7 @@ class Keyboard {
 
 			keyMesh.position.x = x;
 			keyMesh.position.y = y;
-			//keyMesh.position.z = -this.textureSpacerZ;
+			keyMesh.position.z = -this.textureSpacerZ;
 			this.assignMaterial( geometry );
 
 			this.threeButtons.push( keyMesh );
@@ -696,16 +716,22 @@ class Keyboard {
 				geometry = Object3D.roundedBox1( this.panelWidth, this.panelHeight, 0.01, 0.005, 1 );
 			}
 
-			this.meshKeyboard = new THREE.Mesh( geometry, [ materialBlue, materialBlue, materialBlue, materialBlue, this.material, materialBlack ] );
+			this.meshKeyboard = new THREE.Mesh( geometry, [ materialBlue, materialBlue, materialBlue, materialBlue, this.keyboardMaterial, materialBlack ] );
 		} else
 		{
 			geometry = new THREE.PlaneGeometry( this.panelWidth, this.panelHeight );
-			this.meshKeyboard = new THREE.Mesh( geometry, this.material );
+			this.meshKeyboard = new THREE.Mesh( geometry, this.keyboardMaterial );
 		}
 
+		this.meshKeyboard.visible = false;
 		this.mesh = new THREE.Group();
 		this.mesh.add( this.meshKeyboard );
-		if ( this.displayBothCanvasAndThreeKeyboard ) this.meshKeyboard.position.x -= 0.3 * this.scale;
+
+		if ( this.displayBothCanvasAndThreeKeyboard )
+		{
+			this.meshKeyboard.position.x -= 0.3 * this.scale;
+		}
+
 		this.context?.raycasterObjects.push( this.meshKeyboard );
 	}
 
@@ -713,17 +739,13 @@ class Keyboard {
 		const material = THREE.MeshBasicMaterial;
 
 		// material for main plane
-		this.material = new material( this.materialPixiKeyboardConfig );
+		this.keyboardMaterial = new material( this.materialPixiKeyboardConfig );
 		this.canvasTexture = new THREE.CanvasTexture( this.canvasEl );
-		this.canvasTexture.wrapS = THREE.ClampToEdgeWrapping;
-		this.canvasTexture.wrapT = THREE.ClampToEdgeWrapping;
-		this.canvasTexture.anisotropy = 16;
-		this.material.map = this.canvasTexture;
+		this.keyboardMaterial.map = this.canvasTexture;
 
 		// material for keys
-		this.materialKeys = new material( this.materialPixiKeyboardConfig );
+		this.keysMaterial = new material( this.materialPixiKeyboardConfig );
 		this.canvasTextureKeys = new THREE.CanvasTexture( this.canvasEl );
-		this.canvasTextureKeys.anisotropy = 16;
 	}
 
 	update() {
