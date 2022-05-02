@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import * as PIXI from 'pixi.js';
 import { AdvancedBloomFilter } from '@pixi/filter-advanced-bloom';
+import { ColorOverlayFilter } from '@pixi/filter-color-overlay';
 import { Keymap } from '../../utils/Keymap.js';
 import { Object3D } from '../../three/Object3D.js';
 import '../../pixi/center.js';
@@ -26,8 +27,12 @@ class Keyboard {
 		this.keysDepth = ( config.keysDepth || 0.003 ) * this.keysScaleZ;
 		this.debugPixiCanvas = config.debugPixiCanvas || false;
 		this.debugTexture = config.debugTexture || false;
-		this.debugThreeCanvas = false;
+		this.debugThreeCanvas = config.debugThreeCanvas || false;
 		this.debugThreeTexture = config.debugThreeTexture || false;
+
+		// display top/left/right/bottom/center of keys
+		// in the pixijs canvas texture
+		this.debugPosition = config.debugPosition || false;
 
 		// threejs context i.e scene, camera, renderer, controls
 		this.context = context;
@@ -40,12 +45,17 @@ class Keyboard {
 		// colors
 		const mainColor = 0x121eca;
 		const buttonColor = 0x010101;
+		const buttonColorHover = 0x020202;
 		const backdropColor = 0x000000;
 
 		this.backdropColor = this.colorToThree( backdropColor );
 		this.buttonColor = this.colorToThree( buttonColor );
+		this.buttonHoverColor = this.colorToThree( buttonColorHover );
 		this.buttonBorderColor = this.colorToThree( mainColor );
 		this.buttonFontColor = this.colorToThree( mainColor );
+
+		console.log( this.colorToScreen( this.buttonColor ) );
+		console.log( this.colorToScreen( this.buttonHoverColor ) );
 
 		///////////////
 		// pixi
@@ -70,11 +80,16 @@ class Keyboard {
 				brightness: 1,
 				blur: 40,
 				quality: 9
+			},
+			colorOverlay: {
+				color: this.colorToScreen( this.buttonColor )
 			}
 		};
 
 
+
 		this.bloomEffect = new AdvancedBloomFilter( this.filters.bloom );
+		this.colorOverlay = new ColorOverlayFilter( this.filters.colorOverlay );
 
 		this.canvasEl = this.createCanvas( this.canvasWidth, this.canvasHeight );
 		document.body.appendChild( this.canvasEl );
@@ -148,9 +163,9 @@ class Keyboard {
 		itemKeys.addColor( { buttonBorderColor: this.colorToScreen( this.buttonBorderColor ) }, 'buttonBorderColor' ).onChange( onChangeButtonBorderColor );
 		itemKeys.addColor( { buttonFontColor: this.colorToScreen( this.buttonFontColor ) }, 'buttonFontColor' ).onChange( onChangeButtonFontColor );
 
-		if ( !self.filters.bloom ) return;
-
 		const filterBloomAttributes = Object.keys( self.filters.bloom );
+		//const colorOverlayAttributes = Object.keys( self.filters.colorOverlay );
+
 		let pixiBtInstance;
 
 		function onChangeTexture( attrName, value ) {
@@ -257,10 +272,22 @@ class Keyboard {
 		const button = threeEl.pixiEl;
 		if ( !button ) return;
 		this.context.renderer.domElement.style.cursor = 'pointer';
+
 		button.filters = [];
-		if ( this.filters?.bloom )
+		button.textContainer.filters = [];
+
+		if ( this.filters.bloom )
 		{
 			button.filters.push( new AdvancedBloomFilter( this.filters.bloom ) );
+			threeEl.texture.needsUpdate = true;
+			this.needsUpdate = true;
+		}
+
+		if ( this.filters.colorOverlay )
+		{
+			const f = new ColorOverlayFilter();
+			f.color = this.colorToScreen( this.buttonHoverColor );
+			button.textContainer.filters.push( f );
 			threeEl.texture.needsUpdate = true;
 			this.needsUpdate = true;
 		}
@@ -274,6 +301,7 @@ class Keyboard {
 		const button = threeEl.pixiEl;
 		if ( !button ) return;
 		button.filters = [];
+		button.textContainer.filters = [];
 		threeEl.texture.needsUpdate = true;
 		this.needsUpdate = true;
 	}
@@ -619,6 +647,7 @@ class Keyboard {
 				if ( this.debugTexture )
 				{
 					button.filters = [ this.bloomEffect ];
+					button.filters = [ this.colorOverlay ];
 					//threeEl.texture.needsUpdate = true;
 					//this.needsUpdate = true;
 				}
@@ -627,7 +656,8 @@ class Keyboard {
 				this.backdrop.addChild( button );
 				this.pixiButtons.push( button );
 
-				//this.buttonPositionHelper( button );
+				if ( this.debugPosition )
+					this.buttonPositionHelper( button );
 
 				firstKey = false;
 				accumulateX += width + this.buttonMargin;
@@ -684,12 +714,19 @@ class Keyboard {
 
 	createPixiButton( width, height, radius, fillColor, str ) {
 		const button = this.createPixiPanel( width, height, radius, fillColor.getHex() );
+
+		const textContainer = this.createPixiPanel( width, height, radius, this.filters.colorOverlay.color );
+		button.addChild( textContainer );
+
 		const text = new PIXI.Text( str, this.buttonFont );
 		text.style.fill = this.buttonFontColor.getHex();
-		button.addChild( text );
-		button.text = text;
+		textContainer.addChild( text );
 		text.anchor.set( 0.5 );
 		text.centerXY();
+
+		button.text = text;
+		button.textContainer = textContainer;
+
 		return button;
 	}
 
@@ -760,7 +797,6 @@ class Keyboard {
 		this.canvasTexture.needsUpdate = true;
 		this.needsUpdate = false;
 
-		console.log( 'updating' );
 		// this will update pixi app
 		this.pixiApp.renderer.render( this.pixiApp.stage, { clear: true } );
 		return true;
