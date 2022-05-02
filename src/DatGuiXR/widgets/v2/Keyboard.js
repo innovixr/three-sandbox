@@ -554,7 +554,7 @@ class Keyboard {
 
 		if ( this.pixiApp )
 		{
-			for ( let i = this.pixiApp.stage.children.length - 1; i >= 0; i-- ) { this.pixiApp.stage.removeChild( this.pixiApp.stage.children[ i ] ); };
+			for ( let i = this.pixiApp.stage.children.length - 1; i >= 0; i-- ) { this.pixiApp.stage.removeChild( this.pixiApp.stage.children[ i ] ); }
 			this.pixiApp.renderer.render( this.pixiApp.stage, { clear: true } );
 			return;
 		}
