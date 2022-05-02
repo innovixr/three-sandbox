@@ -395,7 +395,7 @@ class Keyboard {
 				let ratio = texture.image.width / texture.image.height;
 				let scale = this.scale * ratio;
 
-				console.log( 'scale', scale );
+				//console.log( 'scale', scale );
 				matFront.map.wrapS = THREE.RepeatWrapping;
 				matFront.map.wrapT = THREE.RepeatWrapping;
 
@@ -452,14 +452,15 @@ class Keyboard {
 
 	pixelToPercentX( x ) {
 		return (
-			( ( ( x * 100 ) / this.canvasWidth ) / 100 ) + 0.0035
+			//( ( ( x * 100 ) / this.canvasWidth ) / 100 ) + 0.0035
+			( ( ( x * 100 ) / this.canvasWidth ) / 100 ) + ( 0.004375 * this.scale )
 		);
 	}
 
 	pixelToPercentY( y ) {
 		return (
 			//( ( ( y * 100 ) / this.canvasHeight ) / 100 )
-			( ( ( ( this.canvasHeight - y - ( this.backdropRadius * 4 ) ) * 100 ) / this.canvasHeight ) / 100 ) - 0.0148
+			( ( ( ( this.canvasHeight - y - ( this.backdropRadius * 4 ) ) * 100 ) / this.canvasHeight ) / 100 ) - ( 0.0185 * this.scale )
 		);
 	}
 
