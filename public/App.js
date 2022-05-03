@@ -27,7 +27,7 @@ class App {
 		this.addLights();
 		this.addRoom();
 		//this.addMouseHandler();
-		this.addMouseRaycaster();
+		//this.addMouseRaycaster();
 		//this.addOrbitControl();
 		this.addCameraControl();
 
