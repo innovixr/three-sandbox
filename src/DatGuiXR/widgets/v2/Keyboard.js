@@ -20,10 +20,10 @@ class Keyboard {
 		config = config || {};
 		this.config = config;
 
-		this.canvasWidth = config.width || 1024 * 8; // max multiplier = 12
+		this.canvasWidth = config.width || 1024 * 2; // max multiplier = 12
 		this.layout = config.layout || 'fr';
 		this.scale = config.scale || 0.8; // 1.5 for webxr
-		this.keysScaleZ = 1.2;
+		this.keysScaleZ = 0.3;
 		this.keysDepth = ( config.keysDepth || 0.003 ) * this.keysScaleZ;
 		this.debugPixiCanvas = config.debugPixiCanvas || false;
 		this.debugTexture = config.debugTexture || false;
@@ -43,16 +43,11 @@ class Keyboard {
 		this.keyLines = Keymap.get( this.layout )[ 0 ];
 
 		// colors
-		const mainColor = 0x121eca;
-		const buttonColor = 0x010101;
-		const buttonColorHover = 0x020202;
-		const backdropColor = 0x000000;
-
-		this.backdropColor = this.colorToThree( backdropColor );
-		this.buttonColor = this.colorToThree( buttonColor );
-		this.buttonHoverColor = this.colorToThree( buttonColorHover );
-		this.buttonBorderColor = this.colorToThree( mainColor );
-		this.buttonFontColor = this.colorToThree( mainColor );
+		this.backdropColor = this.colorToThree( 0x333333 );
+		this.buttonColor = this.colorToThree( 0x444444 );
+		this.buttonHoverColor = this.colorToThree( 0x020202 );
+		this.buttonBorderColor = this.colorToThree( 0x0a08a6 );
+		this.buttonFontColor = this.colorToThree( 0xa8b2ff );
 
 		console.log( this.colorToScreen( this.buttonColor ) );
 		console.log( this.colorToScreen( this.buttonHoverColor ) );
@@ -75,11 +70,11 @@ class Keyboard {
 
 		this.filters = {
 			bloom: {
-				threshold: 0.09,
-				bloomScale: 1,
-				brightness: 1,
-				blur: 40,
-				quality: 9
+				threshold: 0.28,
+				bloomScale: 1.5,
+				//brightness: 1.4,
+				blur: 5.4,
+				quality: 5
 			},
 			colorOverlay: {
 				color: this.colorToScreen( this.buttonColor )
@@ -105,8 +100,8 @@ class Keyboard {
 		// keyboard pixi materials
 		this.materialPixiKeyboardConfig = {
 			transparent: false,
-			opacity: 0.999,
-			alphaTest: 0.1,
+			//opacity: 0.999,
+			//alphaTest: 0.1,
 			wireframe: false,
 			visible: true
 		};
@@ -127,7 +122,7 @@ class Keyboard {
 		this.textureSpacerZ = -0.0001;
 		//this.textureSpacerZ = -0.05;
 
-		this.buttonMaterialBorder = new THREE.MeshBasicMaterial( { color: this.buttonBorderColor.convertSRGBToLinear() } );
+		this.buttonMaterialBorder = new THREE.MeshBasicMaterial( { color: this.colorToThree( this.buttonBorderColor ) } );
 
 		this.drawThreeElements();
 		this.showDebugPanel();
@@ -147,7 +142,7 @@ class Keyboard {
 	}
 
 	colorToThree( color ) {
-		return new THREE.Color( color ).convertLinearToSRGB();
+		return new THREE.Color( color );
 	}
 
 	colorToScreen( color ) {
@@ -230,8 +225,8 @@ class Keyboard {
 			itemTexture.add( this.filters.bloom, 'threshold' ).min( 0 ).max( 1.0 ).step( 0.001 ).onChange( v => { onChangeTexture( 'threshold', v ); } );
 			itemTexture.add( this.filters.bloom, 'bloomScale' ).min( 0 ).max( 5 ).step( 0.01 ).onChange( v => { onChangeTexture( 'bloomScale', v ); } );
 			//itemTexture.add( this.filters.bloom, 'brightness' ).min( 0 ).max( 5 ).step( 0.01 ).onChange( v => { onChangeTexture( 'brightness', v ); } );
-			itemTexture.add( this.filters.bloom, 'blur' ).min( -20.0 ).max( 100.0 ).step( 1 ).onChange( v => { onChangeTexture( 'blur', v ); } );
-			itemTexture.add( this.filters.bloom, 'quality' ).min( -1 ).max( 50 ).step( 0.1 ).onChange( v => { onChangeTexture( 'quality', v ); } );
+			itemTexture.add( this.filters.bloom, 'blur' ).min( 0 ).max( 2.0 ).step( 0.001 ).onChange( v => { onChangeTexture( 'blur', v ); } );
+			itemTexture.add( this.filters.bloom, 'quality' ).min( 0 ).max( 20 ).step( 0.01 ).onChange( v => { onChangeTexture( 'quality', v ); } );
 			itemTexture.open();
 		}
 	}
@@ -283,6 +278,7 @@ class Keyboard {
 			this.needsUpdate = true;
 		}
 
+		/*
 		if ( this.filters.colorOverlay )
 		{
 			const f = new ColorOverlayFilter();
@@ -291,6 +287,7 @@ class Keyboard {
 			threeEl.texture.needsUpdate = true;
 			this.needsUpdate = true;
 		}
+		*/
 	}
 
 	onPointerLeave( threeEl ) {
@@ -353,8 +350,8 @@ class Keyboard {
 
 		if ( material.map )
 		{
-			//material.transparent = true;
-			//material.opacity = 0.8;
+			material.transparent = true;
+			material.opacity = 0.8;
 		}
 
 		let geometry;
@@ -368,7 +365,7 @@ class Keyboard {
 		}
 
 		const keyboardPlane = new THREE.Mesh( geometry, material );
-		keyboardPlane.position.z = -0.001;
+		//keyboardPlane.position.z = -0.001;
 		keyboardPlane.name = 'plane';
 
 		keyboardPlane.addEventListener( 'pointerdown', this.onPointerDown );
@@ -413,8 +410,8 @@ class Keyboard {
 			const matFront = new THREE.MeshBasicMaterial( {
 				map: texture,
 				transparent: false,
-				opacity: 1,
-				alphaTest: 0.01,
+				//opacity: 0.88,
+				//alphaTest: 0.4,
 				wireframe: false
 			} );
 
@@ -570,9 +567,13 @@ class Keyboard {
 		style += `position:absolute;width:${width}px;height:${height}px;`;
 		style += 'margin-left:auto; ;margin-right:auto; top:10%; left:0; right:0; ';
 		style += 'border:1px solid rgba(255, 255, 255, 0.5);background-color: white; opacity: 0.999;z-index: 10;';
-		style += 'zoom: 0.07;';
 		if ( !this.debugPixiCanvas )
+		{
 			style += 'visibility:hidden;';
+		} else
+		{
+			style += 'zoom: ' + 0.07 * ( this.scale * 5 );
+		}
 		canvasEl.style = style;
 		this.canvasEl = canvasEl;
 		return canvasEl;
@@ -591,7 +592,7 @@ class Keyboard {
 			view: this.canvasEl,
 			backgroundAlpha: 0,
 			autoStart:false,
-			backgroundColor: 0x000000,
+			//backgroundColor: 0xFFFFFF,
 			width: this.canvasWidth,
 			height: this.canvasHeight,
 			//legacy: true,
@@ -679,9 +680,9 @@ class Keyboard {
 		topLeft.endFill();
 
 		// center cross
-		const size = 200;
+		const size = 60;
 		const x = 32; // size multiplier
-		const crossOpacity = 0.1;
+		const crossOpacity = 0.5;
 
 		const centerH = new PIXI.Graphics();
 		centerH.beginFill( crossColor, crossOpacity );
@@ -745,8 +746,8 @@ class Keyboard {
 
 		if ( this.panelDepth )
 		{
-			const materialBlack = new THREE.MeshPhongMaterial( { transparent: false, opacity: 0.999, color: 0x111111 } );
-			const materialBlue = new THREE.MeshPhongMaterial( { transparent: false, opacity: 0.999, color: 'darkblue' } );
+			const materialBlack = new THREE.MeshPhongMaterial( { transparent: false, /*opacity: 0.999, */color: 0x111111 } );
+			const materialBlue = new THREE.MeshPhongMaterial( { transparent: false, /*opacity: 0.999, */color: 'darkblue' } );
 			if ( this.shapeType === 'box' )
 			{
 				geometry = new THREE.BoxGeometry( this.panelWidth, this.panelHeight, 0.01 );
@@ -783,8 +784,13 @@ class Keyboard {
 
 		// material for main plane
 		this.canvasTexture = new THREE.CanvasTexture( this.canvasEl );
+
+		// colors are perfect, but it's LAAGGGINGG
+		this.canvasTexture.encoding = THREE.sRGBEncoding;
+
 		this.keyboardMaterial = new material( this.materialPixiKeyboardConfig );
 		this.keyboardMaterial.map = this.canvasTexture;
+		//this.keyboardMaterial.map.encoding = THREE.sRGBEncoding;
 	}
 
 	update() {
