@@ -92,12 +92,12 @@ class App {
 
 		let object3d = new THREE.AmbientLight( new THREE.Color( 0x040404 ), 1 );
 		object3d.name = 'Ambient light';
-		container.add( object3d );
+		//container.add( object3d );
 
-		//const red = new THREE.PointLight( new THREE.Color( 0xAA2200 ), 0.1, 4, 0.5 );
-		//red.position.set( -3, 2, -3 );
+		const red = new THREE.PointLight( new THREE.Color( 0xAA2200 ), 0.1, 4, 0.5 );
+		red.position.set( -3, 2, -3 );
 		//red.castShadow = true;
-		//container.add( red );
+		container.add( red );
 
 		const blue = new THREE.PointLight( new THREE.Color( 0x1133FF ), 0.3, 10, 0.5 );
 		blue.position.set( 3, 2, -3 );
@@ -210,8 +210,8 @@ class App {
 		//this.renderer.toneMapping = THREE.ReinhardToneMapping;
 		//this.renderer.toneMapping = THREE.CineonToneMapping;
 		//this.renderer.toneMappingExposure = 2.2;
-		this.renderer.colorManagement = true;
-		this.renderer.physicallyCorrectLights = false;
+		//this.renderer.colorManagement = true;
+		//this.renderer.physicallyCorrectLights = false;
 		this.renderer.outputEncoding = THREE.sRGBEncoding;
 
 		document.body.appendChild( this.renderer.domElement );
