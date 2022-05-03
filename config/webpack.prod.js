@@ -8,7 +8,7 @@ const TEMPLATE_PATH = `../${PUBLIC_PATH}/html`;
 
 // data in format [ JS file name => demo title in public pages ]
 let pages = [
-	[ 'kit_basic_setup', 'Basic setup' ],
+	//[ 'kit_basic_setup', 'Basic setup' ],
 	[ 'exp_basic_setup', 'Basic setup' ],
 	[ 'three_webgl', 'THREE WebGL test' ],
 	[ 'three_htmlmesh', 'THREE.HTMLMesh test' ],
@@ -18,7 +18,7 @@ let pages = [
 
 const keys = [
 	'exp',
-	'kit',
+	//'kit',
 	'datguixr',
 	'three',
 	'pixi'

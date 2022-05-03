@@ -390,6 +390,7 @@ class App {
 		this.camera.aspect = this.screenWidth / this.screenHeight;
 		this.camera.updateProjectionMatrix();
 		this.renderer.setSize( this.screenWidth, this.screenHeight );
+		this.renderer.render( this.scene, this.camera );
 	}
 
 	onWindowResizeEvent() {
