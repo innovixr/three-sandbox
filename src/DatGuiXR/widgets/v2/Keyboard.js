@@ -20,7 +20,7 @@ class Keyboard {
 		config = config || {};
 		this.config = config;
 
-		this.canvasWidth = config.width || 1024 * 2; // max multiplier = 12
+		this.canvasWidth = config.width || 1024 * 2.5; // max multiplier = 12
 		this.layout = config.layout || 'fr';
 		this.scale = config.scale || 0.8; // 1.5 for webxr
 		this.keysScaleZ = 0.3;
@@ -247,7 +247,10 @@ class Keyboard {
 		if ( ev.target.name === 'plane' ) return;
 		console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
 		this.selectedKeyMesh = ev.target;
+
+		// scale key depth
 		new TWEEN.Tween( this.selectedKeyMesh.scale ).to( { z: 0.4 }, 50 ).start();
+
 		this.needsUpdate = true;
 	}
 
@@ -255,8 +258,13 @@ class Keyboard {
 		if ( ev.target.name === 'plane' ) return;
 		if ( !this.selectedKeyMesh ) return;
 		console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
+
+		// restore key depth
 		new TWEEN.Tween( this.selectedKeyMesh.scale ).to( { z: 1 }, 50 ).start();
+
+		// reset selected mysg
 		this.selectedKeyMesh = null;
+
 		this.needsUpdate = true;
 	}
 
@@ -264,7 +272,10 @@ class Keyboard {
 		if ( this.selectedKeyMesh ) return;
 		if ( threeEl.name === 'plane' ) return;
 		console.log( `Keyboard.js: ${Date.now()} pointerenter ${threeEl.name} `, threeEl.pixiEl );
+
 		const button = threeEl.pixiEl;
+		//const pixiBackground = this.pixiApp.stage.children[ 0 ];
+
 		if ( !button ) return;
 		this.context.renderer.domElement.style.cursor = 'pointer';
 
@@ -273,6 +284,17 @@ class Keyboard {
 
 		if ( this.filters.bloom )
 		{
+			// @TODO: have a look after optimizing same texture with different offset/repeat
+			/*
+			pixiBackground.filters = [];
+			pixiBackground.filters.push( new AdvancedBloomFilter( {
+				threshold: 0.28,
+				bloomScale: 1,
+				//brightness: 1.4,
+				blur: 2,
+				quality: 5
+			} ) );
+			*/
 			button.filters.push( new AdvancedBloomFilter( this.filters.bloom ) );
 			threeEl.texture.needsUpdate = true;
 			this.needsUpdate = true;
@@ -296,7 +318,9 @@ class Keyboard {
 		console.log( `Keyboard.js: ${Date.now()} pointerleave ${threeEl.name} ` );
 		this.context.renderer.domElement.style.cursor = 'auto';
 		const button = threeEl.pixiEl;
+		const pixiBackground = this.pixiApp.stage.children[ 0 ];
 		if ( !button ) return;
+		pixiBackground.filters = [];
 		button.filters = [];
 		button.textContainer.filters = [];
 		threeEl.texture.needsUpdate = true;
@@ -706,7 +730,8 @@ class Keyboard {
 
 	createPixiPanel( width, height, radius, fillColor ) {
 		const panel = new PIXI.Graphics();
-		//panel.lineStyle( { alignment: 0, width: 3, color: this.buttonBorderColor.getHex(), alpha: 0.9 } );
+		//panel.lineStyle( { alignment: 0, width: 5, color: this.buttonBorderColor.getHex(), alpha: 0.9 } );
+		panel.lineStyle( { alignment: 0, width: 5, color: new THREE.Color( 0xbe0aff ).getHex(), alpha: 0.9 } );
 		panel.beginFill( fillColor, 0.8 );
 		panel.drawRoundedRect( 0, 0, width, height, radius );
 		panel.endFill();
