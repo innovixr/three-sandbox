@@ -23,8 +23,10 @@ class Keyboard {
 		this.canvasWidth = config.width || 1024 * 2.5; // max multiplier = 12
 		this.layout = config.layout || 'fr';
 		this.scale = config.scale || 0.8; // 1.5 for webxr
-		this.keysScaleZ = 0.3;
+		this.keysScaleZ = 2;
 		this.keysDepth = ( config.keysDepth || 0.003 ) * this.keysScaleZ;
+		this.keysAnimationDuration = config.keysAnimationDuration || 20;
+
 		this.debugPixiCanvas = config.debugPixiCanvas || false;
 		this.debugTexture = config.debugTexture || false;
 		this.debugThreeCanvas = config.debugThreeCanvas || false;
@@ -48,9 +50,6 @@ class Keyboard {
 		this.buttonHoverColor = this.colorToThree( 0x020202 );
 		this.buttonBorderColor = this.colorToThree( 0x0a08a6 );
 		this.buttonFontColor = this.colorToThree( 0xa8b2ff );
-
-		console.log( this.colorToScreen( this.buttonColor ) );
-		console.log( this.colorToScreen( this.buttonHoverColor ) );
 
 		///////////////
 		// pixi
@@ -232,51 +231,82 @@ class Keyboard {
 	}
 
 	onPointerMove( ev ) {
-		//console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
+		if ( this.isPointerDown )
+		{
+			console.log( `Keyboard.js: ${ev.type} ${ev.target.name} aborted because of isPointerDown = true ` );
+			return;
+		}
+
+		console.log( `Keyboard.js: ${ev.type} ${ev.target.name} ` );
 
 		if ( this.movedOn != ev.target )
 		{
-
-			if ( this.movedOn ) this.onPointerLeave( this.movedOn );
+			if ( this.movedOn )
+			{
+				console.log( `Keyboard.js: leaving ${this.movedOn.name} ` );
+				this.onPointerLeave( this.movedOn );
+			}
 			this.movedOn = ev.target;
 			this.onPointerEnter( this.movedOn );
 		}
 	}
 
-	onPointerDown( ev ) {
-		if ( ev.target.name === 'plane' ) return;
-		console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
-		this.selectedKeyMesh = ev.target;
+	onKeyPress( mesh ) {
+		this.selectedKeyMesh = mesh;
 
 		// scale key depth
-		new TWEEN.Tween( this.selectedKeyMesh.scale ).to( { z: 0.4 }, 50 ).start();
+		new TWEEN
+			.Tween( mesh.scale )
+			.to( { z: 0.4 }, this.keysAnimationDuration )
+			.start();
+	}
 
-		this.needsUpdate = true;
+	onKeyRelease( mesh ) {
+
+		new TWEEN
+			.Tween( mesh.scale )
+			.to( { z: 1 }, this.keysAnimationDuration )
+			.onComplete( () => {
+				this.selectedKeyMesh = null;
+			} )
+			.start();
+
+	}
+
+	onPointerDown( ev ) {
+		this.isPointerDown = true;
+		if ( ev.target.name === 'plane' ) return;
+		console.log( `Keyboard.js: ${ev.type} ${ev.target.name} ` );
+		this.onKeyPress( ev.target );
 	}
 
 	onPointerUp( ev ) {
-		if ( ev.target.name === 'plane' ) return;
-		if ( !this.selectedKeyMesh ) return;
-		console.log( `Keyboard.js: ${Date.now()} ${ev.type} ${ev.target.name} ` );
-
-		// restore key depth
-		new TWEEN.Tween( this.selectedKeyMesh.scale ).to( { z: 1 }, 50 ).start();
-
-		// reset selected mysg
-		this.selectedKeyMesh = null;
-
-		this.needsUpdate = true;
+		this.isPointerDown = false;
+		this.onKeyRelease( ev.target );
 	}
 
 	onPointerEnter( threeEl ) {
-		if ( this.selectedKeyMesh ) return;
-		if ( threeEl.name === 'plane' ) return;
-		console.log( `Keyboard.js: ${Date.now()} pointerenter ${threeEl.name} `, threeEl.pixiEl );
+		if ( this.selectedKeyMesh )
+		{
+			console.warn( `Keyboard.js: pointerenter ${threeEl.name} `, 'aborted because there is a key selected' );
+			return;
+		}
+		if ( threeEl.name === 'plane' )
+		{
+			console.warn( `Keyboard.js: pointerenter ${threeEl.name} `, 'aborted because it append on the keyboard' );
+			return;
+		}
 
 		const button = threeEl.pixiEl;
 		//const pixiBackground = this.pixiApp.stage.children[ 0 ];
 
-		if ( !button ) return;
+		if ( !button )
+		{
+			console.warn( `Keyboard.js: pointerenter ${threeEl.name} `, 'aborted because no button' );
+			return;
+		}
+
+		console.log( `Keyboard.js: pointerenter ${threeEl.name} ` );
 		this.context.renderer.domElement.style.cursor = 'pointer';
 
 		button.filters = [];
@@ -313,13 +343,29 @@ class Keyboard {
 	}
 
 	onPointerLeave( threeEl ) {
-		if ( this.selectedKeyMesh ) return;
-		if ( threeEl.name === 'plane' ) return;
+		/*
+		if ( this.selectedKeyMesh )
+		{
+			console.warn( `Keyboard.js: ${Date.now()} pointerleave ${threeEl.name} `, 'aborted because there is a key selected' );
+			return;
+		}
+		*/
+		if ( threeEl.name === 'plane' )
+		{
+			console.warn( `Keyboard.js: ${Date.now()} pointerleave ${threeEl.name} `, 'aborted because it append on the keyboard' );
+			return;
+		}
+
 		console.log( `Keyboard.js: ${Date.now()} pointerleave ${threeEl.name} ` );
+
 		this.context.renderer.domElement.style.cursor = 'auto';
 		const button = threeEl.pixiEl;
 		const pixiBackground = this.pixiApp.stage.children[ 0 ];
-		if ( !button ) return;
+		if ( !button )
+		{
+			console.warn( `Keyboard.js: ${Date.now()} pointerleave ${threeEl.name} `, 'aborted because no button' );
+			return;
+		}
 		pixiBackground.filters = [];
 		button.filters = [];
 		button.textContainer.filters = [];
@@ -823,6 +869,8 @@ class Keyboard {
 		this.needsUpdate = this.needsUpdate || TWEEN.update();
 
 		if ( !this.needsUpdate ) return false;
+
+		console.log( 'updating' );
 
 		// this will update the texture threejs side
 		this.canvasTexture.needsUpdate = true;

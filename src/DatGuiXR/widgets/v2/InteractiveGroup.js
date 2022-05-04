@@ -63,15 +63,19 @@ class InteractiveGroup extends Group {
 		// TODO: Dispatch pointerevents too
 
 		const events = {
-			'move': 'mousemove',
-			'select': 'click',
-			'selectstart': 'mousedown',
-			'selectend': 'mouseup'
+			'move': 'pointermove',
+			//'select': 'click',
+			'selectstart': 'pointerdown',
+			'selectend': 'pointereup'
 		};
 
 		function onXRControllerEvent( event ) {
 
+			if ( !events[ event.type ] ) return;
+
 			const controller = event.target;
+
+			//console.log( 'onXRControllerEvent' );
 
 			tempMatrix.identity().extractRotation( controller.matrixWorld );
 
@@ -79,6 +83,8 @@ class InteractiveGroup extends Group {
 			raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( tempMatrix );
 
 			const intersections = raycaster.intersectObjects( scope.children, false );
+
+			//console.log( 'intersections', intersections );
 
 			if ( intersections.length > 0 ) {
 
@@ -107,6 +113,8 @@ class InteractiveGroup extends Group {
 		controller2.addEventListener( 'select', onXRControllerEvent );
 		controller2.addEventListener( 'selectstart', onXRControllerEvent );
 		controller2.addEventListener( 'selectend', onXRControllerEvent );
+
+		console.log( 'controllers initialized' );
 
 	}
 
