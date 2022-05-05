@@ -12,45 +12,45 @@ console.clear();
 
 const lines = [
 	[
-		{ width: 0.1, chars: 'A' },
-		{ width: 0.1, chars: 'Z' },
-		{ width: 0.1, chars: 'E' },
-		{ width: 0.1, chars: 'R' },
-		{ width: 0.1, chars: 'T' },
-		{ width: 0.1, chars: 'Y' },
-		{ width: 0.1, chars: 'U' },
-		{ width: 0.1, chars: 'I' },
-		{ width: 0.1, chars: 'O' },
-		{ width: 0.1, chars: 'P' }
+		{ width: 1, chars: 'A' },
+		{ width: 1, chars: 'Z' },
+		{ width: 1, chars: 'E' },
+		{ width: 1, chars: 'R' },
+		{ width: 1, chars: 'T' },
+		{ width: 1, chars: 'Y' },
+		{ width: 1, chars: 'U' },
+		{ width: 1, chars: 'I' },
+		{ width: 1, chars: 'O' },
+		{ width: 1, chars: 'P' }
 	],
 	[
-		{ width: 0.1, chars: 'Q' },
-		{ width: 0.1, chars: 'S' },
-		{ width: 0.1, chars: 'D' },
-		{ width: 0.1, chars: 'F' },
-		{ width: 0.1, chars: 'G' },
-		{ width: 0.1, chars: 'H' },
-		{ width: 0.1, chars: 'J' },
-		{ width: 0.1, chars: 'K' },
-		{ width: 0.1, chars: 'L' },
-		{ width: 0.1, chars: 'M' }
+		{ width: 1, chars: 'Q' },
+		{ width: 1, chars: 'S' },
+		{ width: 1, chars: 'D' },
+		{ width: 1, chars: 'F' },
+		{ width: 1, chars: 'G' },
+		{ width: 1, chars: 'H' },
+		{ width: 1, chars: 'J' },
+		{ width: 1, chars: 'K' },
+		{ width: 1, chars: 'L' },
+		{ width: 1, chars: 'M' }
 	],
 	[
-		{ width: 0.2, chars: 'up' },
-		{ width: 0.1, chars: 'W' },
-		{ width: 0.1, chars: 'X' },
-		{ width: 0.1, chars: 'C' },
-		{ width: 0.1, chars: 'V' },
-		{ width: 0.1, chars: 'B' },
-		{ width: 0.1, chars: 'N' },
-		{ width: 0.2, chars: 'back' }
+		{ width: 2, chars: 'up' },
+		{ width: 1, chars: 'W' },
+		{ width: 1, chars: 'X' },
+		{ width: 1, chars: 'C' },
+		{ width: 1, chars: 'V' },
+		{ width: 1, chars: 'B' },
+		{ width: 1, chars: 'N' },
+		{ width: 2, chars: 'back' }
 	],
 	[
-		{ width: 0.2, chars: '.?12' },
-		{ width: 0.1, chars: ',' },
-		{ width: 0.4, chars: 'space' },
-		{ width: 0.1, chars: '.' },
-		{ width: 0.2, chars: 'enter' }
+		{ width: 2, chars: '.?12' },
+		{ width: 1, chars: ',' },
+		{ width: 4, chars: 'space' },
+		{ width: 1, chars: '.' },
+		{ width: 2, chars: 'enter' }
 	]
 ];
 
@@ -143,6 +143,7 @@ class Keyboard {
 			backgroundColor: 0x000000,
 			width: this.canvasWidth,
 			height: this.canvasHeight,
+			interactive: false
 			//legacy: true,
 			//clearBeforeRender: true,
 			//forceCanvas:true,
@@ -174,7 +175,6 @@ class Keyboard {
 				if ( firstKey ) accumulateX = this.backdropPadding;
 
 				// compute button width
-				key.width = key.width * 10;
 				width = this.buttonBaseWidth * ( key.width );
 				width += this.buttonMargin * ( key.width - 1 );
 
@@ -198,7 +198,7 @@ class Keyboard {
 
 	createPanel( width, height, radius, fillColor ) {
 		const panel = new PIXI.Graphics();
-		//panel.lineStyle( { alignment: 0, width: 5, color: 0x2222FF, alpha: 0.2 } );
+		//panel.lineStyle( { alignment: 0, width: 5, color: 0x2222FF, alpha: 2 } );
 		panel.beginFill( fillColor, 0.8 );
 		panel.drawRoundedRect( 0, 0, width, height, radius );
 		panel.endFill();
@@ -226,7 +226,7 @@ class Keyboard {
 		let max = 0;
 		lines.forEach( ( line ) => {
 			let tmp = 0;
-			line.forEach( key => tmp += key.width * 10 );
+			line.forEach( key => tmp += key.width );
 			if ( tmp > max ) max = tmp;
 		} );
 		return max;
