@@ -48,8 +48,10 @@ class Keyboard {
 		this.backdropColor = this.colorToThree( 0x333333 );
 		this.buttonColor = this.colorToThree( 0x444444 );
 		this.buttonHoverColor = this.colorToThree( 0x020202 );
-		this.buttonBorderColor = this.colorToThree( 0x0a08a6 );
+		//this.buttonBorderColor = this.colorToThree( 0x0a08a6 );
+		this.buttonBorderColor = this.colorToThree( 0x060606 );
 		this.buttonFontColor = this.colorToThree( 0xa8b2ff );
+		this.buttonGlowColor = this.colorToThree( 0x0000ff );
 
 		///////////////
 		// pixi
@@ -73,7 +75,7 @@ class Keyboard {
 				bloomScale: 1.5,
 				//brightness: 1.4,
 				blur: 5.4,
-				quality: 5
+				quality: 4
 			},
 			colorOverlay: {
 				color: this.colorToScreen( this.buttonColor )
@@ -233,17 +235,17 @@ class Keyboard {
 	onPointerMove( ev ) {
 		if ( this.isPointerDown )
 		{
-			console.log( `Keyboard.js: ${ev.type} ${ev.target.name} aborted because of isPointerDown = true ` );
+			//console.log( `Keyboard.js: ${ev.type} ${ev.target.name} aborted because of isPointerDown = true ` );
 			return;
 		}
 
-		console.log( `Keyboard.js: ${ev.type} ${ev.target.name} ` );
+		//console.log( `Keyboard.js: ${ev.type} ${ev.target.name} ` );
 
 		if ( this.movedOn != ev.target )
 		{
 			if ( this.movedOn )
 			{
-				console.log( `Keyboard.js: leaving ${this.movedOn.name} ` );
+				//console.log( `Keyboard.js: leaving ${this.movedOn.name} ` );
 				this.onPointerLeave( this.movedOn );
 			}
 			this.movedOn = ev.target;
@@ -288,12 +290,12 @@ class Keyboard {
 	onPointerEnter( threeEl ) {
 		if ( this.selectedKeyMesh )
 		{
-			console.warn( `Keyboard.js: pointerenter ${threeEl.name} `, 'aborted because there is a key selected' );
+			//console.warn( `Keyboard.js: pointerenter ${threeEl.name} `, 'aborted because there is a key selected' );
 			return;
 		}
 		if ( threeEl.name === 'plane' )
 		{
-			console.warn( `Keyboard.js: pointerenter ${threeEl.name} `, 'aborted because it append on the keyboard' );
+			//console.warn( `Keyboard.js: pointerenter ${threeEl.name} `, 'aborted because it append on the keyboard' );
 			return;
 		}
 
@@ -302,11 +304,11 @@ class Keyboard {
 
 		if ( !button )
 		{
-			console.warn( `Keyboard.js: pointerenter ${threeEl.name} `, 'aborted because no button' );
+			//console.warn( `Keyboard.js: pointerenter ${threeEl.name} `, 'aborted because no button' );
 			return;
 		}
 
-		console.log( `Keyboard.js: pointerenter ${threeEl.name} ` );
+		//console.log( `Keyboard.js: pointerenter ${threeEl.name} ` );
 		this.context.renderer.domElement.style.cursor = 'pointer';
 
 		button.filters = [];
@@ -346,24 +348,24 @@ class Keyboard {
 		/*
 		if ( this.selectedKeyMesh )
 		{
-			console.warn( `Keyboard.js: ${Date.now()} pointerleave ${threeEl.name} `, 'aborted because there is a key selected' );
+			console.warn( `Keyboard.js: pointerleave ${threeEl.name} `, 'aborted because there is a key selected' );
 			return;
 		}
 		*/
 		if ( threeEl.name === 'plane' )
 		{
-			console.warn( `Keyboard.js: ${Date.now()} pointerleave ${threeEl.name} `, 'aborted because it append on the keyboard' );
+			//console.warn( `Keyboard.js: pointerleave ${threeEl.name} `, 'aborted because it append on the keyboard' );
 			return;
 		}
 
-		console.log( `Keyboard.js: ${Date.now()} pointerleave ${threeEl.name} ` );
+		//console.log( `Keyboard.js: pointerleave ${threeEl.name} ` );
 
 		this.context.renderer.domElement.style.cursor = 'auto';
 		const button = threeEl.pixiEl;
 		const pixiBackground = this.pixiApp.stage.children[ 0 ];
 		if ( !button )
 		{
-			console.warn( `Keyboard.js: ${Date.now()} pointerleave ${threeEl.name} `, 'aborted because no button' );
+			//console.warn( `Keyboard.js: pointerleave ${threeEl.name} `, 'aborted because no button' );
 			return;
 		}
 		pixiBackground.filters = [];
@@ -776,8 +778,7 @@ class Keyboard {
 
 	createPixiPanel( width, height, radius, fillColor ) {
 		const panel = new PIXI.Graphics();
-		//panel.lineStyle( { alignment: 0, width: 5, color: this.buttonBorderColor.getHex(), alpha: 0.9 } );
-		panel.lineStyle( { alignment: 0, width: 5, color: new THREE.Color( 0xbe0aff ).getHex(), alpha: 0.9 } );
+		panel.lineStyle( { alignment: 0, width: 5, color: this.buttonGlowColor.getHex(), alpha: 1 } );
 		panel.beginFill( fillColor, 0.8 );
 		panel.drawRoundedRect( 0, 0, width, height, radius );
 		panel.endFill();
@@ -869,8 +870,6 @@ class Keyboard {
 		this.needsUpdate = this.needsUpdate || TWEEN.update();
 
 		if ( !this.needsUpdate ) return false;
-
-		console.log( 'updating' );
 
 		// this will update the texture threejs side
 		this.canvasTexture.needsUpdate = true;
