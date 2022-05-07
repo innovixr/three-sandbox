@@ -672,7 +672,7 @@ class Keyboard {
 			//forceCanvas:true,
 			//interactive:true,
 			//autoResize: true,
-			//powerPreference: 'high-performance'
+			powerPreference: 'high-performance'
 		} );
 	}
 
