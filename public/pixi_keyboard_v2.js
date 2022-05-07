@@ -1,8 +1,3 @@
-//import * as THREE from 'three';
-//import App from './App.js';
-//import KIT from 'three-kit';
-
-import * as PIXIT from './three-pixit/three-pixit.js';
 import * as PIXI from 'pixi.js';
 import { AdvancedBloomFilter } from '@pixi/filter-advanced-bloom';
 import '../src/DatGuiXR/pixi/center.js';
