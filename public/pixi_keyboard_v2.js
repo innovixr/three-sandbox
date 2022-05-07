@@ -110,7 +110,7 @@ class Keyboard {
 
 	onPointerDown( ev ) {
 		const k = this.pixiApp.renderer.plugins.interaction.hitTest( this.pixiMouse );
-		console.log( 'pointerdown', k.name );
+		if ( k ) console.log( 'pointerdown', k.name );
 	}
 
 	onPointerUp( ev ) {
