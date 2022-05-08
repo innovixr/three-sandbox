@@ -103,12 +103,12 @@ class Keyboard {
 		this.pixiMouse = new PIXI.Point();
 	}
 
-	onPointerDown( ev ) {
+	onPointerDown( ) {
 		const k = this.pixiApp.renderer.plugins.interaction.hitTest( this.pixiMouse );
 		if ( k ) console.log( 'pointerdown', k.name );
 	}
 
-	onPointerUp( ev ) {
+	onPointerUp( ) {
 		console.log( 'pointerup' );
 	}
 
