@@ -290,7 +290,6 @@ class Keyboard {
 		return panel;
 	}
 
-
 	createButton( width, height, radius, padding, fillColor, str ) {
 		const button = this.createPanel( width, height, radius, padding, fillColor );
 		button.name = 'key ' + str;
