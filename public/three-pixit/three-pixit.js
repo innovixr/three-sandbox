@@ -1,10 +1,3 @@
-import * as widgets from './widgets/widgets.js';
-
-class PIXIT {
-	constructor() {
-		console.log( widgets );
-	}
-}
-
-export { PIXIT };
+export * from './widgets/widgets.js';
+export * from './core/core.js';
 
