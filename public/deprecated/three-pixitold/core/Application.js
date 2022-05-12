@@ -8,7 +8,7 @@ const APPLICATION_DEFAULTS = {
 	},
 	worker: {
 		enable: true,
-		file: './WorkerInstance.js'
+		file: 'WorkerInstance.js'
 	}
 };
 
