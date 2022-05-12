@@ -10,8 +10,8 @@ const TEMPLATE_PATH = `../${PUBLIC_PATH}/html`;
 let pages = [
 	[ 'exp_basic_setup', 'Basic setup' ],
 	//[ 'kit_basic_setup', 'Basic setup' ],
-	//[ 'three_webgl', 'THREE WebGL test' ],
-	//[ 'three_htmlmesh', 'THREE.HTMLMesh test' ],
+	[ 'three_webgl', 'THREE WebGL test' ],
+	[ 'three_htmlmesh', 'THREE.HTMLMesh test' ],
 	[ 'datguixr_keyboard', 'Keyboard' ],
 	[ 'pixi_keyboard_v1', 'Keyboard v1' ],
 	[ 'pixi_keyboard_v2', 'Keyboard v2' ],
@@ -109,8 +109,9 @@ module.exports = env => {
 	// scenario and avoiding ../src/..;
 	alias[`${MODULE_NAME}/${PUBLIC_PATH}`] = path.resolve( __dirname, `../${PUBLIC_PATH}/` );
 	alias[`${MODULE_NAME}`] = path.resolve( __dirname, `../src/${MODULE_NAME}.js` );
-	alias['DatGuiXR'] = path.resolve( __dirname, '../src/DatGuiXR/DatGuiXR.js' );
-	alias['three-kit'] = path.resolve( __dirname, '../src/KIT/KIT.js' );
+	alias[ 'DatGuiXR' ] = path.resolve( __dirname, '../src/DatGuiXR/DatGuiXR.js' );
+	alias[ 'three-kit' ] = path.resolve( __dirname, '../src/KIT/KIT.js' );
+	alias[ 'three-pixit' ] = path.resolve( __dirname, '../src/three-pixit/three-pixit.js' );
 
 	//alias[ `/assets/`] = path.resolve( __dirname, `../${PUBLIC_PATH}/assets/` );
 
