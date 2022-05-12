@@ -4,6 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link href="//vjs.zencdn.net/7.18.1/video-js.min.css" rel="stylesheet">
 	<title>
 		<%= htmlWebpackPlugin.options.title %>
 	</title>
@@ -15,6 +16,20 @@
 
 		body {
 			overflow: hidden;
+		}
+
+		.video {
+			position: absolute;
+			z-index: 1000;
+			margin: auto;
+			/*
+			width: 640px;
+			height: 480px;
+			*/
+			top: 0px;
+			left: 0px;
+			background-color: rgba(0, 0, 0, 0.2);
+			visibility: hidden;
 		}
 	</style>
 </head>

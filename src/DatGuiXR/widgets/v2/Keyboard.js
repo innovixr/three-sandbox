@@ -855,7 +855,7 @@ class Keyboard {
 	}
 
 	createKeyboardMaterials() {
-		const material = THREE.MeshBasicMaterial;
+		const material = THREE.MeshStandardMaterial;
 
 		// material for main plane
 		this.canvasTexture = new THREE.CanvasTexture( this.canvasEl );

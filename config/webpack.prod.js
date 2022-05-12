@@ -12,6 +12,7 @@ let pages = [
 	//[ 'kit_basic_setup', 'Basic setup' ],
 	[ 'three_webgl', 'THREE WebGL test' ],
 	[ 'three_htmlmesh', 'THREE.HTMLMesh test' ],
+	[ 'three_obs', 'THREE Obs' ],
 	[ 'datguixr_keyboard', 'Keyboard' ],
 	[ 'pixi_keyboard_v1', 'Keyboard v1' ],
 	[ 'pixi_keyboard_v2', 'Keyboard v2' ],
