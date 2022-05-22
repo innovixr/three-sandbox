@@ -2,8 +2,6 @@
 
 Some code related to threejs, evolving in the time.
 
-
-
 ### UI / Canvas / WebGL
 * https://github.com/felixmariotto/three-mesh-ui
 * https://github.com/NikLever/CanvasUI
