@@ -23,7 +23,6 @@ class App {
 		this.addScene();
 		this.addRenderer();
 		this.addCamera();
-		this.setupXR();
 		this.addLights();
 		this.addRoom();
 		//this.addMouseHandler();
@@ -32,6 +31,7 @@ class App {
 		this.addCameraControl();
 
 		this.addWindowResizeEndEvent();
+		this.setupXR();
 
 		//this.clock = new THREE.Clock();
 		this.loop = this.loop.bind( this );
@@ -62,7 +62,7 @@ class App {
 
 		if ( updated || this.renderer.xr?.isPresenting )
 		{
-			this.renderer.render( this.scene, this.camera );
+			this.update();
 		}
 
 		if ( !this.renderer.xr?.isPresenting )
@@ -72,6 +72,9 @@ class App {
 
 	}
 
+	update() {
+		this.renderer.render( this.scene, this.camera );
+	}
 
 	getScreenDimension() {
 		this.screenWidth = window.innerWidth;
