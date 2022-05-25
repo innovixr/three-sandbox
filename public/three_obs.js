@@ -16,14 +16,22 @@ class Experience {
 		this.scene = this.app.scene;
 		this.createVideoElementFlvJs();
 		this.createScreen();
+		this.i = 0;
+		this.max = 3;
 	}
 
 	updateVideo() {
-		if ( this.videoTexture )
+		this.i++;
+
+		if ( this.videoTexture && this.i === this.max )
 		{
+			this.i = 0;
 			return true;
 		}
+	}
 
+	startVideo() {
+		this.flvPlayer.play();
 	}
 
 	createVideoElementFlvJs() {
@@ -31,9 +39,10 @@ class Experience {
 		this.videoElement.setAttribute( 'class', 'video' );
 		//this.videoElement.volume = 0;
 		//this.videoElement.muted = true;
-		this.videoElement.autoplay = true;
+		this.videoElement.autoplay = false;
 
 		document.body.appendChild( this.videoElement );
+		document.addEventListener( 'pointerdown', this.startVideo.bind( this ) );
 
 		const flvPlayer = flvjs.createPlayer( {
 			type: 'flv',
@@ -49,7 +58,7 @@ class Experience {
 		} );
 		flvPlayer.attachMediaElement( this.videoElement );
 		flvPlayer.load();
-		flvPlayer.play();
+		this.flvPlayer = flvPlayer;
 	}
 
 	createScreen() {
@@ -63,7 +72,7 @@ class Experience {
 		const geometry = new THREE.PlaneGeometry( width, height );
 		const material = new THREE.MeshBasicMaterial( { map: this.videoTexture } );
 		const mesh = new THREE.Mesh( geometry, material );
-		mesh.position.set( 0, 2 - ( height / 2 ), -1.5 );
+		mesh.position.set( 0, 1.8 - ( height / 2 ), -1.5 );
 
 		//material.map.needsUpdate = true;
 		//material.needsUpdate = true;
