@@ -1,0 +1,312 @@
+<!doctype html><html><head><title>three-sandbox | examples</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,user-scalable=no,minimum-scale=1,maximum-scale=1"><style>@import url('https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i,900,900i');
+
+		:root {
+			--navbar-height: 60px;
+			--dark-colour: #8e7af6;
+			--github-btn-offset: 20px;
+		}
+
+		* {
+			margin: 0;
+			padding: 0;
+			font-family: "Roboto", "Verdana", Courier, monospace;
+			color: var(--dark-colour);
+			box-sizing: border-box;
+			user-select: none;
+		}
+
+		body {
+			overflow: hidden;
+		}
+
+		h1 {
+			font-size: 1.20em;
+			font-weight: 600;
+			text-align: center;
+			color: rgb(36, 84, 255);
+		}
+
+		h2 {
+			font-size: 1em;
+			font-weight: 600;
+			color: rgba(36, 84, 255, 0.6);
+		}
+
+		#page {
+			position: fixed;
+			height: 100%;
+			width: 100%;
+			display: flex;
+		}
+
+		#menu {
+			width: 230px;
+			transition: height 0.26s;
+			overflow-y: auto;
+			background-color: #1a1d25;
+			box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 4);
+			position: relative;
+		}
+
+		li {
+			font-size: 0.8em;
+			padding: 4px 10px;
+			margin: 10px 0;
+			border-radius: 8px;
+			transition: all 0.2s;
+			box-shadow: inset 0px 0px 3px rgb(0 73 255);
+			background-color: #222a40;
+			color: #9fc4ff
+		}
+
+		li:hover {
+			cursor: pointer;
+			background-color: #005eff55;
+			color: #c0c0FF;
+			transition: background-color 0.1s;
+		}
+
+		li.selected-view {
+			background-color: #005eff;
+			color: #e0e2ff;
+			position: relative;
+			box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.8);
+		}
+
+		ul {
+			list-style-type: none;
+		}
+
+		hr {
+			border: 0px;
+			height: 1px;
+			background-color: #4f7bff;
+			margin-top: 10px;
+			margin-bottom: 20px;
+		}
+
+		#example-code-icon {
+			width: 25px;
+
+		}
+
+		#github-link-menu {
+			display: flex;
+			align-items: center;
+			color: white;
+			text-decoration: none;
+			margin: 8px 0 10px 0;
+			padding: 5px 10px;
+			font-size: 1.1em;
+			border-radius: 3px;
+			width: 50px;
+		}
+
+		#menu-icon {
+			width: 28px;
+			margin-right: 10px;
+		}
+
+		#iframe-container {
+			position: relative;
+			height: 100%;
+			width: 100%;
+			background-color: #1a1d25;
+		}
+
+		#iframe-container>iframe {
+			position: relative;
+			height: 100%;
+			width: 100%;
+			z-index: 1;
+		}
+
+		#iframe-container>img {
+			position: absolute;
+			height: 50px;
+			width: 50px;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+
+		#iframe-container>a {
+			position: absolute;
+			display: flex;
+			align-items: center;
+			right: var(--github-btn-offset);
+			bottom: 20px;
+			z-index: 2;
+			color: white;
+			/*background-color: var(--dark-colour);*/
+			text-decoration: none;
+			padding: 5px 10px;
+			font-size: 1.1em;
+			/*box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);*/
+			border-radius: 3px;
+			opacity: 0.05;
+		}
+
+		#iframe-container>a:hover {
+			background-color: #424242;
+		}
+
+		#social-container {
+			position: absolute;
+			bottom: 0px;
+			left: 0px;
+		}
+
+		#collapse-icon {
+			position: absolute;
+			bottom: 16px;
+			right: 10px;
+			width: 15px;
+			cursor: pointer;
+		}
+
+		#examples-container {
+			padding: 10px;
+			max-height: calc(100% - 60px);
+			overflow-y: auto;
+		}
+
+		#navbar-container {
+			display: none;
+			top: 0;
+			left: 0;
+			height: 60px;
+			width: 100%;
+			border-bottom: solid 1px var(--dark-colour);
+			justify-content: flex-end;
+			align-items: center;
+		}
+
+		button {
+			background-color: #1b356c;
+			border: none;
+			padding: 9px 15px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			outline: none;
+			margin-right: 15px;
+			box-shadow: 1.5px 1.5px 4px rgba(0, 0, 0, 0.75);
+			transition: box-shadow 0.12s;
+		}
+
+		button:active {
+			box-shadow: none;
+		}
+
+		@media screen and (max-width: 768px) {
+
+			#page {
+				flex-direction: column;
+			}
+
+			#menu {
+				height: var(--navbar-height);
+				width: 100%;
+				border-right: none;
+				overflow-y: hidden;
+			}
+
+			#navbar-container {
+				display: flex;
+			}
+
+			#iframe-container {
+				height: calc(100% - var(--navbar-height));
+				width: 100vw;
+			}
+
+			#social-container {
+				display: none;
+			}
+
+		}</style></head><body><div id="page"><div id="menu"><div id="navbar-container"><button id="toggle-btn" onclick="toggleNavbar()">more examples ▼</button></div><div id="examples-container"><h1>Threejs sandbox</h1><hr/><ul></ul><ul><li title="exp_basic_setup">Basic setup</li></ul><h2>Three-DatGuiXR</h2><ul><li title="datguixr_keyboard">Keyboard</li></ul><h2>Threejs tests</h2><ul><li title="three_webgl">THREE WebGL test</li><li title="three_htmlmesh">THREE.HTMLMesh test</li><li title="three_obs">THREE OBS</li><li title="three_torus">THREE Torus</li></ul><h2>Pixijs tests</h2><ul><li title="pixi_keyboard_v1">Keyboard v1</li><li title="pixi_keyboard_v2">Keyboard v2</li><li title="pixi_keyboard_v3">Keyboard v3</li></ul></div><div id="social-container"><a id="github-link-menu" href="https://github.com/innovixr/three-sandox" target="_blank"><img id="menu-icon" src="assets/github-white-icon.png"></a></div><img id="collapse-icon" src="assets/arrow-left.png"></div><div id="iframe-container"><iframe src="./exp_basic_setup.html" allowfullscreen allowvr frameborder="0"></iframe><img src="assets/loading.gif" id="loading-img"> <a id="github-link" href="" target="_blank"><img id="example-code-icon" src="assets/github-white-icon.png"></a></div></div><script>console.clear();
+
+		const root = document.documentElement;
+		const btn = document.getElementById( 'toggle-btn' );
+		const link = document.getElementById( 'github-link' );
+		const iframe = document.querySelector( 'iframe' );
+		const loading = document.getElementById( 'loading-img' );
+		const collapse = document.getElementById( 'collapse-icon' );
+		const menu = document.getElementById( 'menu' );
+		let navbarIsClosed = true;
+
+		const hash = window.location.hash.substr( 1 );
+
+		if ( hash === "" ) {
+			let hash = 'exp_basic_setup';
+			window.location.hash = hash;
+			document.querySelector( `li[title="${hash}"]` ).classList.add( 'selected-view' );
+		}
+
+		function toggleNavbar()
+		{
+			if ( navbarIsClosed ) {
+				root.style.setProperty( '--navbar-height', '100%' );
+				root.style.setProperty( '--github-btn-offset', '-300px' );
+				btn.innerHTML = "hide examples ▲";
+			} else {
+				root.style.setProperty( '--navbar-height', '60px' );
+				root.style.setProperty( '--github-btn-offset', '20px' );
+				btn.innerHTML = "more examples ▼";
+			};
+			navbarIsClosed = !navbarIsClosed
+		};
+
+		//
+
+		document.querySelectorAll( 'li' ).forEach( ( node ) =>
+		{
+			if ( node.title === hash ) selectView( node );
+			node.onclick = () =>
+			{
+				selectView( node );
+				if ( !navbarIsClosed ) {
+					toggleNavbar();
+				};
+			};
+		} );
+
+		collapse.addEventListener( 'click', toggleMenu );
+
+		function toggleMenu()
+		{
+			menu.style[ 'width' ] = '0px';
+		}
+
+		//
+
+		window.addEventListener( 'popstate', () =>
+		{
+			let hash = window.location.hash.substring( 1 );
+			iframe.src = `./${hash}.html`;
+			link.href = `https://github.com/innovixr/three-sandbox/blob/master/public/${hash}.js`
+		} );
+
+		//
+
+		function selectView( listItem )
+		{
+			loading.style.display = 'block';
+			iframe.src = `./${listItem.title}.html`;
+			link.href = `https://github.com/innovixr/three-sandbox/blob/master/public/${listItem.title}.js`
+			window.location.hash = listItem.title;
+			document.querySelectorAll( 'li' ).forEach( ( node ) =>
+			{
+				if ( node === listItem ) {
+					node.classList.add( 'selected-view' );
+				} else {
+					node.classList.remove( 'selected-view' );
+				};
+			} );
+
+			setTimeout( () =>
+			{
+				loading.style.display = 'none';
+			}, 300 );
+		};</script></body></html>
