@@ -29,14 +29,6 @@ object-assign
  */
 
 /*!
- * @pixi/core - v6.3.0
- * Compiled Wed, 23 Mar 2022 18:58:56 UTC
- *
- * @pixi/core is licensed under the MIT License.
- * http://www.opensource.org/licenses/mit-license
- */
-
-/*!
  * @pixi/core - v6.3.2
  * Compiled Wed, 04 May 2022 17:49:13 UTC
  *
@@ -65,14 +57,6 @@ object-assign
  * Compiled Wed, 04 May 2022 17:49:13 UTC
  *
  * @pixi/filter-displacement is licensed under the MIT License.
- * http://www.opensource.org/licenses/mit-license
- */
-
-/*!
- * @pixi/filter-kawase-blur - v4.1.5
- * Compiled Wed, 29 Sep 2021 14:05:57 UTC
- *
- * @pixi/filter-kawase-blur is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
  */
 
@@ -125,42 +109,10 @@ object-assign
  */
 
 /*!
- * @pixi/runner - v6.3.0
- * Compiled Wed, 23 Mar 2022 18:58:56 UTC
- *
- * @pixi/runner is licensed under the MIT License.
- * http://www.opensource.org/licenses/mit-license
- */
-
-/*!
- * @pixi/settings - v6.3.2
- * Compiled Wed, 04 May 2022 17:49:13 UTC
- *
- * @pixi/settings is licensed under the MIT License.
- * http://www.opensource.org/licenses/mit-license
- */
-
-/*!
- * @pixi/ticker - v6.3.0
- * Compiled Wed, 23 Mar 2022 18:58:56 UTC
- *
- * @pixi/ticker is licensed under the MIT License.
- * http://www.opensource.org/licenses/mit-license
- */
-
-/*!
  * @pixi/ticker - v6.3.2
  * Compiled Wed, 04 May 2022 17:49:13 UTC
  *
  * @pixi/ticker is licensed under the MIT License.
- * http://www.opensource.org/licenses/mit-license
- */
-
-/*!
- * @pixi/utils - v6.3.0
- * Compiled Wed, 23 Mar 2022 18:58:56 UTC
- *
- * @pixi/utils is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
  */
 
@@ -179,21 +131,6 @@ object-assign
  * pixi.js is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
  */
-
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation.
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.
-***************************************************************************** */
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
