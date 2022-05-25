@@ -18,7 +18,7 @@ let pages = [
 	[ 'datguixr_keyboard', 'Keyboard' ],
 	[ 'pixi_keyboard_v1', 'Keyboard v1' ],
 	[ 'pixi_keyboard_v2', 'Keyboard v2' ],
-	[ 'pixi_keyboard_v3', 'Keyboard v3' ],
+	//[ 'pixi_keyboard_v3', 'Keyboard v3' ],
 ];
 
 const keys = [
