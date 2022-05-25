@@ -253,13 +253,13 @@ class App {
 		this.addCameraKeyboardControl();
 	}
 
-	onMouseDown( event ) {
+	onMouseDown( /*event*/ ) {
 		//this.controls.setTarget( event.clientX, event.clientY );
 		this.renderer.domElement.addEventListener( 'mouseup', this.onMouseUp.bind( this ) );
 		this.renderer.domElement.removeEventListener( 'mousedown', this.onMouseDown.bind( this ) );
 	}
 
-	onMouseUp( event ) {
+	onMouseUp( /*event*/ ) {
 		this.renderer.domElement.addEventListener( 'mousedown', this.onMouseDown.bind( this ) );
 		this.renderer.domElement.removeEventListener( 'mouseup', this.onMouseUp.bind( this ) );
 	}
