@@ -142,17 +142,28 @@
 			position: absolute;
 			display: flex;
 			align-items: center;
-			right: var(--github-btn-offset);
-			bottom: 20px;
+			right: 5px;
+			bottom: 5px;
 			z-index: 2;
 			color: white;
 			/*background-color: var(--dark-colour);*/
 			text-decoration: none;
-			padding: 5px 10px;
 			font-size: 1.1em;
 			/*box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);*/
 			border-radius: 3px;
-			opacity: 0.05;
+			opacity: 0.5;
+		}
+
+		#help {
+			position:absolute;
+			left:0px;
+			top:3px;
+			right:30px;
+			z-index:1000;
+			color:#F0F0F0;
+			text-align:center;
+			font-size:11px;
+			opacity:0.5;
 		}
 
 		#iframe-container>a:hover {
@@ -283,6 +294,7 @@
 			<iframe src="./exp_basic_setup.html" allowfullscreen allowvr frameBorder="0"></iframe>
 			<img src="assets/loading.gif" id="loading-img">
 			<a id="github-link" href="" target="_blank"><img id="example-code-icon" src="assets/github-white-icon.png"></a>
+			<div id="help">Use keyboard (wasd/zqsd) + mouse to move in the scene. Or use the browser of your headset to test in VR.</div>
 		</div>
 	</div>
 
