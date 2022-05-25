@@ -26,6 +26,8 @@ class Experience {
 		const ratio = 0.2;
 		this.texture.offset.x += 0.001 * ratio;
 		this.texture.offset.y += 0.01 * ratio;
+		//this.torus.rotation.y += 0.01 * ratio;
+		//this.torusBloom.rotation.y += 0.02 * ratio;
 		this.app.update();
 	}
 
@@ -67,12 +69,12 @@ class Experience {
 
 	addTorusBloom() {
 
-		const torusBloomGeometry = new THREE.TorusBufferGeometry( 0.45, 0.05, 16, 98 );
+		const torusBloomGeometry = new THREE.TorusBufferGeometry( 0.39, 0.08, 16, 98 );
 		torusBloomGeometry.center();
 		this.torusBloom = new THREE.Mesh( torusBloomGeometry, this.shaderMaterial );
-		this.torusBloom.position.set( 0, 1.2, this.torusPositionZ );
-		this.torusBloom.scale.set( 0.90, 0.95, 2 );
-		this.scene.add( this.torusBloom );
+		//this.torusBloom.scale.set( 0.90, 0.95, 2 );
+		this.torus.add( this.torusBloom );
+
 	}
 
 	addTorus() {
@@ -93,9 +95,11 @@ class Experience {
 			side: THREE.DoubleSide
 		} );
 
-		this.torus = new THREE.Mesh( geometry, material );
-		this.torus.position.set( 0, 1.2, this.torusPositionZ );
+		const torus = new THREE.Mesh( geometry, material );
+		this.torus = new THREE.Object3D();
+		this.torus.add( torus );
 		this.scene.add( this.torus );
+		this.torus.position.set( 0, 1.2, this.torusPositionZ );
 
 		this.addTorusBloom();
 
