@@ -276,15 +276,15 @@
 			</div>
 			<div id="social-container">
 				<a id="github-link-menu" href="https://github.com/innovixr/three-sandox" target="_blank"><img
-						id="menu-icon" src="/assets/github-white-icon.png"></a>
+						id="menu-icon" src="assets/github-white-icon.png"></a>
 			</div>
-			<img id="collapse-icon" src="/assets/arrow-left.png">
+			<img id="collapse-icon" src="assets/arrow-left.png">
 		</div>
 		<div id="iframe-container">
 			<iframe src="./exp_basic_setup.html" allowfullscreen allowvr frameBorder="0"></iframe>
-			<img src="./assets/loading.gif" id="loading-img">
+			<img src="assets/loading.gif" id="loading-img">
 			<a id="github-link" href="" target="_blank"><img id="example-code-icon"
-					src="/assets/github-white-icon.png"></a>
+					src="assets/github-white-icon.png"></a>
 		</div>
 	</div>
 
@@ -350,7 +350,7 @@
 		{
 			let hash = window.location.hash.substring( 1 );
 			iframe.src = `./${hash}.html`;
-			link.href = `https://github.com/innovixr/three-sandbox/blob/master/public/${hash}.js`
+			link.href = `https://github.com/innovixr/three-sandbox/blob/main/public/${hash}.js`
 		} );
 
 		//
@@ -359,7 +359,7 @@
 		{
 			loading.style.display = 'block';
 			iframe.src = `./${listItem.title}.html`;
-			link.href = `https://github.com/innovixr/three-sandbox/blob/master/public/${listItem.title}.js`
+			link.href = `https://github.com/innovixr/three-sandbox/blob/main/public/${listItem.title}.js`
 			window.location.hash = listItem.title;
 			document.querySelectorAll( 'li' ).forEach( ( node ) =>
 			{

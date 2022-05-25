@@ -1,5 +1,6 @@
 const path = require( 'path' );
 const HtmlWebpackPlugin = require( 'html-webpack-plugin' );
+const CopyPlugin = require( 'copy-webpack-plugin' );
 const networkInterfaces = require( 'os' ).networkInterfaces;
 
 const MODULE_NAME = 'three-sandbox';
@@ -124,8 +125,8 @@ module.exports = env => {
 		plugins,
 		devServer: {
 			static: {
-				directory: path.join( __dirname, `../${PUBLIC_PATH}/assets/` ),
-				publicPath: '/assets',
+				directory: path.join( __dirname, `../${PUBLIC_PATH}/` ),
+				publicPath: '/',
 			},
 			server: env.NODE_SSL ? 'https' : 'http',
 			port: env.NODE_SSL ? '8443' : '8080',
@@ -150,6 +151,38 @@ module.exports = env => {
 			],
 		}
 	};
+
+
+	if ( mode === 'production' )
+	{
+		delete wp.devtool;
+		wp.mode = 'production';
+		wp.plugins.push( new CopyPlugin( {
+			patterns: [
+				{ from: 'public/assets/*.*', to: 'assets/[name][ext]' },
+			],
+		} ) );
+
+		wp.optimization = {
+			minimize: true,
+			/*
+			minimizer: [
+				new TerserPlugin( {
+					test: /\.js(\?.*)?$/i,
+					extractComments: 'some',
+					terserOptions: {
+						format: {
+							comments: /@license/i,
+						},
+						compress: {
+							drop_console: true,
+						},
+					}
+				} ),
+			],
+			*/
+		};
+	}
 
 	return wp;
 };

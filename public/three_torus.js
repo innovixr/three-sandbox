@@ -80,7 +80,7 @@ class Experience {
 		const geometry = new THREE.TorusBufferGeometry( 0.4, 0.1, 16, 98 );
 		geometry.center();
 
-		const texture = new THREE.TextureLoader().load( '/assets/torus11.png', this.onTextureLoaded.bind( this ) );
+		const texture = new THREE.TextureLoader().load( 'assets/torus11.png', this.onTextureLoaded.bind( this ) );
 		texture.encoding = THREE.sRGBEncoding;
 
 		this.texture = texture;

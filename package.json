@@ -6,7 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack-dev-server --config config/webpack.prod.js --open --env NODE_ENV=dev",
-    "https": "webpack-dev-server --config config/webpack.prod.js --open --env NODE_ENV=dev --env NODE_SSL=true"
+    "https": "webpack-dev-server --config config/webpack.prod.js --open --env NODE_ENV=dev --env NODE_SSL=true",
+    "build": "npx webpack --config config/webpack.config.js",
+    "build-site": "npx webpack --config config/webpack.prod.js --env NODE_ENV=prod",
+    "deploy": "gh-pages -d dist"
   },
   "repository": {
     "type": "git",
@@ -29,7 +32,9 @@
     "@babel/core": "7.17.10",
     "@babel/eslint-parser": "7.17.0",
     "@babel/eslint-plugin": "7.17.7",
+    "copy-webpack-plugin": "^11.0.0",
     "fs-extra": "10.1.0",
+    "gh-pages": "^4.0.0",
     "html-webpack-plugin": "5.5.0",
     "node-media-server": "^2.3.9",
     "pem": "1.14.6",
@@ -59,10 +64,10 @@
     "@pixi/text": "6.3.0",
     "camera-controls": "1.34.2",
     "debug": "4.3.4",
+    "deepmerge": "4.2.2",
     "flv.js": "1.6.2",
     "hold-event": "0.2.0",
     "pixi.js": "6.3.2",
-    "three": "0.139",
-    "deepmerge": "4.2.2"
+    "three": "0.139"
   }
 }
