@@ -243,13 +243,29 @@ class App {
 		this.controls.saveState();
 		this.controls.moveTo( 0, 1.2, 0 );
 
+
 		const center = new THREE.Object3D();
 		center.position.set( 0, 1.2, -0.5 );
 		this.scene.add( center );
 		this.controls.setTarget( center.position.x, center.position.y, center.position.z );
-
 		this.renderer.render( this.scene, this.camera );
+		this.addCameraMouseControl();
 		this.addCameraKeyboardControl();
+	}
+
+	onMouseDown( event ) {
+		//this.controls.setTarget( event.clientX, event.clientY );
+		this.renderer.domElement.addEventListener( 'mouseup', this.onMouseUp.bind( this ) );
+		this.renderer.domElement.removeEventListener( 'mousedown', this.onMouseDown.bind( this ) );
+	}
+
+	onMouseUp( event ) {
+		this.renderer.domElement.addEventListener( 'mousedown', this.onMouseDown.bind( this ) );
+		this.renderer.domElement.removeEventListener( 'mouseup', this.onMouseUp.bind( this ) );
+	}
+
+	addCameraMouseControl() {
+		this.renderer.domElement.addEventListener( 'mousedown', this.onMouseDown.bind( this ) );
 	}
 
 	addCameraKeyboardControl() {
