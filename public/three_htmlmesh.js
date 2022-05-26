@@ -18,16 +18,16 @@ class Experience {
 		this.scene.add( group );
 
 		const div = document.createElement( 'div' );
-		div.style = 'color:white;font-family:arial;padding-top:10px;text-align:center;height:20px;font-size:15px;width:200px;';
+		div.className = 'htmlMeshBasicTest';
 		div.innerHTML = 'HTML Mesh basic test';
 		document.body.appendChild( div );
 
 		const mesh = new HTMLMesh( div );
 		mesh.position.x = 0;
-		mesh.position.y = 1.6;
-		mesh.position.z = 0;
+		mesh.position.y = 1.2;
+		mesh.position.z = -0.3;
 		group.add( mesh );
-
+		console.log( div );
 	}
 }
 
