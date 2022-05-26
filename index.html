@@ -134,17 +134,28 @@
 			position: absolute;
 			display: flex;
 			align-items: center;
-			right: var(--github-btn-offset);
-			bottom: 20px;
+			right: 5px;
+			bottom: 5px;
 			z-index: 2;
 			color: white;
 			/*background-color: var(--dark-colour);*/
 			text-decoration: none;
-			padding: 5px 10px;
 			font-size: 1.1em;
 			/*box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);*/
 			border-radius: 3px;
-			opacity: 0.05;
+			opacity: 0.5;
+		}
+
+		#help {
+			position:absolute;
+			left:0px;
+			top:3px;
+			right:30px;
+			z-index:1000;
+			color:#F0F0F0;
+			text-align:center;
+			font-size:11px;
+			opacity:0.5;
 		}
 
 		#iframe-container>a:hover {
@@ -225,7 +236,7 @@
 				display: none;
 			}
 
-		}</style></head><body><div id="page"><div id="menu"><div id="navbar-container"><button id="toggle-btn" onclick="toggleNavbar()">more examples ▼</button></div><div id="examples-container"><h1>Threejs sandbox</h1><hr/><ul></ul><ul><li title="exp_basic_setup">Basic setup</li></ul><h2>Three-DatGuiXR</h2><ul><li title="datguixr_keyboard">Keyboard</li></ul><h2>Threejs tests</h2><ul><li title="three_webgl">THREE WebGL test</li><li title="three_htmlmesh">THREE.HTMLMesh test</li><li title="three_obs">THREE OBS</li><li title="three_torus">THREE Torus</li></ul><h2>Pixijs tests</h2><ul><li title="pixi_keyboard_v1">Keyboard v1</li><li title="pixi_keyboard_v2">Keyboard v2</li></ul></div><div id="social-container"><a id="github-link-menu" href="https://github.com/innovixr/three-sandbox" target="_blank"><img id="menu-icon" src="assets/github-white-icon.png"></a></div><img id="collapse-icon" src="assets/arrow-left.png"></div><div id="iframe-container"><iframe src="./exp_basic_setup.html" allowfullscreen allowvr frameborder="0"></iframe><img src="assets/loading.gif" id="loading-img"> <a id="github-link" href="" target="_blank"><img id="example-code-icon" src="assets/github-white-icon.png"></a></div></div><script>console.clear();
+		}</style></head><body><div id="page"><div id="menu"><div id="navbar-container"><button id="toggle-btn" onclick="toggleNavbar()">more examples ▼</button></div><div id="examples-container"><h1>Threejs sandbox</h1><hr/><ul></ul><ul><li title="exp_basic_setup">Basic setup</li></ul><h2>Three-DatGuiXR</h2><ul><li title="datguixr_keyboard">Keyboard</li></ul><h2>Threejs tests</h2><ul><li title="three_webgl">THREE WebGL test</li><li title="three_htmlmesh">THREE.HTMLMesh test</li><li title="three_obs">THREE OBS</li><li title="three_torus">THREE Torus</li></ul><h2>Pixijs tests</h2><ul><li title="pixi_keyboard_v1">Keyboard v1</li><li title="pixi_keyboard_v2">Keyboard v2</li></ul></div><div id="social-container"><a id="github-link-menu" href="https://github.com/innovixr/three-sandbox" target="_blank"><img id="menu-icon" src="assets/github-white-icon.png"></a></div><img id="collapse-icon" src="assets/arrow-left.png"></div><div id="iframe-container"><iframe src="./exp_basic_setup.html" allowfullscreen allowvr frameborder="0"></iframe><img src="assets/loading.gif" id="loading-img"> <a id="github-link" href="" target="_blank"><img id="example-code-icon" src="assets/github-white-icon.png"></a><div id="help">Use keyboard (wasd/zqsd) + mouse to move in the scene.<br/>Or use the browser of your headset to test in VR.</div></div></div><script>console.clear();
 
 		const root = document.documentElement;
 		const btn = document.getElementById( 'toggle-btn' );
