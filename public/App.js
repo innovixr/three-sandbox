@@ -43,6 +43,7 @@ class App {
 
 		this.stats = Stats();
 		document.body.appendChild( this.stats.dom );
+		this.stats.dom.style.opacity = 0.4;
 
 	}
 
