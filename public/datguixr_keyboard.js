@@ -8,7 +8,8 @@ window.addEventListener( 'load', () => {
 
 class Experience {
 	constructor() {
-		this.app = new App( this.animate.bind( this ) );
+		this.app = new App();
+		this.app.addTicker( this.animate.bind( this ) );
 
 		this.gui = new DatGuiXR( {
 			scene: this.app.scene,

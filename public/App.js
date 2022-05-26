@@ -8,15 +8,19 @@ import * as holdEvent from 'hold-event';
 import Stats from 'three/examples/jsm/libs/stats.module';
 import XRControl from './XR.js';
 
+import { Test } from '../src/three-pixit/utils/utils.js';
+
 CameraControls.install( { THREE: THREE } );
 
 class App {
-	constructor( extraLoop ) {
+	constructor( opts ) {
+		this.opts = opts || {};
+		this.opts.lights = Test.isDefined( this.opts.lights ) ? this.opts.lights : true;
+		this.opts.lightsIntensity = Test.isDefined( this.opts.lightsIntensity ) ? this.opts.lightsIntensity : 1;
 		this.raycasterMeshes = [];
 		this.raycasterIntersects = [];
 		this.raycasterEventsCallback = {};
 		this.meshes = [];
-		this.extraLoop = extraLoop;
 
 		this.getScreenDimension();
 
@@ -40,6 +44,10 @@ class App {
 		this.stats = Stats();
 		document.body.appendChild( this.stats.dom );
 
+	}
+
+	addTicker( extraLoop ) {
+		this.extraLoop = extraLoop;
 	}
 
 	loop( delta ) {
@@ -91,18 +99,21 @@ class App {
 	}
 
 	addLights() {
+
+		if ( !this.opts.lights ) return;
+
 		let container = new THREE.Object3D();
 
-		let object3d = new THREE.AmbientLight( new THREE.Color( 0x040404 ), 1 );
-		object3d.name = 'Ambient light';
+		//let object3d = new THREE.AmbientLight( new THREE.Color( 0x040404 ), 1 * this.opts.lightsIntensity );
+		//object3d.name = 'Ambient light';
 		//container.add( object3d );
 
-		const red = new THREE.PointLight( new THREE.Color( 0xAA2200 ), 0.1, 4, 0.5 );
+		const red = new THREE.PointLight( new THREE.Color( 0xAA2200 ), 0.1 * this.opts.lightsIntensity, 4 , 0.5 );
 		red.position.set( -3, 2, -3 );
 		//red.castShadow = true;
 		container.add( red );
 
-		const blue = new THREE.PointLight( new THREE.Color( 0x1133FF ), 0.3, 10, 0.5 );
+		const blue = new THREE.PointLight( new THREE.Color( 0x1133FF ), 0.3 * this.opts.lightsIntensity, 10, 0.5 );
 		blue.position.set( 3, 2, -3 );
 		//blue.castShadow = true;
 		container.add( blue );
@@ -176,7 +187,7 @@ class App {
 			//bumpScale: 0.0005
 		} );
 		const cube = new THREE.Mesh( geometry, material );
-		cube.receiveShadow = true;
+		//cube.receiveShadow = true;
 		this.scene.add( cube );
 		cube.geometry.center();
 		cube.position.y += height / 2;
@@ -191,6 +202,7 @@ class App {
 			new BoxLineGeometry( width, height, depth, width, height, depth ),
 			new THREE.LineBasicMaterial( { color: 0x808080 } )
 		);
+		//room.receiveShadow = true;
 		room.geometry.center();
 		room.position.y += width / 4;
 		return room;
@@ -207,7 +219,7 @@ class App {
 		} );
 		this.renderer.setPixelRatio( window.devicePixelRatio );
 		this.renderer.setSize( this.screenWidth, this.screenHeight );
-		this.renderer.shadowMap.enabled = true;
+		//this.renderer.shadowMap.enabled = true;
 		//this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
 		//this.renderer.toneMapping = THREE.LinearToneMapping;
 		//this.renderer.toneMapping = THREE.ReinhardToneMapping;

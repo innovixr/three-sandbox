@@ -10,7 +10,8 @@ window.addEventListener( 'load', () => {
 
 class Experience {
 	constructor() {
-		this.app = new App( this.updateVideo.bind( this ) );
+		this.app = new App( );
+		this.app.addTicker( this.updateVideo.bind( this ) );
 		this.renderer = this.app.renderer;
 		this.camera = this.app.camera;
 		this.scene = this.app.scene;
@@ -47,7 +48,6 @@ class Experience {
 		const flvPlayer = flvjs.createPlayer( {
 			type: 'flv',
 			isLive: true,
-
 			url: RTMP_URL
 		}, {
 			enableWorker: false,
