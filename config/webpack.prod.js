@@ -15,6 +15,7 @@ let pages = [
 	[ 'three_htmlmesh', 'THREE.HTMLMesh test' ],
 	[ 'three_obs', 'THREE OBS' ],
 	[ 'three_torus', 'THREE Torus' ],
+	[ 'three_forcegraph', 'THREE Force Graph' ],
 	[ 'datguixr_keyboard', 'Keyboard' ],
 	[ 'pixi_keyboard_v1', 'Keyboard v1' ],
 	[ 'pixi_keyboard_v2', 'Keyboard v2' ],

@@ -69,6 +69,8 @@
     "flv.js": "1.6.2",
     "hold-event": "0.2.0",
     "pixi.js": "6.3.2",
-    "three": "0.140"
+    "three": "0.140",
+    "3d-force-graph-vr": "2.0.14",
+    "three-spritetext": "1.6.5"
   }
 }

@@ -27,8 +27,14 @@ class App {
 		this.addScene();
 		this.addRenderer();
 		this.addCamera();
-		this.addLights();
-		this.addRoom();
+		if ( this.opts.grid )
+		{
+			this.addGrid();
+		} else
+		{
+			this.addLights();
+			this.addRoom();
+		}
 		//this.addMouseHandler();
 		//this.addMouseRaycaster();
 		//this.addOrbitControl();
@@ -177,6 +183,51 @@ class App {
 
 	}
 
+	addGrid() {
+
+		const scene = this.scene;
+
+		scene.background = new THREE.Color( 0x050505 );
+		scene.fog = new THREE.Fog( 0x1E26F0, 0.5, 100 );
+
+		// Lights
+
+		//scene.add( new THREE.AmbientLight( 0x444444 ) );
+
+		const spotLight = new THREE.SpotLight( 0xaaaaaa );
+		spotLight.intensity = 1;
+		spotLight.angle = Math.PI / 4;
+		spotLight.penumbra = 0.2;
+		spotLight.position.set( 0, 5, 6 );
+		spotLight.castShadow = true;
+		spotLight.shadow.camera.near = 7;
+		spotLight.shadow.camera.far = 12;
+		spotLight.shadow.mapSize.width = 1024;
+		spotLight.shadow.mapSize.height = 1024;
+		spotLight.shadow.bias = - 0.0002;
+		spotLight.shadow.radius = 0.9;
+		scene.add( spotLight );
+		//scene.add( new THREE.CameraHelper( spotLight.shadow.camera ) );
+
+		const ground = new THREE.Mesh(
+			new THREE.PlaneGeometry( 100, 100 ),
+			new THREE.MeshPhongMaterial( {
+				color: 0x11111f,
+				side: THREE.DoubleSide,
+				opacity: .95,
+				transparent: true
+			} )
+		);
+
+		//const ground = new THREE.Mesh( planeGeometry, planeMaterial );
+		ground.rotation.x = - Math.PI / 2;
+		ground.scale.multiplyScalar( 3 );
+		ground.castShadow = true;
+		ground.receiveShadow = true;
+		scene.add( ground );
+
+	}
+
 	addRoomCube( width, height ) {
 		const geometry = new THREE.BoxGeometry( width, height, width );
 		const material = new THREE.MeshPhongMaterial( {
@@ -205,7 +256,7 @@ class App {
 		);
 		//room.receiveShadow = true;
 		room.geometry.center();
-		room.position.y += width / 4;
+		room.position.y += width / 8;
 		return room;
 	}
 
@@ -220,7 +271,8 @@ class App {
 		} );
 		this.renderer.setPixelRatio( window.devicePixelRatio );
 		this.renderer.setSize( this.screenWidth, this.screenHeight );
-		//this.renderer.shadowMap.enabled = true;
+		this.renderer.shadowMap.enabled = true;
+		this.renderer.shadowMap.type = THREE.VSMShadowMap;
 		//this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
 		//this.renderer.toneMapping = THREE.LinearToneMapping;
 		//this.renderer.toneMapping = THREE.ReinhardToneMapping;
@@ -228,7 +280,7 @@ class App {
 		//this.renderer.toneMappingExposure = 2.2;
 		//this.renderer.colorManagement = true;
 		//this.renderer.physicallyCorrectLights = false;
-		this.renderer.outputEncoding = THREE.sRGBEncoding;
+		//this.renderer.outputEncoding = THREE.sRGBEncoding;
 
 		document.body.appendChild( this.renderer.domElement );
 	}
@@ -255,7 +307,6 @@ class App {
 		this.controls.touches.two = CameraControls.ACTION.TOUCH_ZOOM_TRUCK;
 		this.controls.saveState();
 		this.controls.moveTo( 0, 1.2, 0 );
-
 
 		const center = new THREE.Object3D();
 		center.position.set( 0, 1.2, -0.5 );
