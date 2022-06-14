@@ -119,6 +119,10 @@ export default function XRControl( renderer ) {
 	if ( controllerGrip1 ) controllerGrips.push( controllerGrip1 );
 	if ( controllerGrip2 ) controllerGrips.push( controllerGrip2 );
 
+	function onEvent( ev ) {
+		console.log( ev );
+	}
+
 	controllers.forEach( ( controller ) => {
 
 		const ray = linesHelper.clone();
@@ -128,6 +132,9 @@ export default function XRControl( renderer ) {
 		controller.ray = ray;
 		controller.point = point;
 
+		controller.addEventListener( 'select', onEvent );
+		controller.addEventListener( 'selectstart', onEvent );
+		controller.addEventListener( 'selectend', onEvent );
 	} );
 
 	controllerGrips.forEach( ( controllerGrip ) => {
@@ -146,10 +153,10 @@ export default function XRControl( renderer ) {
 
 	function setFromController( controllerID, ray ) {
 
+		//console.log( 'setFromController', controllerID, ray );
 		const controller = controllers[ controllerID ];
 
 		// Position the intersection ray
-
 		dummyMatrix.identity().extractRotation( controller.matrixWorld );
 
 		ray.origin.setFromMatrixPosition( controller.matrixWorld );

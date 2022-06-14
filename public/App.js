@@ -5,7 +5,9 @@ import { BoxLineGeometry } from 'three/examples/jsm/geometries/BoxLineGeometry.j
 import CameraControls from 'camera-controls';
 
 import * as holdEvent from 'hold-event';
-import Stats from 'three/examples/jsm/libs/stats.module';
+//import Stats from 'three/examples/jsm/libs/stats.module';
+import StatsMesh from '@depasquale/three-stats-mesh';
+
 import XRControl from './XR.js';
 
 import { Test } from '../src/three-pixit/utils/utils.js';
@@ -35,8 +37,8 @@ class App {
 			this.addLights();
 			this.addRoom();
 		}
-		//this.addMouseHandler();
-		//this.addMouseRaycaster();
+		this.addMouseHandler();
+		this.addMouseRaycaster();
 		//this.addOrbitControl();
 		this.addCameraControl();
 
@@ -47,9 +49,15 @@ class App {
 		this.loop = this.loop.bind( this );
 		this.renderer.setAnimationLoop( this.loop.bind( this ) );
 
-		this.stats = Stats();
-		document.body.appendChild( this.stats.dom );
-		this.stats.dom.style.opacity = 0.4;
+		this.stats = new StatsMesh();
+		this.stats.object.position.y = -0.1;
+		this.stats.object.position.z = -0.3;
+		this.stats.object.scale.setScalar( 0.3 );
+		this.stats.material.transparent = true;
+		this.stats.material.opacity = 0.8;
+		document.body.appendChild( this.stats.stats.dom );
+
+		this.cameraXR.add( this.stats.object );
 
 	}
 
@@ -70,24 +78,24 @@ class App {
 		}
 
 		if ( this.extraLoop )
+		{
 			updated = this.extraLoop( delta ) || updated;
+		}
 
-		//this.meshes.room.material.needsUpdate = true;
-		//this.meshes.room.needsUpdate = true;
+		if ( this.renderer.xr?.isPresenting )
+		{
+			this.handleRaycasterXR();
+		}
 
 		if ( updated || this.renderer.xr?.isPresenting )
 		{
 			this.update();
 		}
 
-		if ( !this.renderer.xr?.isPresenting )
-		{
-			this.stats.update();
-		}
-
 	}
 
 	update() {
+		this.stats?.stats?.update();
 		this.renderer.render( this.scene, this.camera );
 	}
 
@@ -151,6 +159,7 @@ class App {
 		this.cameraXRDolly = new THREE.Object3D();
 		this.cameraXRDolly.add( this.cameraXR );
 		this.cameraXRDolly.position.set( 0, 0, 0 );
+		//this.cameraXRDolly.position.set( 0, -0.4, -0.2 );
 		this.cameraXRDolly.visible = false;
 		this.scene.add( this.cameraXRDolly );
 	}
@@ -168,6 +177,9 @@ class App {
 		this.scene.add( this.xrControl.controllers[ 0 ] );
 		this.scene.add( this.xrControl.controllerGrips[ 1 ] );
 		this.scene.add( this.xrControl.controllers[ 1 ] );
+
+		this.raycasterController0 = new THREE.Raycaster();
+		this.raycasterController1 = new THREE.Raycaster();
 	}
 
 	addRoom() {
@@ -192,20 +204,21 @@ class App {
 
 		// Lights
 
-		//scene.add( new THREE.AmbientLight( 0x444444 ) );
+		scene.add( new THREE.AmbientLight( 0x999999 ) );
 
 		const spotLight = new THREE.SpotLight( 0xaaaaaa );
 		spotLight.intensity = 1;
 		spotLight.angle = Math.PI / 4;
 		spotLight.penumbra = 0.2;
-		spotLight.position.set( 0, 5, 6 );
-		spotLight.castShadow = true;
+		spotLight.position.set( 0, 5, 1 );
+		//spotLight.castShadow = true;
 		spotLight.shadow.camera.near = 7;
 		spotLight.shadow.camera.far = 12;
 		spotLight.shadow.mapSize.width = 1024;
 		spotLight.shadow.mapSize.height = 1024;
 		spotLight.shadow.bias = - 0.0002;
 		spotLight.shadow.radius = 0.9;
+
 		scene.add( spotLight );
 		//scene.add( new THREE.CameraHelper( spotLight.shadow.camera ) );
 
@@ -273,6 +286,7 @@ class App {
 		this.renderer.setSize( this.screenWidth, this.screenHeight );
 		this.renderer.shadowMap.enabled = true;
 		this.renderer.shadowMap.type = THREE.VSMShadowMap;
+
 		//this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
 		//this.renderer.toneMapping = THREE.LinearToneMapping;
 		//this.renderer.toneMapping = THREE.ReinhardToneMapping;
@@ -287,13 +301,13 @@ class App {
 
 	addMouseHandler() {
 		this.mouse = new THREE.Vector2( 1, 1 );
-		this.renderer.domElement.addEventListener( 'pointermove', this.handlerMouseRaycaster.bind( this ) );
-		this.renderer.domElement.addEventListener( 'pointerdown', this.handlerMouseRaycaster.bind( this ) );
-		this.renderer.domElement.addEventListener( 'pointerdup', this.handlerMouseRaycaster.bind( this ) );
+		this.renderer.domElement.addEventListener( 'pointermove', this.handleRaycasterMouse.bind( this ) );
+		this.renderer.domElement.addEventListener( 'pointerdown', this.handleRaycasterMouse.bind( this ) );
+		this.renderer.domElement.addEventListener( 'pointerdup', this.handleRaycasterMouse.bind( this ) );
 	}
 
 	addMouseRaycaster() {
-		this.mouseRaycaster = new THREE.Raycaster();
+		this.raycasterMouse = new THREE.Raycaster();
 	}
 
 	addCameraControl() {
@@ -415,33 +429,64 @@ class App {
 
 	onXRSessionStart() {
 		this.camera = this.cameraXR;
+		this.cameraXRDolly.visible = true;
 		this.session = this.renderer.xr.getSession();
 		this.glBinding = this.renderer.xr.getBinding();
 		this.renderer.xr.addEventListener( 'sessionend', this.onXRSessionEnd.bind( this ) );
 		this.renderer.xr.removeEventListener( 'sessionstart', this.onXRSessionStart.bind( this ) );
+
+
 	}
 
 	onXRSessionEnd() {
 		this.camera = this.cameraDefault;
+		this.cameraXRDolly.visible = false;
 		this.session = null;
 		this.glBinding = null;
 		this.renderer.xr.removeEventListener( 'sessionend', this.onXRSessionEnd.bind( this ) );
 		this.renderer.xr.addEventListener( 'sessionstart', this.onXRSessionStart.bind( this ) );
 	}
 
-	handlerMouseRaycaster( event ) {
-
+	handleRaycasterMouse( event ) {
 		this.mouse.x = ( event.clientX / this.screenWidth ) * 2 - 1;
 		this.mouse.y = - ( event.clientY / this.screenHeight ) * 2 + 1;
 
 		if ( !this.raycasterMeshes.length ) return;
-		this.mouseRaycaster.setFromCamera( this.mouse, this.camera );
-		this.raycasterIntersects = this.mouseRaycaster.intersectObjects( this.raycasterMeshes );
-		if ( this.raycasterIntersects.length !== 0 ) {
+
+		this.raycasterMouse.setFromCamera( this.mouse, this.camera );
+		this.intersect( 0, this.raycasterMouse );
+	}
+
+	handleRaycasterXR() {
+		if ( !this.raycasterMeshes.length ) return;
+		this.raycasterController0.camera = this.camera;
+		this.raycasterController1.camera = this.camera;
+		this.xrControl.setFromController( 0, this.raycasterController0.ray );
+		this.xrControl.setFromController( 1, this.raycasterController1.ray );
+		this.intersect( 0, this.raycasterController0 );
+		this.intersect( 1, this.raycasterController1 );
+	}
+
+	intersect( controllerId, ray ) {
+		this.raycasterIntersects = ray.intersectObjects( this.raycasterMeshes, true );
+
+		if ( this.raycasterIntersects.length !== 0 )
+		{
 			let item = this.raycasterIntersects[ 0 ];
+			this.xrControl.setPointerAt( controllerId, item.point );
 			Object.values( this.raycasterEventsCallback ).map( callback => {
 				callback( item, event );
 			} );
+			this.previousRaycasterIntersectsLength = this.raycasterIntersects.length;
+		} else
+		{
+			if ( this.previousRaycasterIntersectsLength )
+			{
+				this.previousRaycasterIntersectsLength = 0;
+				Object.values( this.raycasterEventsCallback ).map( callback => {
+					callback( null, event );
+				} );
+			}
 		}
 	}
 
