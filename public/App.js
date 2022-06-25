@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 import { BoxLineGeometry } from 'three/examples/jsm/geometries/BoxLineGeometry.js';
 import CameraControls from 'camera-controls';
+import { GUI } from 'lil-gui';
 
 import * as holdEvent from 'hold-event';
 //import Stats from 'three/examples/jsm/libs/stats.module';
@@ -34,7 +35,6 @@ class App {
 			this.addGrid();
 		} else
 		{
-			this.addLights();
 			this.addRoom();
 		}
 		this.addMouseHandler();
@@ -128,25 +128,62 @@ class App {
 		//red.castShadow = true;
 		container.add( red );
 
-		const blue = new THREE.PointLight( new THREE.Color( 0x1133FF ), 0.3 * this.opts.lightsIntensity, 10, 0.5 );
+		const blue = new THREE.PointLight( new THREE.Color( 0x0011FF ), 0.2 * this.opts.lightsIntensity, 10, 0.5 );
 		blue.position.set( 3, 2, -3 );
 		//blue.castShadow = true;
 		container.add( blue );
 
-		//const back = new THREE.PointLight( new THREE.Color( 0xAAAAAA ), 0.3, 5, 0.5 );
-		//back.position.set( 0, 1.3, 1 );
-		//back.rotation.set( 1, 0, 0 );
-		//back.castShadow = true;
-		//container.add( back );
+		/*
+		const back = new THREE.PointLight( new THREE.Color( 0xAAAAAA ), 5, 5, 1 );
+		back.position.set( 0, 3, 0.2 );
+		back.rotation.set( 0, 0, 0 );
+		back.castShadow = true;
+		container.add( back );
+		this.scene.add( new THREE.PointLightHelper( back ) );
+		*/
 
-		//this.scene.add( new THREE.PointLightHelper( back ) );
+		const dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
+		dirLight.name = 'Dir. Light';
+		dirLight.position.set( 0, 2.4, 0.5 );
+		dirLight.castShadow = true;
+		const c = 10;
+		dirLight.shadow.bias = - 0.0005;
+		dirLight.shadow.camera.near = 1;
+		dirLight.shadow.camera.far = c;
+		dirLight.shadow.camera.right = c;
+		dirLight.shadow.camera.left = - c;
+		dirLight.shadow.camera.top = c;
+		dirLight.shadow.camera.bottom = - c;
+		dirLight.shadow.mapSize.width = 1024;
+		dirLight.shadow.mapSize.height = 1024;
+		//container.add( dirLight );
+		this.scene.add( new THREE.DirectionalLightHelper( dirLight ) );
+
+		const f = this.gui.addFolder( 'light' );
+		f.add(
+			this,
+			'dagMode',
+			{
+				td: 'td',
+				bu: 'bu',
+				lr: 'lr',
+				rl: 'rl',
+				zin: 'zin',
+				zout: 'zout',
+				radialin: 'radialin',
+				radialout: 'radialout'
+			}
+		).onChange( value => {
+			this.graph.dagMode( value );
+		} );
+
 		this.scene.add( container );
 
 	}
 
 	addCamera() {
 		const EPS = 1e-5;
-		this.cameraDefault = new THREE.PerspectiveCamera( 60, this.screenWidth / this.screenHeight, 0.001, 100 );
+		this.cameraDefault = new THREE.PerspectiveCamera( 45, this.screenWidth / this.screenHeight, 0.001, 100 );
 		this.cameraDefault.name = 'cameraDefault';
 		this.cameraDefault.position.set( 0, EPS, 0 );
 		this.camera = this.cameraDefault;
@@ -235,13 +272,15 @@ class App {
 		//const ground = new THREE.Mesh( planeGeometry, planeMaterial );
 		ground.rotation.x = - Math.PI / 2;
 		ground.scale.multiplyScalar( 3 );
-		ground.castShadow = true;
 		ground.receiveShadow = true;
 		scene.add( ground );
 
 	}
 
 	addRoomCube( width, height ) {
+
+		this.addLights();
+
 		const geometry = new THREE.BoxGeometry( width, height, width );
 		const material = new THREE.MeshPhongMaterial( {
 			color: 0x999999,
@@ -252,7 +291,7 @@ class App {
 			//bumpScale: 0.0005
 		} );
 		const cube = new THREE.Mesh( geometry, material );
-		//cube.receiveShadow = true;
+		cube.receiveShadow = true;
 		this.scene.add( cube );
 		cube.geometry.center();
 		cube.position.y += height / 2;
@@ -284,8 +323,10 @@ class App {
 		} );
 		this.renderer.setPixelRatio( window.devicePixelRatio );
 		this.renderer.setSize( this.screenWidth, this.screenHeight );
+		//this.renderer.setClearColor( '#FFFFFF' );
 		this.renderer.shadowMap.enabled = true;
 		this.renderer.shadowMap.type = THREE.VSMShadowMap;
+		//this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 		//this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
 		//this.renderer.toneMapping = THREE.LinearToneMapping;
@@ -294,7 +335,7 @@ class App {
 		//this.renderer.toneMappingExposure = 2.2;
 		//this.renderer.colorManagement = true;
 		//this.renderer.physicallyCorrectLights = false;
-		//this.renderer.outputEncoding = THREE.sRGBEncoding;
+		this.renderer.outputEncoding = THREE.sRGBEncoding;
 
 		document.body.appendChild( this.renderer.domElement );
 	}
@@ -303,7 +344,7 @@ class App {
 		this.mouse = new THREE.Vector2( 1, 1 );
 		this.renderer.domElement.addEventListener( 'pointermove', this.handleRaycasterMouse.bind( this ) );
 		this.renderer.domElement.addEventListener( 'pointerdown', this.handleRaycasterMouse.bind( this ) );
-		this.renderer.domElement.addEventListener( 'pointerdup', this.handleRaycasterMouse.bind( this ) );
+		this.renderer.domElement.addEventListener( 'pointerup', this.handleRaycasterMouse.bind( this ) );
 	}
 
 	addMouseRaycaster() {
@@ -450,8 +491,16 @@ class App {
 	handleRaycasterMouse( event ) {
 		this.mouse.x = ( event.clientX / this.screenWidth ) * 2 - 1;
 		this.mouse.y = - ( event.clientY / this.screenHeight ) * 2 + 1;
-
 		if ( !this.raycasterMeshes.length ) return;
+		console.log( event.type );
+
+		if ( [ 'pointerdown', 'pointerup' ].includes( event.type ) )
+		{
+			this.pointerDown = event.type === 'pointerdown' ? true : false;
+		} else if ( this.pointerDown )
+		{
+			return;
+		}
 
 		this.raycasterMouse.setFromCamera( this.mouse, this.camera );
 		this.intersect( 0, this.raycasterMouse );
@@ -527,6 +576,9 @@ class App {
 	}
 
 }
+
+App.prototype.gui = new GUI();
+
 
 export default App;
 

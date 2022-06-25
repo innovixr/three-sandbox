@@ -2,9 +2,12 @@ import App from './App.js';
 import ThreeForceGraph from 'three-forcegraph';
 import SpriteText from 'three-spritetext';
 import * as THREE from 'three';
-import { GUI } from 'lil-gui';
 import { TWEEN } from 'three/examples/jsm/libs/tween.module.min';
 import { EXRLoader } from 'three/examples/jsm/loaders/EXRLoader.js';
+
+// TODO: prepare sound pool
+// TODO: handle "nextSound"
+
 
 window.addEventListener( 'load', () => {
 	new Experience();
@@ -181,7 +184,7 @@ class Experience {
 		//this.light.position.set( 0, 5.2, 0 );
 		//this.app.scene.add( this.light );
 
-		const GUIForceGraph = this.gui.addFolder( 'Force Graph' );
+		const GUIForceGraph = this.app.gui.addFolder( 'Force Graph' );
 		GUIForceGraph.add(
 			this,
 			'dagMode',
@@ -355,5 +358,3 @@ class Experience {
 	}
 
 }
-
-Experience.prototype.gui = new GUI();
